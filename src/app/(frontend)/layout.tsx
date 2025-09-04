@@ -1,4 +1,5 @@
 import React from 'react'
+import { BaseLayout } from '@/components/layout/BaseLayout'
 import './styles.css'
 
 export const metadata = {
@@ -12,7 +13,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <main>{children}</main>
+        <BaseLayout>{children}</BaseLayout>
       </body>
     </html>
   )
