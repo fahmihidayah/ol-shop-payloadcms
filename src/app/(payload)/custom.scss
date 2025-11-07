@@ -1,0 +1,474 @@
+@import '~@payloadcms/ui/scss';
+
+@layer payload-default {
+  .nav {
+    position: sticky;
+    top: 0;
+    left: 0;
+    flex-shrink: 0;
+    height: 100vh;
+    width: var(--nav-width);
+    border-right: 1px solid var(--theme-elevation-100);
+    opacity: 0;
+    overflow: hidden;
+
+    [dir='rtl'] & {
+      border-right: none;
+      border-left: 1px solid var(--theme-elevation-100);
+    }
+
+    &--nav-animate {
+      transition: opacity var(--nav-trans-time) ease-in-out;
+    }
+
+    &--nav-open {
+      opacity: 1;
+    }
+
+    &__header {
+      position: absolute;
+      top: 0;
+      width: 100vw;
+      height: var(--app-header-height);
+    }
+
+    &__header-content {
+      z-index: 1;
+      position: relative;
+      height: 100%;
+      width: 100%;
+    }
+
+    &__mobile-close {
+      display: none;
+      background: none;
+      border: 0;
+      outline: 0;
+      padding: base(0.8) 0;
+    }
+
+    &__scroll {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: var(--app-header-height) base(1) base(2) base(1);
+      overflow-y: auto;
+
+      // remove the scrollbar here to prevent layout shift as nav groups are toggled
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    &__wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      flex-grow: 1;
+    }
+
+    &__label {
+      color: var(--theme-elevation-400);
+    }
+
+    &__controls {
+      margin-top: auto;
+      margin-bottom: 0;
+
+      > * {
+        margin-top: base(1);
+      }
+
+      a:focus-visible {
+        outline: var(--accessibility-outline);
+      }
+    }
+
+    &__log-out {
+      &:hover {
+        g {
+          transform: translateX(-#{base(0.125)});
+        }
+      }
+    }
+
+    &__link {
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding-block: base(0.125);
+      padding-inline-start: 0;
+      padding-inline-end: base(1.5);
+      text-decoration: none;
+
+      &:focus:not(:focus-visible) {
+        box-shadow: none;
+        font-weight: 600;
+      }
+
+      &.active {
+        font-weight: normal;
+        padding-left: 0;
+        font-weight: 600;
+      }
+    }
+
+    a.nav__link {
+      &:hover,
+      &:focus-visible {
+        text-decoration: underline;
+      }
+    }
+
+    &__link:has(.nav__link-indicator) {
+      font-weight: 600;
+      padding-left: 0;
+    }
+
+    &__link-indicator {
+      position: absolute;
+      display: block;
+      // top: 0;
+      inset-inline-start: base(-1);
+      width: 2px;
+      height: 16px;
+      border-start-end-radius: 2px;
+      border-end-end-radius: 2px;
+      background: var(--theme-elevation-400);
+    }
+
+    @include mid-break {
+      &__scroll {
+        padding: var(--app-header-height) base(0.5) base(2);
+      }
+    }
+
+    @include small-break {
+      &__scroll {
+        padding: var(--app-header-height) var(--gutter-h) base(2);
+      }
+
+      &__link {
+        font-size: base(0.875);
+        line-height: base(1.5);
+      }
+
+      &__mobile-close {
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
+}
+
+/* === CUSTOM ENHANCEMENTS FOR NAVIGATION === */
+@layer payload-custom {
+  
+  /* Enhanced navigation styling */
+  .nav {
+    /* Improved sidebar background and spacing */
+    background: var(--theme-bg);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+    
+    [data-theme="dark"] & {
+      background: var(--theme-elevation-0);
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Enhanced scroll area */
+    &__scroll {
+      /* Add subtle background gradient */
+      background: linear-gradient(180deg, 
+        var(--theme-bg) 0%, 
+        var(--theme-elevation-25) 100%);
+      
+      [data-theme="dark"] & {
+        background: linear-gradient(180deg, 
+          var(--theme-elevation-0) 0%, 
+          var(--theme-elevation-50) 100%);
+      }
+      
+      /* Custom scrollbar */
+      &::-webkit-scrollbar {
+        display: block;
+        width: 6px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: var(--theme-elevation-200);
+        border-radius: 3px;
+        
+        &:hover {
+          background: var(--theme-elevation-300);
+        }
+      }
+      
+      [data-theme="dark"] &::-webkit-scrollbar-thumb {
+        background: var(--theme-elevation-300);
+        
+        &:hover {
+          background: var(--theme-elevation-400);
+        }
+      }
+    }
+    
+    /* Flat navigation links - minimal padding and spacing */
+    &__link {
+      /* Minimal padding and spacing */
+      padding: base(0.5) base(0.75);
+      margin: 0;
+      border-radius: 0;
+      transition: all 0.15s ease;
+      position: relative;
+      background: transparent;
+      color: #333333;
+      border: none;
+      
+      /* Simple hover effects */
+      &:hover {
+        background: #f5f5f5;
+        color: #000000;
+        transform: none;
+        text-decoration: none;
+        box-shadow: none;
+        
+        [data-theme="dark"] & {
+          background: #333333;
+          color: #ffffff;
+        }
+      }
+      
+      /* Active state - black background, white text, bold */
+      &.active {
+        background: #000000 !important;
+        color: #ffffff !important;
+        font-weight: 700;
+        border-radius: 0;
+        
+        [data-theme="dark"] & {
+          background: #000000 !important;
+          color: #ffffff !important;
+        }
+        
+        /* Remove active indicator */
+        &::before {
+          display: none;
+        }
+      }
+      
+      /* Simple focus states */
+      &:focus-visible {
+        outline: 1px solid #000000;
+        outline-offset: 0;
+        text-decoration: none;
+        box-shadow: none;
+        
+        [data-theme="dark"] & {
+          outline-color: #ffffff;
+        }
+      }
+      
+      /* Flat icon styling */
+      svg, .icon {
+        margin-right: base(0.5);
+        opacity: 1;
+        transition: none;
+      }
+      
+      &:hover svg,
+      &:hover .icon,
+      &.active svg,
+      &.active .icon {
+        opacity: 1;
+      }
+    }
+    
+    /* Flat link indicator */
+    &__link-indicator {
+      background: #000000;
+      width: 2px;
+      border-radius: 0;
+      
+      [data-theme="dark"] & {
+        background: #ffffff;
+      }
+    }
+    
+    /* Flat navigation labels */
+    &__label {
+      color: #666666;
+      font-size: base(0.75);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: base(0.75) base(0.75) base(0.25) base(0.75);
+      margin: 0;
+      border-top: 1px solid #e5e5e5;
+      
+      &:first-child {
+        border-top: none;
+        padding-top: base(0.5);
+      }
+      
+      [data-theme="dark"] & {
+        color: #cccccc;
+        border-top-color: #333333;
+      }
+    }
+    
+    /* Flat navigation controls */
+    &__controls {
+      padding: base(0.75) base(0.5);
+      border-top: 1px solid #e5e5e5;
+      
+      [data-theme="dark"] & {
+        border-top-color: #333333;
+      }
+      
+      /* Flat logout button */
+      .nav__log-out {
+        padding: base(0.5) base(0.75);
+        margin: 0;
+        border-radius: 0;
+        transition: all 0.15s ease;
+        background: transparent;
+        color: #333333;
+        
+        &:hover {
+          background: #f5f5f5;
+          color: #000000;
+          transform: none;
+          
+          [data-theme="dark"] & {
+            background: #333333;
+            color: #ffffff;
+          }
+          
+          g {
+            transform: none;
+          }
+        }
+      }
+    }
+  }
+  
+  /* Flat navigation groups */
+  .nav-group {
+    margin-bottom: base(0.5);
+    
+    /* Minimal space between navigation groups */
+    &:not(:last-child) {
+      margin-bottom: base(0.75);
+    }
+    
+    /* Flat group styling */
+    .nav__link {
+      /* Sub-navigation with minimal indentation */
+      &.nav__link--nested {
+        padding-left: base(1.5);
+        font-size: base(0.9);
+        
+        &::before {
+          display: none;
+        }
+      }
+    }
+  }
+  
+  /* Flat responsive design */
+  @include mid-break {
+    .nav {
+      &__link {
+        padding: base(0.45) base(0.6);
+        margin: 0;
+        font-size: base(0.9);
+      }
+      
+      &__label {
+        font-size: base(0.7);
+        padding: base(0.6) base(0.6) base(0.2) base(0.6);
+      }
+    }
+  }
+  
+  @include small-break {
+    .nav {
+      &__link {
+        padding: base(0.4) base(0.5);
+        margin: 0;
+        font-size: base(0.85);
+        
+        svg, .icon {
+          margin-right: base(0.4);
+        }
+      }
+      
+      &__label {
+        font-size: base(0.65);
+        padding: base(0.4) base(0.5) base(0.2) base(0.5);
+      }
+    }
+  }
+  
+  /* Remove complex animations - keep it simple */
+  .nav__link {
+    animation: none;
+  }
+  
+  /* Simple flat theme styling */
+  [data-theme="light"] {
+    .nav {
+      background: #ffffff;
+      
+      &__scroll {
+        background: #ffffff;
+      }
+      
+      &__link {
+        color: #333333;
+        
+        &:hover {
+          background: #f5f5f5;
+          color: #000000;
+        }
+        
+        &.active {
+          background: #000000 !important;
+          color: #ffffff !important;
+          font-weight: 700;
+        }
+      }
+    }
+  }
+  
+  /* Dark mode with same flat approach */
+  [data-theme="dark"] {
+    .nav {
+      background: #1a1a1a;
+      
+      &__scroll {
+        background: #1a1a1a;
+      }
+      
+      &__link {
+        color: #cccccc;
+        
+        &:hover {
+          background: #333333;
+          color: #ffffff;
+        }
+        
+        &.active {
+          background: #000000 !important;
+          color: #ffffff !important;
+          font-weight: 700;
+        }
+      }
+    }
+  }
+}

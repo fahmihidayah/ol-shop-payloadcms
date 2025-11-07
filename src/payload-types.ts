@@ -64,11 +64,23 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    customers: CustomerAuthOperations;
   };
   blocks: {};
   collections: {
     users: User;
+    customers: Customer;
     media: Media;
+    categories: Category;
+    products: Product;
+    'product-variants': ProductVariant;
+    'variant-options': VariantOption;
+    carts: Cart;
+    'cart-items': CartItem;
+    orders: Order;
+    'order-items': OrderItem;
+    payments: Payment;
+    addresses: Address;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -76,7 +88,18 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    customers: CustomersSelect<false> | CustomersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    products: ProductsSelect<false> | ProductsSelect<true>;
+    'product-variants': ProductVariantsSelect<false> | ProductVariantsSelect<true>;
+    'variant-options': VariantOptionsSelect<false> | VariantOptionsSelect<true>;
+    carts: CartsSelect<false> | CartsSelect<true>;
+    'cart-items': CartItemsSelect<false> | CartItemsSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
+    'order-items': OrderItemsSelect<false> | OrderItemsSelect<true>;
+    payments: PaymentsSelect<false> | PaymentsSelect<true>;
+    addresses: AddressesSelect<false> | AddressesSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -87,9 +110,13 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user:
+    | (User & {
+        collection: 'users';
+      })
+    | (Customer & {
+        collection: 'customers';
+      });
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -113,12 +140,68 @@ export interface UserAuthOperations {
     password: string;
   };
 }
+export interface CustomerAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
+  name: string;
+  phone?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers".
+ */
+export interface Customer {
+  id: number;
+  name: string;
+  phone?: string | null;
+  dateOfBirth?: string | null;
+  gender?: ('male' | 'female' | 'other' | 'not_specified') | null;
+  /**
+   * Deactivate to prevent customer from logging in
+   */
+  isActive?: boolean | null;
+  /**
+   * Internal notes about this customer
+   */
+  customerNotes?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -158,6 +241,395 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  name: string;
+  /**
+   * Unique identifier for the category URL
+   */
+  slug: string;
+  /**
+   * Select a parent category to create a subcategory
+   */
+  parent?: (number | null) | Category;
+  description?: string | null;
+  image?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: number;
+  title: string;
+  /**
+   * Unique identifier for the product URL
+   */
+  slug: string;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  category: number | Category;
+  /**
+   * Publish this product on the storefront
+   */
+  isActive?: boolean | null;
+  /**
+   * Show this product in featured sections
+   */
+  featured?: boolean | null;
+  /**
+   * Main product image displayed in listings
+   */
+  thumbnail: number | Media;
+  /**
+   * Additional product images
+   */
+  gallery?:
+    | {
+        image: number | Media;
+        /**
+         * Describe the image for accessibility and SEO
+         */
+        alt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  seo?: {
+    /**
+     * Override default title for SEO (50-60 characters recommended)
+     */
+    metaTitle?: string | null;
+    /**
+     * Meta description for search engines (150-160 characters recommended)
+     */
+    metaDescription?: string | null;
+    /**
+     * Keywords for internal search and categorization
+     */
+    keywords?:
+      | {
+          keyword?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Specify if this content exists elsewhere to avoid duplicate content issues
+     */
+    canonicalUrl?: string | null;
+    /**
+     * Title when shared on social media (defaults to Meta Title)
+     */
+    ogTitle?: string | null;
+    /**
+     * Description when shared on social media (defaults to Meta Description)
+     */
+    ogDescription?: string | null;
+    /**
+     * Image when shared on social media (1200x630px recommended)
+     */
+    ogImage?: (number | null) | Media;
+    ogType?: ('product' | 'article' | 'website') | null;
+    twitterCard?: ('summary' | 'summary_large_image' | 'product') | null;
+    /**
+     * Title for Twitter (defaults to OG Title or Meta Title)
+     */
+    twitterTitle?: string | null;
+    /**
+     * Description for Twitter (defaults to OG Description or Meta Description)
+     */
+    twitterDescription?: string | null;
+    /**
+     * Image for Twitter (defaults to OG Image)
+     */
+    twitterImage?: (number | null) | Media;
+    /**
+     * Product brand name for structured data
+     */
+    brand?: string | null;
+    /**
+     * Global Trade Item Number (UPC, EAN, ISBN)
+     */
+    gtin?: string | null;
+    /**
+     * Manufacturer Part Number
+     */
+    mpn?: string | null;
+    condition?: ('new' | 'refurbished' | 'used') | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-variants".
+ */
+export interface ProductVariant {
+  id: number;
+  product: number | Product;
+  /**
+   * e.g., "Large / Red" or "32GB / Black"
+   */
+  title: string;
+  /**
+   * Stock Keeping Unit - unique identifier
+   */
+  sku: string;
+  /**
+   * Current selling price
+   */
+  price: number;
+  /**
+   * Show as strikethrough if different from current price
+   */
+  oldPrice?: number | null;
+  /**
+   * Your cost for this variant (internal use)
+   */
+  cost?: number | null;
+  stockQuantity: number;
+  /**
+   * Get notified when stock falls below this number
+   */
+  lowStockThreshold?: number | null;
+  /**
+   * Product weight for shipping calculations
+   */
+  weight?: number | null;
+  dimensions?: {
+    length?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  /**
+   * Specific image for this variant
+   */
+  image?: (number | null) | Media;
+  /**
+   * Make this variant available for purchase
+   */
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "variant-options".
+ */
+export interface VariantOption {
+  id: number;
+  variant: number | ProductVariant;
+  /**
+   * e.g., "Size", "Color", "Material"
+   */
+  name: string;
+  /**
+   * e.g., "Large", "Red", "Cotton"
+   */
+  value: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "carts".
+ */
+export interface Cart {
+  id: number;
+  /**
+   * Associated customer (for logged-in customers)
+   */
+  customer?: (number | null) | Customer;
+  /**
+   * Session identifier for guest users
+   */
+  sessionId?: string | null;
+  /**
+   * Automatic cart cleanup date
+   */
+  expiresAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cart-items".
+ */
+export interface CartItem {
+  id: number;
+  cart: number | Cart;
+  variant: number | ProductVariant;
+  quantity: number;
+  /**
+   * Price at the time of adding to cart
+   */
+  price: number;
+  /**
+   * Calculated as quantity × price
+   */
+  subtotal: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: number;
+  /**
+   * Unique order identifier
+   */
+  orderNumber: string;
+  /**
+   * Registered customer (if logged in)
+   */
+  customer?: (number | null) | Customer;
+  /**
+   * For guest checkout
+   */
+  guestName?: string | null;
+  guestEmail?: string | null;
+  guestPhone?: string | null;
+  shippingAddress: {
+    recipientName: string;
+    phone: string;
+    addressLine1: string;
+    addressLine2?: string | null;
+    city: string;
+    province: string;
+    postalCode: string;
+  };
+  orderStatus: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
+  /**
+   * Total order amount
+   */
+  totalAmount: number;
+  shippingCost?: number | null;
+  discount?: number | null;
+  /**
+   * Internal notes or customer comments
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "order-items".
+ */
+export interface OrderItem {
+  id: number;
+  order: number | Order;
+  variant: number | ProductVariant;
+  /**
+   * Stored product details at time of purchase
+   */
+  productSnapshot?: {
+    title?: string | null;
+    variantTitle?: string | null;
+    sku?: string | null;
+    imageUrl?: string | null;
+  };
+  quantity: number;
+  /**
+   * Price at the time of purchase
+   */
+  price: number;
+  /**
+   * Calculated as quantity × price
+   */
+  subtotal: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payments".
+ */
+export interface Payment {
+  id: number;
+  order: number | Order;
+  method: 'credit_card' | 'bank_transfer' | 'cod' | 'e_wallet' | 'paypal' | 'stripe' | 'other';
+  /**
+   * Payment gateway transaction identifier
+   */
+  transactionId?: string | null;
+  status: 'pending' | 'processing' | 'success' | 'failed' | 'refunded' | 'cancelled';
+  amount: number;
+  /**
+   * Currency code (e.g., USD, EUR, IDR)
+   */
+  currency?: string | null;
+  /**
+   * Raw response from payment gateway (JSON format)
+   */
+  gatewayResponse?: string | null;
+  /**
+   * Additional payment notes or details
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "addresses".
+ */
+export interface Address {
+  id: number;
+  customer: number | Customer;
+  /**
+   * e.g., "Home", "Office", "Mom's House"
+   */
+  label: string;
+  recipientName: string;
+  phone: string;
+  /**
+   * Street address, P.O. box, company name
+   */
+  addressLine1: string;
+  /**
+   * Apartment, suite, unit, building, floor, etc.
+   */
+  addressLine2?: string | null;
+  city: string;
+  province: string;
+  postalCode: string;
+  country?: string | null;
+  /**
+   * Use this address as the default shipping address
+   */
+  isDefault?: boolean | null;
+  /**
+   * Optional location coordinates for delivery
+   */
+  coordinates?: {
+    latitude?: number | null;
+    longitude?: number | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -168,14 +640,63 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
+        relationTo: 'customers';
+        value: number | Customer;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'products';
+        value: number | Product;
+      } | null)
+    | ({
+        relationTo: 'product-variants';
+        value: number | ProductVariant;
+      } | null)
+    | ({
+        relationTo: 'variant-options';
+        value: number | VariantOption;
+      } | null)
+    | ({
+        relationTo: 'carts';
+        value: number | Cart;
+      } | null)
+    | ({
+        relationTo: 'cart-items';
+        value: number | CartItem;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: number | Order;
+      } | null)
+    | ({
+        relationTo: 'order-items';
+        value: number | OrderItem;
+      } | null)
+    | ({
+        relationTo: 'payments';
+        value: number | Payment;
+      } | null)
+    | ({
+        relationTo: 'addresses';
+        value: number | Address;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'customers';
+        value: number | Customer;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -185,10 +706,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: number;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'customers';
+        value: number | Customer;
+      };
   key?: string | null;
   value?:
     | {
@@ -218,6 +744,36 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers_select".
+ */
+export interface CustomersSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
+  dateOfBirth?: T;
+  gender?: T;
+  isActive?: T;
+  customerNotes?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -252,6 +808,219 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  parent?: T;
+  description?: T;
+  image?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_select".
+ */
+export interface ProductsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  description?: T;
+  category?: T;
+  isActive?: T;
+  featured?: T;
+  thumbnail?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        alt?: T;
+        id?: T;
+      };
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        keywords?:
+          | T
+          | {
+              keyword?: T;
+              id?: T;
+            };
+        canonicalUrl?: T;
+        ogTitle?: T;
+        ogDescription?: T;
+        ogImage?: T;
+        ogType?: T;
+        twitterCard?: T;
+        twitterTitle?: T;
+        twitterDescription?: T;
+        twitterImage?: T;
+        brand?: T;
+        gtin?: T;
+        mpn?: T;
+        condition?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-variants_select".
+ */
+export interface ProductVariantsSelect<T extends boolean = true> {
+  product?: T;
+  title?: T;
+  sku?: T;
+  price?: T;
+  oldPrice?: T;
+  cost?: T;
+  stockQuantity?: T;
+  lowStockThreshold?: T;
+  weight?: T;
+  dimensions?:
+    | T
+    | {
+        length?: T;
+        width?: T;
+        height?: T;
+      };
+  image?: T;
+  isActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "variant-options_select".
+ */
+export interface VariantOptionsSelect<T extends boolean = true> {
+  variant?: T;
+  name?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "carts_select".
+ */
+export interface CartsSelect<T extends boolean = true> {
+  customer?: T;
+  sessionId?: T;
+  expiresAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cart-items_select".
+ */
+export interface CartItemsSelect<T extends boolean = true> {
+  cart?: T;
+  variant?: T;
+  quantity?: T;
+  price?: T;
+  subtotal?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  orderNumber?: T;
+  customer?: T;
+  guestName?: T;
+  guestEmail?: T;
+  guestPhone?: T;
+  shippingAddress?:
+    | T
+    | {
+        recipientName?: T;
+        phone?: T;
+        addressLine1?: T;
+        addressLine2?: T;
+        city?: T;
+        province?: T;
+        postalCode?: T;
+      };
+  orderStatus?: T;
+  paymentStatus?: T;
+  totalAmount?: T;
+  shippingCost?: T;
+  discount?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "order-items_select".
+ */
+export interface OrderItemsSelect<T extends boolean = true> {
+  order?: T;
+  variant?: T;
+  productSnapshot?:
+    | T
+    | {
+        title?: T;
+        variantTitle?: T;
+        sku?: T;
+        imageUrl?: T;
+      };
+  quantity?: T;
+  price?: T;
+  subtotal?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payments_select".
+ */
+export interface PaymentsSelect<T extends boolean = true> {
+  order?: T;
+  method?: T;
+  transactionId?: T;
+  status?: T;
+  amount?: T;
+  currency?: T;
+  gatewayResponse?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "addresses_select".
+ */
+export interface AddressesSelect<T extends boolean = true> {
+  customer?: T;
+  label?: T;
+  recipientName?: T;
+  phone?: T;
+  addressLine1?: T;
+  addressLine2?: T;
+  city?: T;
+  province?: T;
+  postalCode?: T;
+  country?: T;
+  isDefault?: T;
+  coordinates?:
+    | T
+    | {
+        latitude?: T;
+        longitude?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

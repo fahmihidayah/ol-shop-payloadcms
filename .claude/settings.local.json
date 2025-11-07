@@ -4,7 +4,9 @@
       "Bash(find:*)",
       "Bash(pnpm add:*)",
       "Bash(pnpm run lint:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(pnpm run generate:types:*)",
+      "Bash(npm:*)"
     ],
     "deny": []
   }
