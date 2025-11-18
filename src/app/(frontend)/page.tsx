@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 
 import config from '@/payload.config'
 import './styles.css'
+import ListProduct from '@/modules/products/templates/list-products-page'
 
 export default async function HomePage() {
   const headers = await getHeaders()
@@ -15,5 +16,17 @@ export default async function HomePage() {
 
   const fileURL = `vscode://file/${fileURLToPath(import.meta.url)}`
 
-  return <></>
+  const products = await payload.find({
+    collection: 'products',
+    limit: 100,
+  })
+
+  console.log('list of product ', products.docs.length)
+
+  return (
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+      <h3 className="font-semibold text-2xl mb-6 sm:mb-8">Products</h3>
+      <ListProduct productsDoc={products} />
+    </div>
+  )
 }

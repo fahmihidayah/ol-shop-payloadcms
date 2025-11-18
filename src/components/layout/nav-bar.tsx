@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { User, LogOut, Settings, ShoppingBag, Heart } from 'lucide-react'
+import { User, LogOut, Settings, ShoppingBag, Heart, Store } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 
@@ -34,7 +34,7 @@ export function NavBar() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="font-semibold text-xl">
-            Shop
+            <Store />
           </Link>
 
           <div className="flex items-center gap-4">
