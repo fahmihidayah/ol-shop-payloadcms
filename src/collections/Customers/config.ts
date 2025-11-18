@@ -10,6 +10,14 @@ export const Customers: CollectionConfig = {
   auth: true,
   fields: [
     {
+      name: 'id',
+      type: 'text',
+      defaultValue: () => crypto.randomUUID(),
+      admin: {
+        hidden: true,
+      },
+    },
+    {
       name: 'name',
       type: 'text',
       required: true,

@@ -10,6 +10,14 @@ export const Users: CollectionConfig = {
   auth: true,
   fields: [
     {
+      name: 'id',
+      type: 'text',
+      defaultValue: () => crypto.randomUUID(),
+      admin: {
+        hidden: true,
+      },
+    },
+    {
       name: 'name',
       type: 'text',
       required: true,
@@ -28,4 +36,7 @@ export const Users: CollectionConfig = {
     },
     // Email and password are added by default with auth: true
   ],
+  hooks: {
+    afterChange: [({ collection, data, doc, context, operation, previousDoc, req }) => {}],
+  },
 }

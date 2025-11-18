@@ -12,6 +12,14 @@ export const Orders: CollectionConfig = {
   },
   fields: [
     {
+      name: 'id',
+      type: 'text',
+      defaultValue: () => crypto.randomUUID(),
+      admin: {
+        hidden: true,
+      },
+    },
+    {
       name: 'orderNumber',
       type: 'text',
       required: true,
@@ -196,7 +204,9 @@ export const Orders: CollectionConfig = {
         // Generate order number for new orders
         if (operation === 'create' && !data.orderNumber) {
           const timestamp = Date.now()
-          const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0')
+          const random = Math.floor(Math.random() * 1000)
+            .toString()
+            .padStart(3, '0')
           data.orderNumber = `ORD-${timestamp}-${random}`
         }
         return data

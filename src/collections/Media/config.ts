@@ -10,6 +10,14 @@ export const Media: CollectionConfig = {
   },
   fields: [
     {
+      name: 'id',
+      type: 'text',
+      defaultValue: () => crypto.randomUUID(),
+      admin: {
+        hidden: true,
+      },
+    },
+    {
       name: 'alt',
       type: 'text',
       required: true,

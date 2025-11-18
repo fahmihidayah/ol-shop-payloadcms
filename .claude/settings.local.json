@@ -6,7 +6,10 @@
       "Bash(pnpm run lint:*)",
       "Bash(npx tsc:*)",
       "Bash(pnpm run generate:types:*)",
-      "Bash(npm:*)"
+      "Bash(npm:*)",
+      "Bash(pnpm list:*)",
+      "Bash(cat:*)",
+      "Bash(xargs cat:*)"
     ],
     "deny": []
   }

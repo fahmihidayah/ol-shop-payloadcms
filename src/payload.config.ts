@@ -12,8 +12,6 @@ import { Customers } from './collections/Customers/config'
 import { Media } from './collections/Media/config'
 import { Categories } from './collections/Categories/config'
 import { Products } from './collections/Products/config'
-import { ProductVariants } from './collections/ProductVariants/config'
-import { VariantOptions } from './collections/VariantOptions/config'
 import { Carts } from './collections/Carts/config'
 import { CartItems } from './collections/CartItems/config'
 import { Orders } from './collections/Orders/config'
@@ -37,8 +35,6 @@ export default buildConfig({
     Media,
     Categories,
     Products,
-    ProductVariants,
-    VariantOptions,
     Carts,
     CartItems,
     Orders,

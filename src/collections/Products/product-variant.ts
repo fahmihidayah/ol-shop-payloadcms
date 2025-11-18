@@ -1,34 +1,12 @@
-import type { CollectionConfig } from 'payload'
-
-export const ProductVariants: CollectionConfig = {
-  slug: 'product-variants',
-  admin: {
-    useAsTitle: 'title',
-    defaultColumns: ['title', 'product', 'sku', 'price', 'stockQuantity'],
-    group: 'Catalog',
-  },
-  access: {
-    read: () => true,
-  },
-  fields: [
+import RowLabel from '@/components/payload-ui/RowLabel'
+import { Field } from 'payload'
+import PriceField from './components/price-field'
+export function getProductVariantField(): Field[] {
+  return [
     {
-      name: 'product',
-      type: 'relationship',
-      relationTo: 'products',
-      required: true,
-      label: 'Product',
-      admin: {
-        position: 'sidebar',
-      },
-    },
-    {
-      name: 'title',
+      name: 'variant',
       type: 'text',
-      required: true,
-      label: 'Variant Title',
-      admin: {
-        description: 'e.g., "Large / Red" or "32GB / Black"',
-      },
+      label: 'Variant Name',
     },
     {
       name: 'sku',
@@ -47,6 +25,9 @@ export const ProductVariants: CollectionConfig = {
       min: 0,
       label: 'Price',
       admin: {
+        components: {
+          Field: '@/collections/Products/components/price-field#default',
+        },
         description: 'Current selling price',
       },
     },
@@ -56,6 +37,9 @@ export const ProductVariants: CollectionConfig = {
       min: 0,
       label: 'Original Price',
       admin: {
+        components: {
+          Field: '@/collections/Products/components/price-field#default',
+        },
         description: 'Show as strikethrough if different from current price',
       },
     },
@@ -65,6 +49,9 @@ export const ProductVariants: CollectionConfig = {
       min: 0,
       label: 'Cost',
       admin: {
+        components: {
+          Field: '@/collections/Products/components/price-field#default',
+        },
         description: 'Your cost for this variant (internal use)',
       },
     },
@@ -138,5 +125,23 @@ export const ProductVariants: CollectionConfig = {
         description: 'Make this variant available for purchase',
       },
     },
-  ],
+  ]
+}
+
+export default function getProductVariantArrayFields(): Field {
+  return {
+    name: 'product-variant',
+    type: 'array',
+    admin: {
+      components: {
+        RowLabel: {
+          path: '@/components/payload-ui/RowLabel',
+          clientProps: {
+            labelPrefix: 'variant',
+          },
+        },
+      },
+    },
+    fields: [...getProductVariantField()],
+  } as Field
 }

@@ -12,6 +12,14 @@ export const Carts: CollectionConfig = {
   },
   fields: [
     {
+      name: 'id',
+      type: 'text',
+      defaultValue: () => crypto.randomUUID(),
+      admin: {
+        hidden: true,
+      },
+    },
+    {
       name: 'customer',
       type: 'relationship',
       relationTo: 'customers',

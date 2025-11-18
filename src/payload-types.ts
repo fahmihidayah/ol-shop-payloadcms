@@ -73,8 +73,6 @@ export interface Config {
     media: Media;
     categories: Category;
     products: Product;
-    'product-variants': ProductVariant;
-    'variant-options': VariantOption;
     carts: Cart;
     'cart-items': CartItem;
     orders: Order;
@@ -92,8 +90,6 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
-    'product-variants': ProductVariantsSelect<false> | ProductVariantsSelect<true>;
-    'variant-options': VariantOptionsSelect<false> | VariantOptionsSelect<true>;
     carts: CartsSelect<false> | CartsSelect<true>;
     'cart-items': CartItemsSelect<false> | CartItemsSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
@@ -163,7 +159,7 @@ export interface CustomerAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   name: string;
   phone?: string | null;
   updatedAt: string;
@@ -189,7 +185,7 @@ export interface User {
  * via the `definition` "customers".
  */
 export interface Customer {
-  id: number;
+  id: string;
   name: string;
   phone?: string | null;
   dateOfBirth?: string | null;
@@ -225,7 +221,7 @@ export interface Customer {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   alt: string;
   updatedAt: string;
   createdAt: string;
@@ -244,7 +240,7 @@ export interface Media {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: number;
+  id: string;
   name: string;
   /**
    * Unique identifier for the category URL
@@ -253,9 +249,9 @@ export interface Category {
   /**
    * Select a parent category to create a subcategory
    */
-  parent?: (number | null) | Category;
+  parent?: (string | null) | Category;
   description?: string | null;
-  image?: (number | null) | Media;
+  image?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -264,12 +260,10 @@ export interface Category {
  * via the `definition` "products".
  */
 export interface Product {
-  id: number;
+  id: string;
   title: string;
-  /**
-   * Unique identifier for the product URL
-   */
-  slug: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
   description: {
     root: {
       type: string;
@@ -285,7 +279,7 @@ export interface Product {
     };
     [k: string]: unknown;
   };
-  category: number | Category;
+  category: string | Category;
   /**
    * Publish this product on the storefront
    */
@@ -294,16 +288,60 @@ export interface Product {
    * Show this product in featured sections
    */
   featured?: boolean | null;
+  'product-variant'?:
+    | {
+        variant?: string | null;
+        /**
+         * Stock Keeping Unit - unique identifier
+         */
+        sku: string;
+        /**
+         * Current selling price
+         */
+        price: number;
+        /**
+         * Show as strikethrough if different from current price
+         */
+        oldPrice?: number | null;
+        /**
+         * Your cost for this variant (internal use)
+         */
+        cost?: number | null;
+        stockQuantity: number;
+        /**
+         * Get notified when stock falls below this number
+         */
+        lowStockThreshold?: number | null;
+        /**
+         * Product weight for shipping calculations
+         */
+        weight?: number | null;
+        dimensions?: {
+          length?: number | null;
+          width?: number | null;
+          height?: number | null;
+        };
+        /**
+         * Specific image for this variant
+         */
+        image?: (string | null) | Media;
+        /**
+         * Make this variant available for purchase
+         */
+        isActive?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Main product image displayed in listings
    */
-  thumbnail: number | Media;
+  thumbnail: string | Media;
   /**
    * Additional product images
    */
   gallery?:
     | {
-        image: number | Media;
+        image: string | Media;
         /**
          * Describe the image for accessibility and SEO
          */
@@ -344,7 +382,7 @@ export interface Product {
     /**
      * Image when shared on social media (1200x630px recommended)
      */
-    ogImage?: (number | null) | Media;
+    ogImage?: (string | null) | Media;
     ogType?: ('product' | 'article' | 'website') | null;
     twitterCard?: ('summary' | 'summary_large_image' | 'product') | null;
     /**
@@ -358,7 +396,7 @@ export interface Product {
     /**
      * Image for Twitter (defaults to OG Image)
      */
-    twitterImage?: (number | null) | Media;
+    twitterImage?: (string | null) | Media;
     /**
      * Product brand name for structured data
      */
@@ -378,84 +416,14 @@ export interface Product {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "product-variants".
- */
-export interface ProductVariant {
-  id: number;
-  product: number | Product;
-  /**
-   * e.g., "Large / Red" or "32GB / Black"
-   */
-  title: string;
-  /**
-   * Stock Keeping Unit - unique identifier
-   */
-  sku: string;
-  /**
-   * Current selling price
-   */
-  price: number;
-  /**
-   * Show as strikethrough if different from current price
-   */
-  oldPrice?: number | null;
-  /**
-   * Your cost for this variant (internal use)
-   */
-  cost?: number | null;
-  stockQuantity: number;
-  /**
-   * Get notified when stock falls below this number
-   */
-  lowStockThreshold?: number | null;
-  /**
-   * Product weight for shipping calculations
-   */
-  weight?: number | null;
-  dimensions?: {
-    length?: number | null;
-    width?: number | null;
-    height?: number | null;
-  };
-  /**
-   * Specific image for this variant
-   */
-  image?: (number | null) | Media;
-  /**
-   * Make this variant available for purchase
-   */
-  isActive?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "variant-options".
- */
-export interface VariantOption {
-  id: number;
-  variant: number | ProductVariant;
-  /**
-   * e.g., "Size", "Color", "Material"
-   */
-  name: string;
-  /**
-   * e.g., "Large", "Red", "Cotton"
-   */
-  value: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "carts".
  */
 export interface Cart {
-  id: number;
+  id: string;
   /**
    * Associated customer (for logged-in customers)
    */
-  customer?: (number | null) | Customer;
+  customer?: (string | null) | Customer;
   /**
    * Session identifier for guest users
    */
@@ -472,9 +440,10 @@ export interface Cart {
  * via the `definition` "cart-items".
  */
 export interface CartItem {
-  id: number;
-  cart: number | Cart;
-  variant: number | ProductVariant;
+  id: string;
+  cart: string | Cart;
+  product: string | Product;
+  variant: string;
   quantity: number;
   /**
    * Price at the time of adding to cart
@@ -492,7 +461,7 @@ export interface CartItem {
  * via the `definition` "orders".
  */
 export interface Order {
-  id: number;
+  id: string;
   /**
    * Unique order identifier
    */
@@ -500,7 +469,7 @@ export interface Order {
   /**
    * Registered customer (if logged in)
    */
-  customer?: (number | null) | Customer;
+  customer?: (string | null) | Customer;
   /**
    * For guest checkout
    */
@@ -537,8 +506,9 @@ export interface Order {
  */
 export interface OrderItem {
   id: number;
-  order: number | Order;
-  variant: number | ProductVariant;
+  order: string | Order;
+  product: string | Product;
+  variant: string;
   /**
    * Stored product details at time of purchase
    */
@@ -565,8 +535,8 @@ export interface OrderItem {
  * via the `definition` "payments".
  */
 export interface Payment {
-  id: number;
-  order: number | Order;
+  id: string;
+  order: string | Order;
   method: 'credit_card' | 'bank_transfer' | 'cod' | 'e_wallet' | 'paypal' | 'stripe' | 'other';
   /**
    * Payment gateway transaction identifier
@@ -594,8 +564,8 @@ export interface Payment {
  * via the `definition` "addresses".
  */
 export interface Address {
-  id: number;
-  customer: number | Customer;
+  id: string;
+  customer: string | Customer;
   /**
    * e.g., "Home", "Office", "Mom's House"
    */
@@ -637,43 +607,35 @@ export interface PayloadLockedDocument {
   document?:
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null)
     | ({
         relationTo: 'customers';
-        value: number | Customer;
+        value: string | Customer;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'categories';
-        value: number | Category;
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'products';
-        value: number | Product;
-      } | null)
-    | ({
-        relationTo: 'product-variants';
-        value: number | ProductVariant;
-      } | null)
-    | ({
-        relationTo: 'variant-options';
-        value: number | VariantOption;
+        value: string | Product;
       } | null)
     | ({
         relationTo: 'carts';
-        value: number | Cart;
+        value: string | Cart;
       } | null)
     | ({
         relationTo: 'cart-items';
-        value: number | CartItem;
+        value: string | CartItem;
       } | null)
     | ({
         relationTo: 'orders';
-        value: number | Order;
+        value: string | Order;
       } | null)
     | ({
         relationTo: 'order-items';
@@ -681,21 +643,21 @@ export interface PayloadLockedDocument {
       } | null)
     | ({
         relationTo: 'payments';
-        value: number | Payment;
+        value: string | Payment;
       } | null)
     | ({
         relationTo: 'addresses';
-        value: number | Address;
+        value: string | Address;
       } | null);
   globalSlug?: string | null;
   user:
     | {
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       }
     | {
         relationTo: 'customers';
-        value: number | Customer;
+        value: string | Customer;
       };
   updatedAt: string;
   createdAt: string;
@@ -709,11 +671,11 @@ export interface PayloadPreference {
   user:
     | {
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       }
     | {
         relationTo: 'customers';
-        value: number | Customer;
+        value: string | Customer;
       };
   key?: string | null;
   value?:
@@ -744,6 +706,7 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  id?: T;
   name?: T;
   phone?: T;
   updatedAt?: T;
@@ -768,6 +731,7 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "customers_select".
  */
 export interface CustomersSelect<T extends boolean = true> {
+  id?: T;
   name?: T;
   phone?: T;
   dateOfBirth?: T;
@@ -796,6 +760,7 @@ export interface CustomersSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  id?: T;
   alt?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -814,6 +779,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
+  id?: T;
   name?: T;
   slug?: T;
   parent?: T;
@@ -827,12 +793,36 @@ export interface CategoriesSelect<T extends boolean = true> {
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
+  id?: T;
   title?: T;
   slug?: T;
+  slugLock?: T;
   description?: T;
   category?: T;
   isActive?: T;
   featured?: T;
+  'product-variant'?:
+    | T
+    | {
+        variant?: T;
+        sku?: T;
+        price?: T;
+        oldPrice?: T;
+        cost?: T;
+        stockQuantity?: T;
+        lowStockThreshold?: T;
+        weight?: T;
+        dimensions?:
+          | T
+          | {
+              length?: T;
+              width?: T;
+              height?: T;
+            };
+        image?: T;
+        isActive?: T;
+        id?: T;
+      };
   thumbnail?: T;
   gallery?:
     | T
@@ -871,46 +861,10 @@ export interface ProductsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "product-variants_select".
- */
-export interface ProductVariantsSelect<T extends boolean = true> {
-  product?: T;
-  title?: T;
-  sku?: T;
-  price?: T;
-  oldPrice?: T;
-  cost?: T;
-  stockQuantity?: T;
-  lowStockThreshold?: T;
-  weight?: T;
-  dimensions?:
-    | T
-    | {
-        length?: T;
-        width?: T;
-        height?: T;
-      };
-  image?: T;
-  isActive?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "variant-options_select".
- */
-export interface VariantOptionsSelect<T extends boolean = true> {
-  variant?: T;
-  name?: T;
-  value?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "carts_select".
  */
 export interface CartsSelect<T extends boolean = true> {
+  id?: T;
   customer?: T;
   sessionId?: T;
   expiresAt?: T;
@@ -922,7 +876,9 @@ export interface CartsSelect<T extends boolean = true> {
  * via the `definition` "cart-items_select".
  */
 export interface CartItemsSelect<T extends boolean = true> {
+  id?: T;
   cart?: T;
+  product?: T;
   variant?: T;
   quantity?: T;
   price?: T;
@@ -935,6 +891,7 @@ export interface CartItemsSelect<T extends boolean = true> {
  * via the `definition` "orders_select".
  */
 export interface OrdersSelect<T extends boolean = true> {
+  id?: T;
   orderNumber?: T;
   customer?: T;
   guestName?: T;
@@ -966,6 +923,7 @@ export interface OrdersSelect<T extends boolean = true> {
  */
 export interface OrderItemsSelect<T extends boolean = true> {
   order?: T;
+  product?: T;
   variant?: T;
   productSnapshot?:
     | T
@@ -986,6 +944,7 @@ export interface OrderItemsSelect<T extends boolean = true> {
  * via the `definition` "payments_select".
  */
 export interface PaymentsSelect<T extends boolean = true> {
+  id?: T;
   order?: T;
   method?: T;
   transactionId?: T;
@@ -1002,6 +961,7 @@ export interface PaymentsSelect<T extends boolean = true> {
  * via the `definition` "addresses_select".
  */
 export interface AddressesSelect<T extends boolean = true> {
+  id?: T;
   customer?: T;
   label?: T;
   recipientName?: T;

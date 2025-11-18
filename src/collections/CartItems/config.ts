@@ -3,14 +3,24 @@ import type { CollectionConfig } from 'payload'
 export const CartItems: CollectionConfig = {
   slug: 'cart-items',
   admin: {
+    hidden: true,
     useAsTitle: 'id',
     defaultColumns: ['cart', 'variant', 'quantity', 'subtotal'],
     group: 'Shop',
   },
+
   access: {
     read: () => true,
   },
   fields: [
+    {
+      name: 'id',
+      type: 'text',
+      defaultValue: () => crypto.randomUUID(),
+      admin: {
+        hidden: true,
+      },
+    },
     {
       name: 'cart',
       type: 'relationship',
@@ -22,9 +32,15 @@ export const CartItems: CollectionConfig = {
       },
     },
     {
-      name: 'variant',
+      name: 'product',
       type: 'relationship',
-      relationTo: 'product-variants',
+      relationTo: 'products',
+      required: true,
+      label: 'Product',
+    },
+    {
+      name: 'variant',
+      type: 'text',
       required: true,
       label: 'Product Variant',
     },

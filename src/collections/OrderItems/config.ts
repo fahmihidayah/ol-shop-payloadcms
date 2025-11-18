@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const OrderItems: CollectionConfig = {
   slug: 'order-items',
   admin: {
+    hidden: true,
     useAsTitle: 'id',
     defaultColumns: ['order', 'variant', 'quantity', 'price', 'subtotal'],
     group: 'Shop',
@@ -22,9 +23,15 @@ export const OrderItems: CollectionConfig = {
       },
     },
     {
-      name: 'variant',
+      name: 'product',
       type: 'relationship',
-      relationTo: 'product-variants',
+      relationTo: 'products',
+      required: true,
+      label: 'Product',
+    },
+    {
+      name: 'variant',
+      type: 'text',
       required: true,
       label: 'Product Variant',
     },

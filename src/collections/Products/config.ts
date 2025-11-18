@@ -1,4 +1,6 @@
 import type { CollectionConfig } from 'payload'
+import getProductVariantArrayFields from './product-variant'
+import { slugField } from '@/fields/slug'
 
 export const Products: CollectionConfig = {
   slug: 'products',
@@ -10,7 +12,18 @@ export const Products: CollectionConfig = {
   access: {
     read: () => true,
   },
+  hooks: {
+    afterChange: [],
+  },
   fields: [
+    {
+      name: 'id',
+      type: 'text',
+      defaultValue: () => crypto.randomUUID(),
+      admin: {
+        hidden: true,
+      },
+    },
     {
       type: 'tabs',
       tabs: [
@@ -23,29 +36,7 @@ export const Products: CollectionConfig = {
               required: true,
               label: 'Product Title',
             },
-            {
-              name: 'slug',
-              type: 'text',
-              required: true,
-              unique: true,
-              label: 'URL Slug',
-              admin: {
-                description: 'Unique identifier for the product URL',
-              },
-              hooks: {
-                beforeValidate: [
-                  ({ value, data }) => {
-                    if (!value && data?.title) {
-                      return data.title
-                        .toLowerCase()
-                        .replace(/[^a-z0-9]+/g, '-')
-                        .replace(/(^-|-$)/g, '')
-                    }
-                    return value
-                  },
-                ],
-              },
-            },
+            ...slugField(),
             {
               name: 'description',
               type: 'richText',
@@ -85,6 +76,10 @@ export const Products: CollectionConfig = {
               ],
             },
           ],
+        },
+        {
+          label: 'Variants',
+          fields: [getProductVariantArrayFields()],
         },
         {
           label: 'Media',
@@ -145,7 +140,8 @@ export const Products: CollectionConfig = {
                       type: 'text',
                       label: 'Meta Title',
                       admin: {
-                        description: 'Override default title for SEO (50-60 characters recommended)',
+                        description:
+                          'Override default title for SEO (50-60 characters recommended)',
                       },
                       maxLength: 60,
                     },
@@ -154,7 +150,8 @@ export const Products: CollectionConfig = {
                       type: 'textarea',
                       label: 'Meta Description',
                       admin: {
-                        description: 'Meta description for search engines (150-160 characters recommended)',
+                        description:
+                          'Meta description for search engines (150-160 characters recommended)',
                       },
                       maxLength: 160,
                     },
@@ -177,7 +174,8 @@ export const Products: CollectionConfig = {
                       type: 'text',
                       label: 'Canonical URL',
                       admin: {
-                        description: 'Specify if this content exists elsewhere to avoid duplicate content issues',
+                        description:
+                          'Specify if this content exists elsewhere to avoid duplicate content issues',
                       },
                     },
                   ],
@@ -202,7 +200,8 @@ export const Products: CollectionConfig = {
                       type: 'textarea',
                       label: 'OG Description',
                       admin: {
-                        description: 'Description when shared on social media (defaults to Meta Description)',
+                        description:
+                          'Description when shared on social media (defaults to Meta Description)',
                       },
                     },
                     {
@@ -258,7 +257,8 @@ export const Products: CollectionConfig = {
                       type: 'textarea',
                       label: 'Twitter Description',
                       admin: {
-                        description: 'Description for Twitter (defaults to OG Description or Meta Description)',
+                        description:
+                          'Description for Twitter (defaults to OG Description or Meta Description)',
                       },
                     },
                     {

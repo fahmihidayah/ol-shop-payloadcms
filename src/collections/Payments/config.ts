@@ -12,6 +12,14 @@ export const Payments: CollectionConfig = {
   },
   fields: [
     {
+      name: 'id',
+      type: 'text',
+      defaultValue: () => crypto.randomUUID(),
+      admin: {
+        hidden: true,
+      },
+    },
+    {
       name: 'order',
       type: 'relationship',
       relationTo: 'orders',
