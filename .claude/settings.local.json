@@ -9,7 +9,8 @@
       "Bash(npm:*)",
       "Bash(pnpm list:*)",
       "Bash(cat:*)",
-      "Bash(xargs cat:*)"
+      "Bash(xargs cat:*)",
+      "Bash(pnpm install:*)"
     ],
     "deny": []
   }
