@@ -103,8 +103,12 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'home-page': HomePage;
+  };
+  globalsSelect: {
+    'home-page': HomePageSelect<false> | HomePageSelect<true>;
+  };
   locale: null;
   user:
     | (User & {
@@ -1013,6 +1017,249 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * Manage home page content and settings
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page".
+ */
+export interface HomePage {
+  id: number;
+  hero: {
+    enabled?: boolean | null;
+    /**
+     * Main headline for the hero section
+     */
+    title: string;
+    /**
+     * Supporting text for the hero section
+     */
+    subtitle?: string | null;
+    /**
+     * Hero background image (recommended: 1920x800px)
+     */
+    backgroundImage?: (string | null) | Media;
+    ctaButtons?:
+      | {
+          text: string;
+          /**
+           * URL or path (e.g., /products, /about)
+           */
+          link: string;
+          style?: ('primary' | 'secondary' | 'outline') | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
+   * Rotating banners for promotions and campaigns
+   */
+  banners?:
+    | {
+        /**
+         * Recommended size: 1920x600px
+         */
+        image: string | Media;
+        title?: string | null;
+        description?: string | null;
+        /**
+         * Where should this banner link to?
+         */
+        link?: string | null;
+        /**
+         * Leave empty to hide button
+         */
+        buttonText?: string | null;
+        /**
+         * Show/hide this banner
+         */
+        active?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Small promotional banners (e.g., free shipping, discounts)
+   */
+  promotionalBanners?:
+    | {
+        /**
+         * Small icon (64x64px recommended)
+         */
+        icon?: (string | null) | Media;
+        title: string;
+        description?: string | null;
+        link?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  featuredProducts?: {
+    enabled?: boolean | null;
+    title?: string | null;
+    subtitle?: string | null;
+    displayType?: ('auto' | 'manual') | null;
+    /**
+     * Only used when Display Type is Manual Selection
+     */
+    products?: (string | Product)[] | null;
+    limit?: number | null;
+  };
+  newArrivals?: {
+    enabled?: boolean | null;
+    title?: string | null;
+    subtitle?: string | null;
+    limit?: number | null;
+  };
+  categoriesShowcase?: {
+    enabled?: boolean | null;
+    title?: string | null;
+    /**
+     * Select categories to highlight on home page
+     */
+    categories?: (string | Category)[] | null;
+  };
+  /**
+   * Add custom content sections to your home page
+   */
+  contentBlocks?:
+    | {
+        type: 'text-image' | 'image-grid' | 'testimonials' | 'newsletter';
+        title?: string | null;
+        content?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        image?: (string | null) | Media;
+        layout?: ('left' | 'right' | 'full') | null;
+        id?: string | null;
+      }[]
+    | null;
+  seo?: {
+    /**
+     * Page title for SEO (50-60 characters)
+     */
+    metaTitle?: string | null;
+    /**
+     * Page description for search engines (150-160 characters)
+     */
+    metaDescription?: string | null;
+    /**
+     * Image shown when sharing on social media (1200x630px)
+     */
+    ogImage?: (string | null) | Media;
+    keywords?:
+      | {
+          keyword?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page_select".
+ */
+export interface HomePageSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        enabled?: T;
+        title?: T;
+        subtitle?: T;
+        backgroundImage?: T;
+        ctaButtons?:
+          | T
+          | {
+              text?: T;
+              link?: T;
+              style?: T;
+              id?: T;
+            };
+      };
+  banners?:
+    | T
+    | {
+        image?: T;
+        title?: T;
+        description?: T;
+        link?: T;
+        buttonText?: T;
+        active?: T;
+        id?: T;
+      };
+  promotionalBanners?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        description?: T;
+        link?: T;
+        id?: T;
+      };
+  featuredProducts?:
+    | T
+    | {
+        enabled?: T;
+        title?: T;
+        subtitle?: T;
+        displayType?: T;
+        products?: T;
+        limit?: T;
+      };
+  newArrivals?:
+    | T
+    | {
+        enabled?: T;
+        title?: T;
+        subtitle?: T;
+        limit?: T;
+      };
+  categoriesShowcase?:
+    | T
+    | {
+        enabled?: T;
+        title?: T;
+        categories?: T;
+      };
+  contentBlocks?:
+    | T
+    | {
+        type?: T;
+        title?: T;
+        content?: T;
+        image?: T;
+        layout?: T;
+        id?: T;
+      };
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        keywords?:
+          | T
+          | {
+              keyword?: T;
+              id?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

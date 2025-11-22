@@ -1,15 +1,14 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { User } from '@/payload-types'
 import { SessionData } from '@/types/session-data'
 
 export function useSession() {
-  return useQuery({
-    queryKey: ['session'],
+  return useQuery<SessionData | null>({
+    queryKey: ['customer-session'],
     queryFn: async (): Promise<SessionData | null> => {
       try {
-        const response = await fetch('/api/users/me', {
+        const response = await fetch('/api/customers/me', {
           credentials: 'include',
         })
 

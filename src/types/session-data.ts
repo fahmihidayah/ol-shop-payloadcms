@@ -1,6 +1,8 @@
-import { User } from '@/payload-types'
+import { Customer } from '@/payload-types'
 
 export type SessionData = {
   token: string
-  user: User
+  user: Customer
 }
+
+export type CustomerSessionData = SessionData

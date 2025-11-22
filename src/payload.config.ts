@@ -18,6 +18,7 @@ import { Orders } from './collections/Orders/config'
 import { OrderItems } from './collections/OrderItems/config'
 import { Payments } from './collections/Payments/config'
 import { Addresses } from './collections/Addresses/config'
+import { HomePageSettings } from './globals'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -42,6 +43,7 @@ export default buildConfig({
     Payments,
     Addresses,
   ],
+  globals: [HomePageSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
