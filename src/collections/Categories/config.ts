@@ -14,7 +14,7 @@ export const Categories: CollectionConfig = {
     {
       name: 'id',
       type: 'text',
-      defaultValue: () => crypto.randomUUID(),
+      defaultValue: () => `category-${crypto.randomUUID()}`,
       admin: {
         hidden: true,
       },

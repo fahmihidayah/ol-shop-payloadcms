@@ -12,7 +12,7 @@ export const Customers: CollectionConfig = {
     {
       name: 'id',
       type: 'text',
-      defaultValue: () => crypto.randomUUID(),
+      defaultValue: () => `customer-${crypto.randomUUID()}`,
       admin: {
         hidden: true,
       },

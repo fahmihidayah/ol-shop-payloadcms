@@ -19,7 +19,7 @@ export const Products: CollectionConfig = {
     {
       name: 'id',
       type: 'text',
-      defaultValue: () => crypto.randomUUID(),
+      defaultValue: () => `products-${crypto.randomUUID()}`,
       admin: {
         hidden: true,
       },

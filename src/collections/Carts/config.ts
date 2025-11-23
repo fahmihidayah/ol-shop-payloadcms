@@ -14,7 +14,7 @@ export const Carts: CollectionConfig = {
     {
       name: 'id',
       type: 'text',
-      defaultValue: () => crypto.randomUUID(),
+      defaultValue: () => `cart-${crypto.randomUUID()}`,
       admin: {
         hidden: true,
       },

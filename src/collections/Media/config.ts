@@ -12,7 +12,7 @@ export const Media: CollectionConfig = {
     {
       name: 'id',
       type: 'text',
-      defaultValue: () => crypto.randomUUID(),
+      defaultValue: () => `media-${crypto.randomUUID()}`,
       admin: {
         hidden: true,
       },

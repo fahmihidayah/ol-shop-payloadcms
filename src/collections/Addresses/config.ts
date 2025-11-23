@@ -14,7 +14,7 @@ export const Addresses: CollectionConfig = {
     {
       name: 'id',
       type: 'text',
-      defaultValue: () => crypto.randomUUID(),
+      defaultValue: () => `address-${crypto.randomUUID()}`,
       admin: {
         hidden: true,
       },

@@ -14,7 +14,7 @@ export const Orders: CollectionConfig = {
     {
       name: 'id',
       type: 'text',
-      defaultValue: () => crypto.randomUUID(),
+      defaultValue: () => `order-${crypto.randomUUID()}`,
       admin: {
         hidden: true,
       },
