@@ -19,6 +19,7 @@ import {
 import { LogIn, Mail, Lock, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { signIn } from '../actions'
 import { toast } from 'sonner'
+import { useUserStore } from '@/store'
 
 const signInFormSchema = z.object({
   email: z.string().email({
@@ -35,6 +36,7 @@ export default function SignInForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const login = useUserStore((state) => state.login)
 
   const form = useForm<SignInFormSchema>({
     resolver: zodResolver(signInFormSchema),
@@ -51,7 +53,10 @@ export default function SignInForm() {
     try {
       const response = await signIn(data)
 
-      if (response.success) {
+      if (response.success && response.user) {
+        // Update user store with logged in user
+        login(response.user, response.token || '')
+
         // Show success toast
         toast.success('Welcome back!', {
           description: 'You have successfully signed in.',

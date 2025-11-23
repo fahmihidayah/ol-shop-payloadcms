@@ -19,6 +19,7 @@ import {
 import { UserPlus, Mail, Lock, Loader2, AlertCircle, User, Phone } from 'lucide-react'
 import { signUp } from '../actions'
 import { toast } from 'sonner'
+import { useUserStore } from '@/store'
 
 const signUpFormSchema = z
   .object({
@@ -47,6 +48,7 @@ export default function SignUpForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const login = useUserStore((state) => state.login)
 
   const form = useForm<SignUpFormSchema>({
     resolver: zodResolver(signUpFormSchema),
@@ -71,7 +73,10 @@ export default function SignUpForm() {
         phone: data.phone,
       })
 
-      if (response.success) {
+      if (response.success && response.user) {
+        // Update user store with newly created user
+        login(response.user, response.token || '')
+
         // Show success toast
         toast.success('Welcome!', {
           description: 'Your account has been created successfully.',

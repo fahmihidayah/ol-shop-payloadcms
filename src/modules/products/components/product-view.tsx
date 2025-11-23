@@ -5,28 +5,65 @@ import { Media, Product } from '@/payload-types'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import { QuantityCounter } from '@/components/ui/quantity-counter'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { ShoppingCart } from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
+import { useCartStore } from '@/store'
 
 export default function ProductDetailView({ product }: { product: Product }) {
   const [quantity, setQuantity] = useState(1)
-  const [isLoading, setIsLoading] = useState(false)
+  const addItem = useCartStore((state: any) => state.addItem)
+  const openCart = useCartStore((state: any) => state.openCart)
+  const isLoading = useCartStore((state: any) => state.isLoading)
 
-  // Get the first variant or use default values
-  const variants = (product as any)['product-variant'] || []
-  const firstVariant = variants[0]
-  const price = firstVariant?.price || 0
-  const compareAtPrice = firstVariant?.compareAtPrice
-  const stock = firstVariant?.stock || 0
+  // Get all variants
+  const variants = product['product-variant'] || []
+  const [selectedVariantId, setSelectedVariantId] = useState(variants[0]?.id || '')
+
+  // Get selected variant details
+  const selectedVariant = variants.find((v: any) => v.id === selectedVariantId)
+  const price = selectedVariant?.price || 0
+  const compareAtPrice = selectedVariant?.oldPrice || 0
+  const stock = selectedVariant?.stockQuantity || 0
 
   const handleAddToCart = async () => {
-    setIsLoading(true)
-    // TODO: Implement add to cart functionality
-    console.log('Adding to cart:', { product: product.id, quantity })
+    if (!selectedVariantId || !selectedVariant) {
+      toast.error('Please select a variant')
+      return
+    }
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    setIsLoading(false)
+    if (stock === 0) {
+      toast.error('This variant is out of stock')
+      return
+    }
+
+    try {
+      await addItem({
+        productId: product.id,
+        productTitle: product.title,
+        productImage: typeof product.thumbnail === 'string'
+          ? product.thumbnail
+          : product.thumbnail?.url,
+        productSlug: product.slug || undefined,
+        variant: selectedVariantId, // The variant ID from PayloadCMS
+        quantity,
+        price,
+        stock,
+      })
+
+      toast.success('Item added to cart')
+      setQuantity(1) // Reset quantity after successful add
+      openCart() // Open cart preview
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to add item to cart')
+    }
   }
 
   const formatPrice = (price: number) => {
@@ -84,6 +121,29 @@ export default function ProductDetailView({ product }: { product: Product }) {
         {/* Divider */}
         <div className="border-t border-border my-2" />
 
+        {/* Variant Selection */}
+        {variants.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <label htmlFor="variant-select" className="text-sm sm:text-base font-medium">
+              Select Variant:
+            </label>
+            <Select value={selectedVariantId} onValueChange={setSelectedVariantId}>
+              <SelectTrigger id="variant-select" className="w-full sm:w-auto">
+                <SelectValue placeholder="Choose a variant" />
+              </SelectTrigger>
+              <SelectContent>
+                {variants.map((variant: any) => (
+                  <SelectItem key={variant.id} value={variant.id}>
+                    {variant.variant} - {formatPrice(variant.price)}
+                    {variant.stock === 0 && ' (Out of Stock)'}
+                    {variant.stock > 0 && variant.stock <= 5 && ` (Only ${variant.stock} left)`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         {/* Quantity and Add to Cart */}
         <div className="flex flex-col gap-4 sm:gap-5">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
@@ -99,7 +159,7 @@ export default function ProductDetailView({ product }: { product: Product }) {
 
           <Button
             size="lg"
-            className=" gap-2 text-base w-min"
+            className="gap-2 text-base w-full sm:w-auto"
             onClick={handleAddToCart}
             disabled={stock === 0 || isLoading}
           >
@@ -109,18 +169,18 @@ export default function ProductDetailView({ product }: { product: Product }) {
         </div>
 
         {/* Additional Info */}
-        {firstVariant && (
+        {selectedVariant && (
           <div className="mt-4 p-4 bg-muted rounded-lg">
             <h3 className="text-sm font-semibold mb-2">Product Details</h3>
             <ul className="text-sm space-y-1 text-muted-foreground">
-              {firstVariant.variant && (
+              {selectedVariant.variant && (
                 <li>
-                  <span className="font-medium">Variant:</span> {firstVariant.variant}
+                  <span className="font-medium">Variant:</span> {selectedVariant.variant}
                 </li>
               )}
-              {firstVariant.sku && (
+              {selectedVariant.sku && (
                 <li>
-                  <span className="font-medium">SKU:</span> {firstVariant.sku}
+                  <span className="font-medium">SKU:</span> {selectedVariant.sku}
                 </li>
               )}
             </ul>

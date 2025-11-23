@@ -10,7 +10,8 @@
       "Bash(pnpm list:*)",
       "Bash(cat:*)",
       "Bash(xargs cat:*)",
-      "Bash(pnpm install:*)"
+      "Bash(pnpm install:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }
