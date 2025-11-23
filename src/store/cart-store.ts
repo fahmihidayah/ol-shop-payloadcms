@@ -10,7 +10,7 @@ import type { CartItem as PayloadCartItem } from '@/payload-types'
 // PayloadCMS CartItem has: cart (relation), product (relation), but we need denormalized data for UI
 export type CartItem = Pick<
   PayloadCartItem,
-  'id' | 'variant' | 'quantity' | 'price' | 'subtotal'
+  'id' | 'variant' | 'quantity' | 'price' | 'subtotal' | 'product'
 > & {
   // UI-specific denormalized fields
   productId: string

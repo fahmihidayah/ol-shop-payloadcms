@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { CartItem } from '@/payload-types'
+import { getMeCustomer } from '@/actions/customer/getMeCustomer'
 
 export interface CartData {
   items: CartItem[]
@@ -87,24 +88,9 @@ async function getOrCreateCart(customerId?: string, sessionId?: string) {
  * Get current customer ID from session
  */
 async function getCurrentCustomerId(): Promise<string | undefined> {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('payload-token')?.value
-
-  if (!token) return undefined
-
   try {
-    const payload = await getPayload({ config })
-    const result = await payload.find({
-      collection: 'customers',
-      where: {
-        _token: {
-          equals: token,
-        },
-      },
-      limit: 1,
-    })
-
-    return result.docs[0]?.id
+    const { user } = await getMeCustomer()
+    return user?.id
   } catch {
     return undefined
   }

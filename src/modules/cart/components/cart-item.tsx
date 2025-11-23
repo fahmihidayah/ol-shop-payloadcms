@@ -7,6 +7,7 @@ import { Trash2, Minus, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { QuantityCounter } from '@/components/ui/quantity-counter'
 import type { CartItem as CartItemType } from '@/store/cart-store'
+import { Product } from '@/payload-types'
 
 interface CartItemProps {
   item: CartItemType
@@ -59,6 +60,13 @@ export function CartItem({ item, onUpdateQuantity, onRemove, isLoading = false }
             {item.productTitle}
           </Link>
           <p className="text-sm text-muted-foreground mt-1">Variant: {item.variant}</p>
+          <QuantityCounter
+            value={item.quantity}
+            onChange={handleQuantityChange}
+            min={1}
+            max={item.stock}
+            disabled={isLoading}
+          />
         </div>
 
         {/* Mobile: Price and Actions */}
@@ -80,23 +88,10 @@ export function CartItem({ item, onUpdateQuantity, onRemove, isLoading = false }
         </div>
       </div>
 
-      {/* Quantity Counter */}
-      <div className="hidden sm:flex items-center justify-center min-w-[140px]">
-        <QuantityCounter
-          value={item.quantity}
-          onChange={handleQuantityChange}
-          min={1}
-          max={item.stock}
-          disabled={isLoading}
-        />
-      </div>
-
       {/* Subtotal */}
       <div className="hidden sm:flex flex-col items-end justify-between min-w-[120px]">
         <p className="font-bold text-lg">{formatPrice(item.subtotal)}</p>
-        {item.stock <= 5 && (
-          <p className="text-xs text-orange-600">Only {item.stock} left</p>
-        )}
+        {item.stock <= 5 && <p className="text-xs text-orange-600">Only {item.stock} left</p>}
       </div>
 
       {/* Remove Button */}

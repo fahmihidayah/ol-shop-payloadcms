@@ -85,10 +85,9 @@ export function CartPage() {
           <div className="lg:col-span-2">
             <div className="bg-card rounded-lg border">
               {/* Desktop Table Headers */}
-              <div className="hidden sm:grid grid-cols-[1fr_120px_140px_120px_48px] gap-4 px-6 py-4 border-b bg-muted/30 font-semibold text-sm">
+              <div className="hidden sm:grid grid-cols-[1fr_120px_120px_48px] gap-4 px-6 py-4 border-b bg-muted/30 font-semibold text-sm">
                 <div>Product</div>
                 <div className="text-right">Price</div>
-                <div className="text-center">Quantity</div>
                 <div className="text-right">Subtotal</div>
                 <div></div>
               </div>
