@@ -73,11 +73,13 @@ export interface Config {
     media: Media;
     categories: Category;
     products: Product;
+    productVariants: ProductVariant;
     carts: Cart;
     'cart-items': CartItem;
     orders: Order;
     'order-items': OrderItem;
     payments: Payment;
+    'payment-options': PaymentOption;
     addresses: Address;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -90,11 +92,13 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
+    productVariants: ProductVariantsSelect<false> | ProductVariantsSelect<true>;
     carts: CartsSelect<false> | CartsSelect<true>;
     'cart-items': CartItemsSelect<false> | CartItemsSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
     'order-items': OrderItemsSelect<false> | OrderItemsSelect<true>;
     payments: PaymentsSelect<false> | PaymentsSelect<true>;
+    'payment-options': PaymentOptionsSelect<false> | PaymentOptionsSelect<true>;
     addresses: AddressesSelect<false> | AddressesSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -265,6 +269,7 @@ export interface Category {
  */
 export interface Product {
   id: string;
+  variants?: (number | ProductVariant)[] | null;
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
@@ -420,6 +425,55 @@ export interface Product {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "productVariants".
+ */
+export interface ProductVariant {
+  id: number;
+  variant?: string | null;
+  /**
+   * Stock Keeping Unit - unique identifier
+   */
+  sku: string;
+  /**
+   * Current selling price
+   */
+  price: number;
+  /**
+   * Show as strikethrough if different from current price
+   */
+  oldPrice?: number | null;
+  /**
+   * Your cost for this variant (internal use)
+   */
+  cost?: number | null;
+  stockQuantity: number;
+  /**
+   * Get notified when stock falls below this number
+   */
+  lowStockThreshold?: number | null;
+  /**
+   * Product weight for shipping calculations
+   */
+  weight?: number | null;
+  dimensions?: {
+    length?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  /**
+   * Specific image for this variant
+   */
+  image?: (string | null) | Media;
+  /**
+   * Make this variant available for purchase
+   */
+  isActive?: boolean | null;
+  product?: (string | null) | Product;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "carts".
  */
 export interface Cart {
@@ -565,6 +619,51 @@ export interface Payment {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payment-options".
+ */
+export interface PaymentOption {
+  id: number;
+  /**
+   * e.g., "Credit Card", "Bank Transfer BCA"
+   */
+  name: string;
+  type: 'credit_card' | 'bank_transfer' | 'cod' | 'e_wallet' | 'paypal' | 'stripe';
+  /**
+   * Additional information about this payment method
+   */
+  description?: string | null;
+  icon?: (string | null) | Media;
+  /**
+   * Enable or disable this payment option
+   */
+  isActive?: boolean | null;
+  /**
+   * Fee percentage for this payment method
+   */
+  processingFee?: number | null;
+  /**
+   * Detailed instructions for customers
+   */
+  instructions?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "addresses".
  */
 export interface Address {
@@ -630,6 +729,10 @@ export interface PayloadLockedDocument {
         value: string | Product;
       } | null)
     | ({
+        relationTo: 'productVariants';
+        value: number | ProductVariant;
+      } | null)
+    | ({
         relationTo: 'carts';
         value: string | Cart;
       } | null)
@@ -648,6 +751,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'payments';
         value: string | Payment;
+      } | null)
+    | ({
+        relationTo: 'payment-options';
+        value: number | PaymentOption;
       } | null)
     | ({
         relationTo: 'addresses';
@@ -798,6 +905,7 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface ProductsSelect<T extends boolean = true> {
   id?: T;
+  variants?: T;
   title?: T;
   slug?: T;
   slugLock?: T;
@@ -860,6 +968,32 @@ export interface ProductsSelect<T extends boolean = true> {
         mpn?: T;
         condition?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "productVariants_select".
+ */
+export interface ProductVariantsSelect<T extends boolean = true> {
+  variant?: T;
+  sku?: T;
+  price?: T;
+  oldPrice?: T;
+  cost?: T;
+  stockQuantity?: T;
+  lowStockThreshold?: T;
+  weight?: T;
+  dimensions?:
+    | T
+    | {
+        length?: T;
+        width?: T;
+        height?: T;
+      };
+  image?: T;
+  isActive?: T;
+  product?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -957,6 +1091,21 @@ export interface PaymentsSelect<T extends boolean = true> {
   currency?: T;
   gatewayResponse?: T;
   notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payment-options_select".
+ */
+export interface PaymentOptionsSelect<T extends boolean = true> {
+  name?: T;
+  type?: T;
+  description?: T;
+  icon?: T;
+  isActive?: T;
+  processingFee?: T;
+  instructions?: T;
   updatedAt?: T;
   createdAt?: T;
 }

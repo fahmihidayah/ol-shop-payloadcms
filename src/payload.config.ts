@@ -18,7 +18,9 @@ import { Orders } from './collections/Orders/config'
 import { OrderItems } from './collections/OrderItems/config'
 import { Payments } from './collections/Payments/config'
 import { Addresses } from './collections/Addresses/config'
+import { PaymentOptions } from './collections/PaymentOptions/config'
 import { HomePageSettings } from './globals'
+import { ProductVariant } from './collections/Products/Variants/config'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -36,11 +38,13 @@ export default buildConfig({
     Media,
     Categories,
     Products,
+    ProductVariant,
     Carts,
     CartItems,
     Orders,
     OrderItems,
     Payments,
+    PaymentOptions,
     Addresses,
   ],
   globals: [HomePageSettings],

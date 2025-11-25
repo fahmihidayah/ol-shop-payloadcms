@@ -2,7 +2,10 @@ import { CollectionConfig } from 'payload'
 import { getProductVariantField } from '../product-variant'
 
 export const ProductVariant: CollectionConfig = {
-  slug: 'product-variants',
+  slug: 'productVariants',
+  admin: {
+    hidden: true,
+  },
   fields: [
     ...getProductVariantField(),
     {

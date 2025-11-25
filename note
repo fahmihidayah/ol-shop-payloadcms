@@ -1,0 +1,7 @@
+masih ada error ketika session cart tidak ada.
+harusnya jika tidak ada create lagi atau cari tahu kenapa tidak ada.
+
+pelajari kenapa harus pakai cart session id kenapa tidak memakai user.
+
+ketika check out add address harus tidak boleh pindah halaman.
+gunakan store untuk save state check out

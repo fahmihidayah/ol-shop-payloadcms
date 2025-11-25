@@ -13,7 +13,7 @@ export const Products: CollectionConfig = {
     read: () => true,
   },
   hooks: {
-    afterChange: [],
+    afterChange: [async ({ req, doc }) => {}],
   },
   fields: [
     {
@@ -22,6 +22,17 @@ export const Products: CollectionConfig = {
       defaultValue: () => `products-${crypto.randomUUID()}`,
       admin: {
         hidden: true,
+      },
+    },
+    {
+      name: 'variants',
+      type: 'relationship',
+      relationTo: 'productVariants',
+      hasMany: true,
+      admin: {
+        hidden: true,
+        // Show variants inline with quick edit
+        allowCreate: true, // Can create variants without leaving page
       },
     },
     {
@@ -81,6 +92,7 @@ export const Products: CollectionConfig = {
           label: 'Variants',
           fields: [getProductVariantArrayFields()],
         },
+
         {
           label: 'Media',
           fields: [
