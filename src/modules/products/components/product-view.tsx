@@ -19,7 +19,7 @@ import { useCartStore } from '@/store'
 
 export default function ProductDetailView({ product }: { product: Product }) {
   const [quantity, setQuantity] = useState(1)
-  const addItem = useCartStore((state: any) => state.addItem)
+  const addProduct = useCartStore((state: any) => state.addProduct)
   const openCart = useCartStore((state: any) => state.openCart)
   const isLoading = useCartStore((state: any) => state.isLoading)
 
@@ -45,18 +45,7 @@ export default function ProductDetailView({ product }: { product: Product }) {
     }
 
     try {
-      await addItem({
-        productId: product.id,
-        productTitle: product.title,
-        productImage: typeof product.thumbnail === 'string'
-          ? product.thumbnail
-          : product.thumbnail?.url,
-        productSlug: product.slug || undefined,
-        variant: selectedVariantId, // The variant ID from PayloadCMS
-        quantity,
-        price,
-        stock,
-      })
+      await addProduct(product, selectedVariantId, quantity)
 
       toast.success('Item added to cart')
       setQuantity(1) // Reset quantity after successful add

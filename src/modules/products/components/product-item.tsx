@@ -2,8 +2,9 @@
 import { Button } from '@/components/ui/button'
 import { ImageMedia } from '@/modules/media/image-media'
 import { Media, Product } from '@/payload-types'
+import { useCartStore } from '@/store'
 import Link from 'next/link'
-import { useState } from 'react'
+import React, { useState } from 'react'
 
 export function formatPrice(value: number | string | null | undefined) {
   if (!value) return 'Rp 0'
@@ -20,11 +21,14 @@ export function formatPrice(value: number | string | null | undefined) {
 export default function ProductItem({ product }: { product: Product }) {
   const [loading, setLoading] = useState(false)
 
-  const handleAddToCart = async (e: any) => {
+  const { addProduct } = useCartStore()
+
+  const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+    e.preventDefault()
     try {
       setLoading(true)
-      await new Promise((res) => setTimeout(res, 600))
-      console.log('Added to cart', product)
+      await addProduct(product, product['product-variant']?.[0]?.id || '', 1)
     } finally {
       setLoading(false)
     }
