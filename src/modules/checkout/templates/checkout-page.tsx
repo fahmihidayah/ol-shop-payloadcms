@@ -10,6 +10,8 @@ import { CheckoutSummary } from '../components/checkout-summary'
 import { ShoppingCart } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Address } from '@/payload-types'
+import { createAddress } from '@/modules/addresses/actions'
+import type { AddressFormData } from '@/modules/addresses/components'
 
 interface CheckoutPageProps {
   addresses: Address[]
@@ -28,12 +30,17 @@ interface CheckoutPageProps {
   }) => Promise<{ success: boolean; message?: string; orderId?: string }>
 }
 
-export function CheckoutPage({ addresses, paymentOptions, onPlaceOrder }: CheckoutPageProps) {
+export function CheckoutPage({
+  addresses: initialAddresses,
+  paymentOptions,
+  onPlaceOrder,
+}: CheckoutPageProps) {
   const router = useRouter()
   const cartItems = useCartItems()
   const subtotal = useCartTotalPrice()
 
-  const [selectedAddressId, setSelectedAddressId] = useState<string>(addresses[0]?.id || '')
+  const [addresses, setAddresses] = useState<Address[]>(initialAddresses)
+  const [selectedAddressId, setSelectedAddressId] = useState<string>(initialAddresses[0]?.id || '')
   const [selectedPaymentId, setSelectedPaymentId] = useState<string>(
     paymentOptions.find((p) => p.isActive)?.id || '',
   )
@@ -52,6 +59,21 @@ export function CheckoutPage({ addresses, paymentOptions, onPlaceOrder }: Checko
 
     return { subtotal, tax, shippingCost, processingFee, total }
   }, [subtotal, selectedPaymentId, paymentOptions])
+
+  const handleAddAddress = async (data: AddressFormData) => {
+    const result = await createAddress(data)
+
+    if (result.success && result.addressId) {
+      toast.success('Address added successfully')
+      // Auto-select the newly created address
+      setSelectedAddressId(result.addressId)
+      // Refresh page to get updated addresses list
+      router.refresh()
+    } else {
+      toast.error(result.message || 'Failed to add address')
+      throw new Error(result.message)
+    }
+  }
 
   const handlePlaceOrder = async () => {
     // Validation
@@ -138,6 +160,7 @@ export function CheckoutPage({ addresses, paymentOptions, onPlaceOrder }: Checko
               addresses={addresses}
               selectedAddressId={selectedAddressId}
               onSelectAddress={setSelectedAddressId}
+              onAddAddress={handleAddAddress}
             />
           </div>
 

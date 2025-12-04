@@ -35,9 +35,17 @@ interface AddressFormProps {
   address?: Address
   onSubmit: (data: AddressFormData) => Promise<void>
   isLoading?: boolean
+  submitButtonRef?: React.RefObject<HTMLButtonElement | null>
+  hideSubmitButton?: boolean
 }
 
-export function AddressForm({ address, onSubmit, isLoading = false }: AddressFormProps) {
+export function AddressForm({
+  address,
+  onSubmit,
+  isLoading = false,
+  submitButtonRef,
+  hideSubmitButton,
+}: AddressFormProps) {
   const form = useForm<AddressFormData>({
     resolver: zodResolver(addressFormSchema),
     defaultValues: {
@@ -204,8 +212,8 @@ export function AddressForm({ address, onSubmit, isLoading = false }: AddressFor
           )}
         />
 
-        <div className="flex gap-3">
-          <Button type="submit" disabled={isLoading}>
+        <div className={`flex gap-3 ${hideSubmitButton ? 'h-0' : ''}`}>
+          <Button type="submit" disabled={isLoading} ref={submitButtonRef}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

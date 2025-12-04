@@ -106,27 +106,6 @@ export function CartItem({ item, onUpdateQuantity, onRemove, isLoading = false }
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
-
-      {/* Mobile: Quantity and Remove */}
-      <div className="sm:hidden w-full flex items-center justify-between mt-2">
-        <QuantityCounter
-          value={item.quantity}
-          onChange={handleQuantityChange}
-          min={1}
-          max={item.stock}
-          disabled={isLoading}
-        />
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onRemove(item.id, item.productTitle)}
-          disabled={isLoading}
-          className="text-destructive hover:text-destructive"
-        >
-          <Trash2 className="h-4 w-4 mr-1" />
-          Remove
-        </Button>
-      </div>
     </div>
   )
 }

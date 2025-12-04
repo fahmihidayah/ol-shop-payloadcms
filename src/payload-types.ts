@@ -668,7 +668,8 @@ export interface PaymentOption {
  */
 export interface Address {
   id: string;
-  customer: string | Customer;
+  sessionId?: string | null;
+  customer?: (string | null) | Customer;
   /**
    * e.g., "Home", "Office", "Mom's House"
    */
@@ -1115,6 +1116,7 @@ export interface PaymentOptionsSelect<T extends boolean = true> {
  */
 export interface AddressesSelect<T extends boolean = true> {
   id?: T;
+  sessionId?: T;
   customer?: T;
   label?: T;
   recipientName?: T;

@@ -8,7 +8,66 @@ export const Addresses: CollectionConfig = {
     group: 'Customers',
   },
   access: {
-    read: () => true,
+    // Only allow users to read their own addresses
+    read: ({ req }) => {
+      // Admins can read all addresses
+      if (req.user?.collection === 'users') {
+        return true
+      }
+
+      // Customers can only read their own addresses
+      if (req.user) {
+        return {
+          customer: {
+            equals: req.user.id,
+          },
+        }
+      }
+
+      // For guest users, access will be controlled at the action level
+      // PayloadCMS access control cannot access cookies easily
+      return true
+    },
+    create: () => {
+      // Allow all - will be controlled at action level
+      return true
+    },
+    update: ({ req }) => {
+      // Admins can update all
+      if (req.user?.collection === 'users') {
+        return true
+      }
+
+      // Customers can only update their own
+      if (req.user) {
+        return {
+          customer: {
+            equals: req.user.id,
+          },
+        }
+      }
+
+      // Guest users controlled at action level
+      return true
+    },
+    delete: ({ req }) => {
+      // Admins can delete all
+      if (req.user?.collection === 'users') {
+        return true
+      }
+
+      // Customers can only delete their own
+      if (req.user) {
+        return {
+          customer: {
+            equals: req.user.id,
+          },
+        }
+      }
+
+      // Guest users controlled at action level
+      return true
+    },
   },
   fields: [
     {
@@ -20,10 +79,18 @@ export const Addresses: CollectionConfig = {
       },
     },
     {
+      name: 'sessionId',
+      type: 'text',
+      required: false,
+      admin: {
+        hidden: true,
+      },
+    },
+    {
       name: 'customer',
       type: 'relationship',
       relationTo: 'customers',
-      required: true,
+      required: false,
       label: 'Customer',
       admin: {
         position: 'sidebar',

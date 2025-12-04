@@ -97,6 +97,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResp
       collection: 'orders',
       data: {
         customer: customerId,
+        orderNumber: '',
         shippingAddress: {
           recipientName: address.recipientName,
           phone: address.phone,

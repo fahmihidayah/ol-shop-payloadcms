@@ -28,7 +28,7 @@ export interface AddToCartResponse {
 /**
  * Get or create a cart for the current user/session
  */
-async function getOrCreateCart(customerId?: string, sessionId?: string) {
+export async function getOrCreateCart(customerId?: string, sessionId?: string) {
   const payload = await getPayload({ config })
 
   // Try to find existing cart
@@ -99,9 +99,27 @@ async function getCurrentCustomerId(): Promise<string | undefined> {
 /**
  * Get cart session ID from cookies
  */
-async function getCartSessionId(): Promise<string | undefined> {
+export async function getSessionId(): Promise<string | undefined> {
   const cookieStore = await cookies()
   return cookieStore.get('cart-session-id')?.value
+}
+
+/**
+ * create cart session Id
+ * @returns
+ */
+
+export async function createSessionId(): Promise<string | undefined> {
+  const newSessionId = crypto.randomUUID()
+  const cookieStore = await cookies()
+  cookieStore.set('cart-session-id', newSessionId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+    path: '/',
+  })
+  return newSessionId
 }
 
 /**
@@ -113,7 +131,7 @@ export async function getCartItems(): Promise<CartData> {
 
     // Get cart ID
     const customerId = await getCurrentCustomerId()
-    const sessionId = await getCartSessionId()
+    const sessionId = await getSessionId()
 
     if (!customerId && !sessionId) {
       return { items: [], totalItems: 0, totalPrice: 0 }
@@ -213,7 +231,7 @@ export async function addToCart(input: AddToCartInput): Promise<AddToCartRespons
 
     // Get or create cart
     const customerId = await getCurrentCustomerId()
-    const sessionId = await getCartSessionId()
+    const sessionId = await getSessionId()
     const cart = await getOrCreateCart(customerId, sessionId)
 
     // Check if item already exists in cart

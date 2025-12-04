@@ -4,10 +4,17 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Address } from '@/payload-types'
 import { getMeCustomer } from '@/actions/customer/getMeCustomer'
+import { createSessionId, getSessionId } from '@/modules/cart/actions'
 
 interface ActionResponse {
   success: boolean
   message?: string
+}
+
+interface CreateAddressResponse {
+  success: boolean
+  message?: string
+  addressId?: string
 }
 
 interface GetAddressesResponse {
@@ -40,29 +47,51 @@ async function getCurrentCustomerId(): Promise<string | undefined> {
  */
 export async function getAddresses(): Promise<GetAddressesResponse> {
   try {
-    const customerId = await getCurrentCustomerId()
-    if (!customerId) {
-      return {
-        success: false,
-        addresses: [],
-        message: 'Not authenticated',
-      }
-    }
-
     const payload = await getPayload({ config })
-    const result = await payload.find({
-      collection: 'addresses',
-      where: {
-        customer: {
-          equals: customerId,
-        },
-      },
-      sort: '-createdAt',
-    })
+    const customerId = await getCurrentCustomerId()
 
-    return {
-      success: true,
-      addresses: result.docs,
+    if (customerId) {
+      // Authenticated user - fetch by customer ID
+      const result = await payload.find({
+        collection: 'addresses',
+        where: {
+          customer: {
+            equals: customerId,
+          },
+        },
+        sort: '-createdAt',
+      })
+
+      return {
+        success: true,
+        addresses: result.docs,
+      }
+    } else {
+      // Guest user - fetch by session ID
+      const sessionId = await getSessionId()
+
+      if (!sessionId) {
+        // No session yet - return empty
+        return {
+          success: true,
+          addresses: [],
+        }
+      }
+
+      const result = await payload.find({
+        collection: 'addresses',
+        where: {
+          sessionId: {
+            equals: sessionId,
+          },
+        },
+        sort: '-createdAt',
+      })
+
+      return {
+        success: true,
+        addresses: result.docs,
+      }
     }
   } catch (error) {
     console.error('Get addresses error:', error)
@@ -80,8 +109,10 @@ export async function getAddresses(): Promise<GetAddressesResponse> {
 export async function getAddress(id: string): Promise<GetAddressResponse> {
   try {
     const customerId = await getCurrentCustomerId()
+    const sessionId = await getSessionId()
 
-    if (!customerId) {
+    // Require either authentication or session
+    if (!customerId && !sessionId) {
       return {
         success: false,
         message: 'Not authenticated',
@@ -94,10 +125,15 @@ export async function getAddress(id: string): Promise<GetAddressResponse> {
       id,
     })
 
-    // Verify ownership
+    // Verify ownership - check both customer ID and session ID
     const addressCustomerId =
       typeof address.customer === 'string' ? address.customer : address.customer?.id
-    if (addressCustomerId !== customerId) {
+    const addressSessionId = address.sessionId
+
+    const hasCustomerAccess = customerId && addressCustomerId === customerId
+    const hasSessionAccess = sessionId && addressSessionId === sessionId
+
+    if (!hasCustomerAccess && !hasSessionAccess) {
       return {
         success: false,
         message: 'Address not found',
@@ -130,30 +166,28 @@ export async function createAddress(data: {
   province: string
   postalCode: string
   country?: string
-}): Promise<ActionResponse> {
+}): Promise<CreateAddressResponse> {
   try {
     const customerId = await getCurrentCustomerId()
-
-    console.log('customer ', customerId)
-    if (!customerId) {
-      return {
-        success: false,
-        message: 'Not authenticated',
-      }
+    let sessionId = await getSessionId()
+    if (!customerId && !sessionId) {
+      sessionId = await createSessionId()
     }
 
     const payload = await getPayload({ config })
-    await payload.create({
+    const newAddress = await payload.create({
       collection: 'addresses',
       data: {
         ...data,
         customer: customerId,
+        sessionId: sessionId,
       },
     })
 
     return {
       success: true,
       message: 'Address created successfully',
+      addressId: newAddress.id,
     }
   } catch (error) {
     console.error('Create address error:', error)
@@ -183,8 +217,10 @@ export async function updateAddress(
 ): Promise<ActionResponse> {
   try {
     const customerId = await getCurrentCustomerId()
+    const sessionId = await getSessionId()
 
-    if (!customerId) {
+    // Require either authentication or session
+    if (!customerId && !sessionId) {
       return {
         success: false,
         message: 'Not authenticated',
@@ -203,8 +239,13 @@ export async function updateAddress(
       typeof existingAddress.customer === 'string'
         ? existingAddress.customer
         : existingAddress.customer?.id
+    const addressSessionId = existingAddress.sessionId
 
-    if (addressCustomerId !== customerId) {
+    // Check if user has access to this address
+    const hasCustomerAccess = customerId && addressCustomerId === customerId
+    const hasSessionAccess = sessionId && addressSessionId === sessionId
+
+    if (!hasCustomerAccess && !hasSessionAccess) {
       return {
         success: false,
         message: 'Address not found',
@@ -236,8 +277,10 @@ export async function updateAddress(
 export async function deleteAddress(id: string): Promise<ActionResponse> {
   try {
     const customerId = await getCurrentCustomerId()
+    const sessionId = await getSessionId()
 
-    if (!customerId) {
+    // Require either authentication or session
+    if (!customerId && !sessionId) {
       return {
         success: false,
         message: 'Not authenticated',
@@ -256,8 +299,13 @@ export async function deleteAddress(id: string): Promise<ActionResponse> {
       typeof existingAddress.customer === 'string'
         ? existingAddress.customer
         : existingAddress.customer?.id
+    const addressSessionId = existingAddress.sessionId
 
-    if (addressCustomerId !== customerId) {
+    // Check if user has access to this address
+    const hasCustomerAccess = customerId && addressCustomerId === customerId
+    const hasSessionAccess = sessionId && addressSessionId === sessionId
+
+    if (!hasCustomerAccess && !hasSessionAccess) {
       return {
         success: false,
         message: 'Address not found',
