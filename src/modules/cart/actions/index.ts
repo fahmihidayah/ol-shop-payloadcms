@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers'
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import { CartItem } from '@/payload-types'
+import { Cart, CartItem } from '@/payload-types'
 import { getMeCustomer } from '@/actions/customer/getMeCustomer'
 
 export interface CartData {
@@ -28,7 +28,7 @@ export interface AddToCartResponse {
 /**
  * Get or create a cart for the current user/session
  */
-export async function getOrCreateCart(customerId?: string, sessionId?: string) {
+export async function getOrCreateCart(customerId?: string, sessionId?: string): Promise<Cart> {
   const payload = await getPayload({ config })
 
   // Try to find existing cart

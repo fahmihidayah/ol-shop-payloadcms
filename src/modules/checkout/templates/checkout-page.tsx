@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useCartItems, useCartTotalPrice } from '@/store'
+import { useCartItems } from '@/store'
 import { CheckoutItem } from '../components/checkout-item'
 import { AddressSelector } from '../components/address-selector'
 import { PaymentSelector, type PaymentOption } from '../components/payment-selector'
@@ -12,32 +12,17 @@ import { toast } from 'sonner'
 import type { Address } from '@/payload-types'
 import { createAddress } from '@/modules/addresses/actions'
 import type { AddressFormData } from '@/modules/addresses/components'
+import { placeOrder, selectAddress } from '../actions'
+import { calculateCheckoutTotals } from '../utils/calculations'
 
 interface CheckoutPageProps {
   addresses: Address[]
   paymentOptions: PaymentOption[]
-  onPlaceOrder: (data: {
-    addressId: string
-    paymentOptionId: string
-    items: any[]
-    totals: {
-      subtotal: number
-      tax: number
-      shippingCost: number
-      processingFee: number
-      total: number
-    }
-  }) => Promise<{ success: boolean; message?: string; orderId?: string }>
 }
 
-export function CheckoutPage({
-  addresses: initialAddresses,
-  paymentOptions,
-  onPlaceOrder,
-}: CheckoutPageProps) {
+export function CheckoutPage({ addresses: initialAddresses, paymentOptions }: CheckoutPageProps) {
   const router = useRouter()
   const cartItems = useCartItems()
-  const subtotal = useCartTotalPrice()
 
   const [addresses, setAddresses] = useState<Address[]>(initialAddresses)
   const [selectedAddressId, setSelectedAddressId] = useState<string>(initialAddresses[0]?.id || '')
@@ -46,19 +31,27 @@ export function CheckoutPage({
   )
   const [isLoading, setIsLoading] = useState(false)
 
-  // Calculate totals
+  // Calculate totals using the new calculation utilities
   const totals = useMemo(() => {
-    const tax = subtotal * 0.11 // 11% PPN
-    const shippingCost = subtotal >= 500000 ? 0 : 20000 // Free shipping over 500k
+    const selectedPayment = paymentOptions.find((p) => String(p.id) === selectedPaymentId)
 
-    const selectedPayment = paymentOptions.find((p) => p.id === selectedPaymentId)
-    const processingFeePercent = selectedPayment?.processingFee || 0
-    const processingFee = (subtotal + shippingCost + tax) * (processingFeePercent / 100)
+    return calculateCheckoutTotals(cartItems, selectedPayment as any, {
+      taxRate: 0.1, // 10% tax as per spec
+      freeShippingThreshold: 500000,
+      shippingFlatRate: 20000,
+    })
+  }, [cartItems, selectedPaymentId, paymentOptions])
 
-    const total = subtotal + tax + shippingCost + processingFee
+  // Handle address selection - save to cart
+  const handleSelectAddress = async (addressId: string) => {
+    setSelectedAddressId(addressId)
 
-    return { subtotal, tax, shippingCost, processingFee, total }
-  }, [subtotal, selectedPaymentId, paymentOptions])
+    // Save selected address to cart
+    const result = await selectAddress(addressId)
+    if (!result.success) {
+      toast.error(result.message || 'Failed to select address')
+    }
+  }
 
   const handleAddAddress = async (data: AddressFormData) => {
     const result = await createAddress(data)
@@ -66,7 +59,7 @@ export function CheckoutPage({
     if (result.success && result.addressId) {
       toast.success('Address added successfully')
       // Auto-select the newly created address
-      setSelectedAddressId(result.addressId)
+      await handleSelectAddress(result.addressId)
       // Refresh page to get updated addresses list
       router.refresh()
     } else {
@@ -95,12 +88,7 @@ export function CheckoutPage({
     setIsLoading(true)
 
     try {
-      const result = await onPlaceOrder({
-        addressId: selectedAddressId,
-        paymentOptionId: selectedPaymentId,
-        items: cartItems,
-        totals,
-      })
+      const result = await placeOrder(selectedPaymentId)
 
       if (result.success) {
         toast.success('Order placed successfully!')
@@ -159,7 +147,7 @@ export function CheckoutPage({
             <AddressSelector
               addresses={addresses}
               selectedAddressId={selectedAddressId}
-              onSelectAddress={setSelectedAddressId}
+              onSelectAddress={handleSelectAddress}
               onAddAddress={handleAddAddress}
             />
           </div>

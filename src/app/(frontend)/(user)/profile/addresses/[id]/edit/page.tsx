@@ -3,7 +3,8 @@ import { AddressFormPage } from '@/modules/addresses/templates/address-form-page
 import { getAddress, updateAddress } from '@/modules/addresses/actions'
 
 interface EditAddressProps {
-  params: { id: string }
+  params: Promise<
+>
 }
 
 export default async function EditAddress({ params }: EditAddressProps) {

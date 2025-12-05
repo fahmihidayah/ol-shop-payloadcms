@@ -486,10 +486,51 @@ export interface Cart {
    * Session identifier for guest users
    */
   sessionId?: string | null;
+  address?: (string | null) | Address;
   /**
    * Automatic cart cleanup date
    */
   expiresAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "addresses".
+ */
+export interface Address {
+  id: string;
+  sessionId?: string | null;
+  customer?: (string | null) | Customer;
+  /**
+   * e.g., "Home", "Office", "Mom's House"
+   */
+  label: string;
+  recipientName: string;
+  phone: string;
+  /**
+   * Street address, P.O. box, company name
+   */
+  addressLine1: string;
+  /**
+   * Apartment, suite, unit, building, floor, etc.
+   */
+  addressLine2?: string | null;
+  city: string;
+  province: string;
+  postalCode: string;
+  country?: string | null;
+  /**
+   * Use this address as the default shipping address
+   */
+  isDefault?: boolean | null;
+  /**
+   * Optional location coordinates for delivery
+   */
+  coordinates?: {
+    latitude?: number | null;
+    longitude?: number | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -659,46 +700,6 @@ export interface PaymentOption {
     };
     [k: string]: unknown;
   } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "addresses".
- */
-export interface Address {
-  id: string;
-  sessionId?: string | null;
-  customer?: (string | null) | Customer;
-  /**
-   * e.g., "Home", "Office", "Mom's House"
-   */
-  label: string;
-  recipientName: string;
-  phone: string;
-  /**
-   * Street address, P.O. box, company name
-   */
-  addressLine1: string;
-  /**
-   * Apartment, suite, unit, building, floor, etc.
-   */
-  addressLine2?: string | null;
-  city: string;
-  province: string;
-  postalCode: string;
-  country?: string | null;
-  /**
-   * Use this address as the default shipping address
-   */
-  isDefault?: boolean | null;
-  /**
-   * Optional location coordinates for delivery
-   */
-  coordinates?: {
-    latitude?: number | null;
-    longitude?: number | null;
-  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1006,6 +1007,7 @@ export interface CartsSelect<T extends boolean = true> {
   id?: T;
   customer?: T;
   sessionId?: T;
+  address?: T;
   expiresAt?: T;
   updatedAt?: T;
   createdAt?: T;

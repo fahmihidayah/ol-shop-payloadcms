@@ -8,7 +8,65 @@ export const Carts: CollectionConfig = {
     group: 'Shop',
   },
   access: {
-    read: () => true,
+    // Only allow users to read their own carts
+    read: ({ req }) => {
+      // Admins can read all carts
+      if (req.user?.collection === 'users') {
+        return true
+      }
+
+      // Customers can only read their own cart
+      if (req.user) {
+        return {
+          customer: {
+            equals: req.user.id,
+          },
+        }
+      }
+
+      // Guest users controlled at action level (session-based)
+      return true
+    },
+    create: () => {
+      // Allow all - controlled at action level
+      return true
+    },
+    update: ({ req }) => {
+      // Admins can update all
+      if (req.user?.collection === 'users') {
+        return true
+      }
+
+      // Customers can only update their own
+      if (req.user) {
+        return {
+          customer: {
+            equals: req.user.id,
+          },
+        }
+      }
+
+      // Guest users controlled at action level
+      return true
+    },
+    delete: ({ req }) => {
+      // Admins can delete all
+      if (req.user?.collection === 'users') {
+        return true
+      }
+
+      // Customers can only delete their own
+      if (req.user) {
+        return {
+          customer: {
+            equals: req.user.id,
+          },
+        }
+      }
+
+      // Guest users controlled at action level
+      return true
+    },
   },
   fields: [
     {
@@ -36,6 +94,15 @@ export const Carts: CollectionConfig = {
       label: 'Session ID',
       admin: {
         description: 'Session identifier for guest users',
+      },
+    },
+    {
+      name: 'address',
+      type: 'relationship',
+      relationTo: 'addresses',
+      label: 'Selected Address',
+      admin: {
+        hidden: true,
       },
     },
     {

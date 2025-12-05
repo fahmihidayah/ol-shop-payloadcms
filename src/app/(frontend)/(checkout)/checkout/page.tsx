@@ -6,11 +6,5 @@ export default async function Checkout() {
   const { addresses } = await getAddresses()
   const { paymentOptions } = await getPaymentOptions()
 
-  return (
-    <CheckoutPage
-      addresses={addresses}
-      paymentOptions={paymentOptions as any}
-      onPlaceOrder={placeOrder}
-    />
-  )
+  return <CheckoutPage addresses={addresses} paymentOptions={paymentOptions as any} />
 }
