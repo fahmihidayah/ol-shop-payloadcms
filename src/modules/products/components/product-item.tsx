@@ -38,7 +38,7 @@ export default function ProductItem({ product }: { product: Product }) {
     <Link
       prefetch
       href={`/products/${product.slug}`}
-      className="flex flex-col gap-3 rounded-lg p-3 h-full hover:cursor-pointer"
+      className="flex flex-col gap-3 rounded-lg p-3 h-full hover:cursor-pointer border border-gray-100"
     >
       {/* image section stays on top */}
       <div className="flex justify-center">

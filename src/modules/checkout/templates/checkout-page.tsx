@@ -1,18 +1,16 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useCartItems } from '@/store'
+import { useCartItems, useUserStore, useCheckoutStore } from '@/store'
 import { CheckoutItem } from '../components/checkout-item'
 import { AddressSelector } from '../components/address-selector'
 import { PaymentSelector, type PaymentOption } from '../components/payment-selector'
 import { CheckoutSummary } from '../components/checkout-summary'
+import { GuestInfoForm } from '../components/guest-info-form'
+import { OrderNotes } from '../components/order-notes'
 import { ShoppingCart } from 'lucide-react'
-import { toast } from 'sonner'
 import type { Address } from '@/payload-types'
-import { createAddress } from '@/modules/addresses/actions'
-import type { AddressFormData } from '@/modules/addresses/components'
-import { placeOrder, selectAddress } from '../actions'
 import { calculateCheckoutTotals } from '../utils/calculations'
 
 interface CheckoutPageProps {
@@ -23,85 +21,47 @@ interface CheckoutPageProps {
 export function CheckoutPage({ addresses: initialAddresses, paymentOptions }: CheckoutPageProps) {
   const router = useRouter()
   const cartItems = useCartItems()
+  const { isAuthenticated } = useUserStore()
 
-  const [addresses, setAddresses] = useState<Address[]>(initialAddresses)
-  const [selectedAddressId, setSelectedAddressId] = useState<string>(initialAddresses[0]?.id || '')
-  const [selectedPaymentId, setSelectedPaymentId] = useState<string>(
-    paymentOptions.find((p) => p.isActive)?.id || '',
-  )
-  const [isLoading, setIsLoading] = useState(false)
+  // Checkout store
+  const {
+    addresses,
+    selectedAddressId,
+    selectedPaymentId,
+    guestInfo,
+    orderNotes,
+    isLoading,
+    setGuestInfo,
+    setOrderNotes,
+    setSelectedPaymentId,
+    handleSelectAddress,
+    handleAddAddress,
+    handlePlaceOrder,
+    initialize,
+  } = useCheckoutStore()
 
-  // Calculate totals using the new calculation utilities
+  // Initialize store with server data on mount
+  useEffect(() => {
+    initialize(initialAddresses, paymentOptions)
+  }, [initialAddresses, paymentOptions, initialize])
+
+  // Calculate totals
   const totals = useMemo(() => {
     const selectedPayment = paymentOptions.find((p) => String(p.id) === selectedPaymentId)
 
     return calculateCheckoutTotals(cartItems, selectedPayment as any, {
-      taxRate: 0.1, // 10% tax as per spec
+      taxRate: 0.1,
       freeShippingThreshold: 500000,
       shippingFlatRate: 20000,
     })
   }, [cartItems, selectedPaymentId, paymentOptions])
 
-  // Handle address selection - save to cart
-  const handleSelectAddress = async (addressId: string) => {
-    setSelectedAddressId(addressId)
-
-    // Save selected address to cart
-    const result = await selectAddress(addressId)
-    if (!result.success) {
-      toast.error(result.message || 'Failed to select address')
-    }
-  }
-
-  const handleAddAddress = async (data: AddressFormData) => {
-    const result = await createAddress(data)
-
-    if (result.success && result.addressId) {
-      toast.success('Address added successfully')
-      // Auto-select the newly created address
-      await handleSelectAddress(result.addressId)
-      // Refresh page to get updated addresses list
-      router.refresh()
-    } else {
-      toast.error(result.message || 'Failed to add address')
-      throw new Error(result.message)
-    }
-  }
-
-  const handlePlaceOrder = async () => {
-    // Validation
-    if (!selectedAddressId) {
-      toast.error('Please select a shipping address')
-      return
-    }
-
-    if (!selectedPaymentId) {
-      toast.error('Please select a payment method')
-      return
-    }
-
-    if (cartItems.length === 0) {
-      toast.error('Your cart is empty')
-      return
-    }
-
-    setIsLoading(true)
-
-    try {
-      const result = await placeOrder(selectedPaymentId)
-
-      if (result.success) {
-        toast.success('Order placed successfully!')
-        router.push(`/orders/${result.orderId}`)
-      } else {
-        toast.error(result.message || 'Failed to place order')
-      }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to place order')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  // Handlers
+  const onAddAddress = (data: any) => handleAddAddress(data, () => router.refresh())
+  const onPlaceOrder = () =>
+    handlePlaceOrder(isAuthenticated, cartItems.length, (orderId: string) =>
+      router.push(`/orders/${orderId}`),
+    )
 
   // Show empty cart state
   if (cartItems.length === 0) {
@@ -142,13 +102,20 @@ export function CheckoutPage({ addresses: initialAddresses, paymentOptions }: Ch
             </div>
           </div>
 
+          {/* Guest Info - Only show for guest users */}
+          {!isAuthenticated && (
+            <div className="bg-card rounded-lg border p-6">
+              <GuestInfoForm onDataChange={setGuestInfo} defaultValues={guestInfo || undefined} />
+            </div>
+          )}
+
           {/* Shipping Address */}
           <div className="bg-card rounded-lg border p-6">
             <AddressSelector
               addresses={addresses}
               selectedAddressId={selectedAddressId}
               onSelectAddress={handleSelectAddress}
-              onAddAddress={handleAddAddress}
+              onAddAddress={onAddAddress}
             />
           </div>
 
@@ -160,13 +127,18 @@ export function CheckoutPage({ addresses: initialAddresses, paymentOptions }: Ch
               onSelectPayment={setSelectedPaymentId}
             />
           </div>
+
+          {/* Order Notes - Optional */}
+          <div className="bg-card rounded-lg border">
+            <OrderNotes value={orderNotes} onChange={setOrderNotes} />
+          </div>
         </div>
 
         {/* Right Column - Summary */}
         <div className="lg:col-span-1">
           <CheckoutSummary
             {...totals}
-            onPlaceOrder={handlePlaceOrder}
+            onPlaceOrder={onPlaceOrder}
             isLoading={isLoading}
             disabled={!selectedAddressId || !selectedPaymentId}
           />

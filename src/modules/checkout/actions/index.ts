@@ -274,6 +274,14 @@ export async function selectAddress(
  */
 export async function placeOrder(
   paymentOptionId?: string,
+  options?: {
+    guestInfo?: {
+      guestName: string
+      guestEmail: string
+      guestPhone: string
+    }
+    notes?: string
+  },
 ): Promise<PlaceOrderResponse> {
   try {
     const payload = await getPayload({ config })
@@ -285,6 +293,14 @@ export async function placeOrder(
       return {
         success: false,
         message: 'You should choose an address',
+      }
+    }
+
+    // Validate guest info if not authenticated
+    if (!customerId && !options?.guestInfo) {
+      return {
+        success: false,
+        message: 'Guest contact information is required',
       }
     }
 
@@ -328,6 +344,10 @@ export async function placeOrder(
       data: {
         customer: customerId,
         orderNumber: '',
+        // Guest info - only for guest users
+        guestName: options?.guestInfo?.guestName,
+        guestEmail: options?.guestInfo?.guestEmail,
+        guestPhone: options?.guestInfo?.guestPhone,
         shippingAddress: {
           recipientName: address.recipientName,
           phone: address.phone,
@@ -342,6 +362,7 @@ export async function placeOrder(
         totalAmount: totals.total,
         shippingCost: totals.shippingCost,
         discount: 0,
+        notes: options?.notes,
       },
     })
 

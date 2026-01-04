@@ -12,7 +12,8 @@
       "Bash(xargs cat:*)",
       "Bash(pnpm install:*)",
       "Bash(mkdir:*)",
-      "Bash(/Users/s/Documents/NodeJs/ol-shop-payloadcms/src/app/(frontend)/(checkout)/cart/page.tsx)"
+      "Bash(/Users/s/Documents/NodeJs/ol-shop-payloadcms/src/app/(frontend)/(checkout)/cart/page.tsx)",
+      "Bash(npx shadcn@latest add:*)"
     ],
     "deny": []
   }

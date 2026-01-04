@@ -570,6 +570,10 @@ export interface Order {
    */
   customer?: (string | null) | Customer;
   /**
+   * Session Id for guest user
+   */
+  sessionId?: string | null;
+  /**
    * For guest checkout
    */
   guestName?: string | null;
@@ -1035,6 +1039,7 @@ export interface OrdersSelect<T extends boolean = true> {
   id?: T;
   orderNumber?: T;
   customer?: T;
+  sessionId?: T;
   guestName?: T;
   guestEmail?: T;
   guestPhone?: T;
@@ -1172,7 +1177,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
- * Manage home page content and settings
+ * Manage home page content
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "home-page".
@@ -1181,64 +1186,16 @@ export interface HomePage {
   id: number;
   hero: {
     enabled?: boolean | null;
-    /**
-     * Main headline for the hero section
-     */
     title: string;
-    /**
-     * Supporting text for the hero section
-     */
     subtitle?: string | null;
-    /**
-     * Hero background image (recommended: 1920x800px)
-     */
-    backgroundImage?: (string | null) | Media;
-    ctaButtons?:
-      | {
-          text: string;
-          /**
-           * URL or path (e.g., /products, /about)
-           */
-          link: string;
-          style?: ('primary' | 'secondary' | 'outline') | null;
-          id?: string | null;
-        }[]
-      | null;
+    image?: (string | null) | Media;
+    primaryCTA?: {
+      label?: string | null;
+      href?: string | null;
+    };
   };
-  /**
-   * Rotating banners for promotions and campaigns
-   */
-  banners?:
+  promotions?:
     | {
-        /**
-         * Recommended size: 1920x600px
-         */
-        image: string | Media;
-        title?: string | null;
-        description?: string | null;
-        /**
-         * Where should this banner link to?
-         */
-        link?: string | null;
-        /**
-         * Leave empty to hide button
-         */
-        buttonText?: string | null;
-        /**
-         * Show/hide this banner
-         */
-        active?: boolean | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Small promotional banners (e.g., free shipping, discounts)
-   */
-  promotionalBanners?:
-    | {
-        /**
-         * Small icon (64x64px recommended)
-         */
         icon?: (string | null) | Media;
         title: string;
         description?: string | null;
@@ -1249,74 +1206,24 @@ export interface HomePage {
   featuredProducts?: {
     enabled?: boolean | null;
     title?: string | null;
-    subtitle?: string | null;
-    displayType?: ('auto' | 'manual') | null;
-    /**
-     * Only used when Display Type is Manual Selection
-     */
+    selectionMode?: ('auto' | 'manual') | null;
     products?: (string | Product)[] | null;
     limit?: number | null;
   };
   newArrivals?: {
     enabled?: boolean | null;
     title?: string | null;
-    subtitle?: string | null;
     limit?: number | null;
   };
   categoriesShowcase?: {
     enabled?: boolean | null;
     title?: string | null;
-    /**
-     * Select categories to highlight on home page
-     */
     categories?: (string | Category)[] | null;
   };
-  /**
-   * Add custom content sections to your home page
-   */
-  contentBlocks?:
-    | {
-        type: 'text-image' | 'image-grid' | 'testimonials' | 'newsletter';
-        title?: string | null;
-        content?: {
-          root: {
-            type: string;
-            children: {
-              type: string;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        image?: (string | null) | Media;
-        layout?: ('left' | 'right' | 'full') | null;
-        id?: string | null;
-      }[]
-    | null;
   seo?: {
-    /**
-     * Page title for SEO (50-60 characters)
-     */
     metaTitle?: string | null;
-    /**
-     * Page description for search engines (150-160 characters)
-     */
     metaDescription?: string | null;
-    /**
-     * Image shown when sharing on social media (1200x630px)
-     */
     ogImage?: (string | null) | Media;
-    keywords?:
-      | {
-          keyword?: string | null;
-          id?: string | null;
-        }[]
-      | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1332,28 +1239,15 @@ export interface HomePageSelect<T extends boolean = true> {
         enabled?: T;
         title?: T;
         subtitle?: T;
-        backgroundImage?: T;
-        ctaButtons?:
+        image?: T;
+        primaryCTA?:
           | T
           | {
-              text?: T;
-              link?: T;
-              style?: T;
-              id?: T;
+              label?: T;
+              href?: T;
             };
       };
-  banners?:
-    | T
-    | {
-        image?: T;
-        title?: T;
-        description?: T;
-        link?: T;
-        buttonText?: T;
-        active?: T;
-        id?: T;
-      };
-  promotionalBanners?:
+  promotions?:
     | T
     | {
         icon?: T;
@@ -1367,8 +1261,7 @@ export interface HomePageSelect<T extends boolean = true> {
     | {
         enabled?: T;
         title?: T;
-        subtitle?: T;
-        displayType?: T;
+        selectionMode?: T;
         products?: T;
         limit?: T;
       };
@@ -1377,7 +1270,6 @@ export interface HomePageSelect<T extends boolean = true> {
     | {
         enabled?: T;
         title?: T;
-        subtitle?: T;
         limit?: T;
       };
   categoriesShowcase?:
@@ -1387,28 +1279,12 @@ export interface HomePageSelect<T extends boolean = true> {
         title?: T;
         categories?: T;
       };
-  contentBlocks?:
-    | T
-    | {
-        type?: T;
-        title?: T;
-        content?: T;
-        image?: T;
-        layout?: T;
-        id?: T;
-      };
   seo?:
     | T
     | {
         metaTitle?: T;
         metaDescription?: T;
         ogImage?: T;
-        keywords?:
-          | T
-          | {
-              keyword?: T;
-              id?: T;
-            };
       };
   updatedAt?: T;
   createdAt?: T;

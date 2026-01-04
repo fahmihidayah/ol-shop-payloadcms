@@ -3,12 +3,14 @@ import { AddressFormPage } from '@/modules/addresses/templates/address-form-page
 import { getAddress, updateAddress } from '@/modules/addresses/actions'
 
 interface EditAddressProps {
-  params: Promise<
->
+  params: Promise<{
+    id: string
+  }>
 }
 
 export default async function EditAddress({ params }: EditAddressProps) {
-  const { address, success } = await getAddress(params.id)
+  const id = (await params).id
+  const { address, success } = await getAddress(id)
 
   if (!success || !address) {
     notFound()
@@ -16,7 +18,7 @@ export default async function EditAddress({ params }: EditAddressProps) {
 
   const handleUpdate = async (data: any) => {
     'use server'
-    return updateAddress(params.id, data)
+    return updateAddress(id, data)
   }
 
   return <AddressFormPage address={address} onSubmit={handleUpdate} mode="edit" />

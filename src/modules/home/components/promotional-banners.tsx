@@ -2,16 +2,53 @@ import Link from 'next/link'
 import { ImageMedia } from '@/modules/media/image-media'
 import { Media } from '@/payload-types'
 
-type PromotionalBanner = {
-  icon?: Media | string
+type TBanner = {
+  icon?: (string | null) | Media
   title: string
-  description?: string
-  link?: string
-  id?: string
+  description?: string | null
+  link?: string | null
+  id?: string | null
 }
 
 type PromotionalBannersProps = {
-  banners?: PromotionalBanner[]
+  banners?: TBanner[] | null
+}
+
+export function PromotionalItem({ banner, index }: { banner: TBanner; index: number }) {
+  {
+    const content = (
+      <div className="w-60 flex items-start gap-4 p-6 rounded-lg bg-background border border-border hover:shadow-md transition-shadow overflow-auto">
+        {banner.icon && (
+          <ImageMedia
+            media={banner.icon as Media}
+            className="w-12 h-12 rounded-lg"
+            width={64}
+            height={64}
+          />
+        )}
+        <div className="flex flex-col">
+          <h3 className="font-semibold text-base sm:text-lg mb-1">{banner.title}</h3>
+          {banner.description && (
+            <p className="text-sm text-muted-foreground">{banner.description}</p>
+          )}
+        </div>
+      </div>
+    )
+
+    if (banner.link) {
+      return (
+        <Link key={banner.id || index} href={banner.link} className="block">
+          {content}
+        </Link>
+      )
+    }
+
+    return (
+      <div key={banner.id || index} className="block">
+        {content}
+      </div>
+    )
+  }
 }
 
 export function PromotionalBanners({ banners }: PromotionalBannersProps) {
@@ -19,45 +56,10 @@ export function PromotionalBanners({ banners }: PromotionalBannersProps) {
 
   return (
     <section className="bg-muted/50 py-8 sm:py-12">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {banners.map((banner, index) => {
-            const content = (
-              <div className="flex items-start gap-4 p-6 rounded-lg bg-background border border-border hover:shadow-md transition-shadow">
-                {banner.icon && (
-                  <div className="flex-shrink-0">
-                    <ImageMedia
-                      media={banner.icon as Media}
-                      className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
-                      width={64}
-                      height={64}
-                    />
-                  </div>
-                )}
-                <div className="flex-1">
-                  <h3 className="font-semibold text-base sm:text-lg mb-1">{banner.title}</h3>
-                  {banner.description && (
-                    <p className="text-sm text-muted-foreground">{banner.description}</p>
-                  )}
-                </div>
-              </div>
-            )
-
-            if (banner.link) {
-              return (
-                <Link key={banner.id || index} href={banner.link} className="block">
-                  {content}
-                </Link>
-              )
-            }
-
-            return (
-              <div key={banner.id || index} className="block">
-                {content}
-              </div>
-            )
-          })}
-        </div>
+      <div className="container flex flex-row gap-3 overflow-scroll px-10">
+        {banners?.map((e, index) => {
+          return <PromotionalItem key={index} banner={e} index={index} />
+        })}
       </div>
     </section>
   )

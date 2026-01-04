@@ -34,9 +34,20 @@ export const Orders: CollectionConfig = {
       name: 'customer',
       type: 'relationship',
       relationTo: 'customers',
+      required: false,
       label: 'Customer',
       admin: {
         description: 'Registered customer (if logged in)',
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'sessionId',
+      type: 'text',
+      required: false,
+      label: 'session Id',
+      admin: {
+        description: 'Session Id for guest user',
         position: 'sidebar',
       },
     },
