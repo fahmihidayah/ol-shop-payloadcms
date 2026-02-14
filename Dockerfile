@@ -135,12 +135,6 @@ RUN adduser --system --uid 1001 nextjs
 # Copy public assets
 COPY --from=builder /app/public ./public
 
-# Create media directory with proper ownership and permissions
-RUN mkdir -p ./media && chown -R nextjs:nodejs ./media && chmod -R 755 ./media
-
-# Copy existing media files if they exist (with proper ownership)
-COPY --from=builder --chown=nextjs:nodejs /app/media ./media
-
 # Create .next directory with proper ownership
 RUN mkdir .next && chown nextjs:nodejs .next
 
