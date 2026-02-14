@@ -1,98 +1,120 @@
-import type { CollectionConfig } from 'payload'
-import getProductVariantArrayFields from './product-variant'
+import { CollectionConfig } from 'payload'
+import getProductVariantArrayFields from './product-variants'
 import { slugField } from '@/fields/slug'
 
 export const Products: CollectionConfig = {
   slug: 'products',
   admin: {
-    useAsTitle: 'title',
-    defaultColumns: ['title', 'slug', 'category', 'isActive', 'updatedAt'],
+    useAsTitle: 'name',
     group: 'Catalog',
   },
-  access: {
-    read: () => true,
-  },
   hooks: {
-    afterChange: [async ({ req, doc }) => {}],
+    beforeChange: [
+      ({ data }) => {
+        // Auto-populate defaultVariant and defaultVariantPrice based on lowest price variant
+        if (data['product-variant'] && data['product-variant'].length > 0) {
+          // Filter active variants
+          const activeVariants = data['product-variant'].filter(
+            (variant: any) => variant.isActive !== false,
+          )
+
+          if (activeVariants.length > 0) {
+            // Find variant with lowest price
+            const lowestPriceVariant = activeVariants.reduce((lowest: any, current: any) => {
+              return current.price < lowest.price ? current : lowest
+            })
+
+            // Set default variant and price
+            data.defaultVariant = lowestPriceVariant.id
+            data.defaultVariantPrice = lowestPriceVariant.price
+          } else {
+            // No active variants, clear defaults
+            data.defaultVariant = null
+            data.defaultVariantPrice = null
+          }
+        } else {
+          // No variants, clear defaults
+          data.defaultVariant = null
+          data.defaultVariantPrice = null
+        }
+
+        return data
+      },
+    ],
   },
   fields: [
     {
       name: 'id',
       type: 'text',
-      defaultValue: () => `products-${crypto.randomUUID()}`,
+      defaultValue: () => 'prod-' + crypto.randomUUID(),
       admin: {
         hidden: true,
       },
     },
     {
-      name: 'variants',
-      type: 'relationship',
-      relationTo: 'productVariants',
-      hasMany: true,
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
+    ...slugField('name'),
+    {
+      name: 'description',
+      type: 'richText',
+      required: true,
+    },
+    {
+      name: 'defaultVariant',
+      type: 'text',
       admin: {
         hidden: true,
-        // Show variants inline with quick edit
-        allowCreate: true, // Can create variants without leaving page
       },
+    },
+    {
+      name: 'defaultVariantPrice',
+      type: 'number',
+      admin: {
+        hidden: true,
+      },
+    },
+    {
+      name: 'category',
+      type: 'relationship',
+      relationTo: 'categories',
+      required: true,
+      label: 'Category',
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'isActive',
+          type: 'checkbox',
+          defaultValue: true,
+          label: 'Active',
+          admin: {
+            description: 'Publish this product on the storefront',
+            width: '50%',
+          },
+        },
+        {
+          name: 'featured',
+          type: 'checkbox',
+          defaultValue: false,
+          label: 'Featured Product',
+          admin: {
+            description: 'Show this product in featured sections',
+            width: '50%',
+          },
+        },
+      ],
     },
     {
       type: 'tabs',
       tabs: [
         {
-          label: 'Product Details',
-          fields: [
-            {
-              name: 'title',
-              type: 'text',
-              required: true,
-              label: 'Product Title',
-            },
-            ...slugField(),
-            {
-              name: 'description',
-              type: 'richText',
-              required: true,
-              label: 'Product Description',
-            },
-            {
-              name: 'category',
-              type: 'relationship',
-              relationTo: 'categories',
-              required: true,
-              label: 'Category',
-            },
-            {
-              type: 'row',
-              fields: [
-                {
-                  name: 'isActive',
-                  type: 'checkbox',
-                  defaultValue: true,
-                  label: 'Active',
-                  admin: {
-                    description: 'Publish this product on the storefront',
-                    width: '50%',
-                  },
-                },
-                {
-                  name: 'featured',
-                  type: 'checkbox',
-                  defaultValue: false,
-                  label: 'Featured Product',
-                  admin: {
-                    description: 'Show this product in featured sections',
-                    width: '50%',
-                  },
-                },
-              ],
-            },
-          ],
-        },
-        {
           label: 'Variants',
           fields: [getProductVariantArrayFields()],
         },
-
         {
           label: 'Media',
           fields: [
@@ -100,7 +122,7 @@ export const Products: CollectionConfig = {
               name: 'thumbnail',
               type: 'upload',
               relationTo: 'media',
-              required: true,
+
               label: 'Thumbnail Image',
               admin: {
                 description: 'Main product image displayed in listings',

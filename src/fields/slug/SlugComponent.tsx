@@ -2,18 +2,11 @@
 import React, { useCallback, useEffect } from 'react'
 import { TextFieldClientProps } from 'payload'
 
-import {
-  useField,
-  Button,
-  TextInput,
-  FieldLabel,
-  useFormFields,
-  useForm,
-  useTranslation,
-} from '@payloadcms/ui'
+import { useField, Button, TextInput, FieldLabel, useFormFields, useForm, useTranslation } from '@payloadcms/ui'
 
 import { formatSlug } from './formatSlug'
 import './index.scss'
+import { getLocaleTextByLanguage } from '@/i18n/admin'
 
 type SlugComponentProps = {
   fieldToUse: string
@@ -84,7 +77,7 @@ export const SlugComponent: React.FC<SlugComponentProps> = ({
         <FieldLabel htmlFor={`field-${path}`} label={label} />
 
         <Button className="lock-button" buttonStyle="none" onClick={handleLock}>
-          {checkboxValue ? 'unlock' : 'lock'}
+          {checkboxValue ? getLocaleTextByLanguage("unlock", currentLocale ) : getLocaleTextByLanguage("lock",currentLocale )}
         </Button>
       </div>
 

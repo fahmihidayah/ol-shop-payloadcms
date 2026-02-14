@@ -116,6 +116,12 @@ export const Carts: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'isDone',
+      type: 'checkbox',
+      label: 'Is Done',
+      defaultValue: false,
+    },
   ],
   hooks: {
     beforeChange: [

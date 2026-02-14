@@ -1,10 +1,29 @@
-import { CheckoutPage } from '@/modules/checkout/templates/checkout-page'
-import { getAddresses } from '@/modules/addresses/actions'
-import { getPaymentOptions, placeOrder } from '@/modules/checkout/actions'
+import { getCart } from '@/feature/cart/actions'
+import { getListAddresses } from '@/feature/account/actions/address'
+import { getCombinedPaymentOptions } from '@/feature/checkout/actions/payment-options'
+import { CheckoutPageClient } from '@/feature/checkout/components/checkout-page'
+import { redirect } from 'next/navigation'
 
-export default async function Checkout() {
-  const { addresses } = await getAddresses()
-  const { paymentOptions } = await getPaymentOptions()
+export default async function CheckoutPage() {
+  const [cart, addresses] = await Promise.all([
+    getCart(),
+    getListAddresses(),
+  ])
 
-  return <CheckoutPage addresses={addresses} paymentOptions={paymentOptions as any} />
+  if (!cart || cart.items.length === 0) {
+    redirect('/cart')
+  }
+
+  // Get Duitku payment methods based on cart total
+  const paymentOptions = await getCombinedPaymentOptions(cart.totalPrice)
+
+  return (
+    <CheckoutPageClient
+      addresses={addresses}
+      items={cart.items}
+      totalItems={cart.totalItems}
+      totalPrice={cart.totalPrice}
+      paymentOptions={paymentOptions}
+    />
+  )
 }

@@ -1,3 +1,0 @@
-product-item.tsx
-- create Component name ProductItem 
-- the parameter is Product type 

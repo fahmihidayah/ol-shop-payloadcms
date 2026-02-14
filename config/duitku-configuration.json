@@ -1,0 +1,9 @@
+{
+  "merchantCode": "DS26539",
+  "apiKey": "191c67ee614094f32f1c776306b284cc",
+  "passport": true,
+  "callbackUrl": "http://localhost:3000/route/callback",
+  "returnUrl": "http://localhost:3000/route/return",
+  "accountLinkReturnUrl": "http://localhost:3000/route/dashboard/account",
+  "expiryPeriod": 1440
+}

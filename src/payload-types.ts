@@ -69,18 +69,19 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
-    customers: Customer;
-    media: Media;
+    posts: Post;
     categories: Category;
+    media: Media;
     products: Product;
-    productVariants: ProductVariant;
-    carts: Cart;
-    'cart-items': CartItem;
+    addresses: Address;
     orders: Order;
     'order-items': OrderItem;
     payments: Payment;
     'payment-options': PaymentOption;
-    addresses: Address;
+    customers: Customer;
+    carts: Cart;
+    'cart-items': CartItem;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -88,18 +89,19 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
-    customers: CustomersSelect<false> | CustomersSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
-    productVariants: ProductVariantsSelect<false> | ProductVariantsSelect<true>;
-    carts: CartsSelect<false> | CartsSelect<true>;
-    'cart-items': CartItemsSelect<false> | CartItemsSelect<true>;
+    addresses: AddressesSelect<false> | AddressesSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
     'order-items': OrderItemsSelect<false> | OrderItemsSelect<true>;
     payments: PaymentsSelect<false> | PaymentsSelect<true>;
     'payment-options': PaymentOptionsSelect<false> | PaymentOptionsSelect<true>;
-    addresses: AddressesSelect<false> | AddressesSelect<true>;
+    customers: CustomersSelect<false> | CustomersSelect<true>;
+    carts: CartsSelect<false> | CartsSelect<true>;
+    'cart-items': CartItemsSelect<false> | CartItemsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -107,6 +109,7 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
+  fallbackLocale: null;
   globals: {
     'home-page': HomePage;
   };
@@ -168,8 +171,6 @@ export interface CustomerAuthOperations {
  */
 export interface User {
   id: string;
-  name: string;
-  phone?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -190,46 +191,45 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customers".
+ * via the `definition` "posts".
  */
-export interface Customer {
+export interface Post {
   id: string;
-  name: string;
-  phone?: string | null;
-  dateOfBirth?: string | null;
-  gender?: ('male' | 'female' | 'other' | 'not_specified') | null;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
   /**
-   * Deactivate to prevent customer from logging in
+   * Short description of the post
    */
-  isActive?: boolean | null;
-  /**
-   * Internal notes about this customer
-   */
-  customerNotes?: string | null;
+  excerpt?: string | null;
+  featuredImage?: (number | null) | Media;
+  categories?: (string | Category)[] | null;
+  publishedAt?: string | null;
+  status?: ('draft' | 'published' | 'archived') | null;
   updatedAt: string;
   createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   alt: string;
   updatedAt: string;
   createdAt: string;
@@ -250,16 +250,14 @@ export interface Media {
 export interface Category {
   id: string;
   name: string;
-  /**
-   * Unique identifier for the category URL
-   */
-  slug: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
   /**
    * Select a parent category to create a subcategory
    */
   parent?: (string | null) | Category;
   description?: string | null;
-  image?: (string | null) | Media;
+  image?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -269,15 +267,14 @@ export interface Category {
  */
 export interface Product {
   id: string;
-  variants?: (number | ProductVariant)[] | null;
-  title: string;
+  name: string;
   slug?: string | null;
   slugLock?: boolean | null;
   description: {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -288,6 +285,8 @@ export interface Product {
     };
     [k: string]: unknown;
   };
+  defaultVariant?: string | null;
+  defaultVariantPrice?: number | null;
   category: string | Category;
   /**
    * Publish this product on the storefront
@@ -299,6 +298,7 @@ export interface Product {
   featured?: boolean | null;
   'product-variant'?:
     | {
+        id?: string | null;
         variant?: string | null;
         /**
          * Stock Keeping Unit - unique identifier
@@ -333,24 +333,23 @@ export interface Product {
         /**
          * Specific image for this variant
          */
-        image?: (string | null) | Media;
+        image?: (number | null) | Media;
         /**
          * Make this variant available for purchase
          */
         isActive?: boolean | null;
-        id?: string | null;
       }[]
     | null;
   /**
    * Main product image displayed in listings
    */
-  thumbnail: string | Media;
+  thumbnail?: (number | null) | Media;
   /**
    * Additional product images
    */
   gallery?:
     | {
-        image: string | Media;
+        image: number | Media;
         /**
          * Describe the image for accessibility and SEO
          */
@@ -391,7 +390,7 @@ export interface Product {
     /**
      * Image when shared on social media (1200x630px recommended)
      */
-    ogImage?: (string | null) | Media;
+    ogImage?: (number | null) | Media;
     ogType?: ('product' | 'article' | 'website') | null;
     twitterCard?: ('summary' | 'summary_large_image' | 'product') | null;
     /**
@@ -405,7 +404,7 @@ export interface Product {
     /**
      * Image for Twitter (defaults to OG Image)
      */
-    twitterImage?: (string | null) | Media;
+    twitterImage?: (number | null) | Media;
     /**
      * Product brand name for structured data
      */
@@ -420,77 +419,6 @@ export interface Product {
     mpn?: string | null;
     condition?: ('new' | 'refurbished' | 'used') | null;
   };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "productVariants".
- */
-export interface ProductVariant {
-  id: number;
-  variant?: string | null;
-  /**
-   * Stock Keeping Unit - unique identifier
-   */
-  sku: string;
-  /**
-   * Current selling price
-   */
-  price: number;
-  /**
-   * Show as strikethrough if different from current price
-   */
-  oldPrice?: number | null;
-  /**
-   * Your cost for this variant (internal use)
-   */
-  cost?: number | null;
-  stockQuantity: number;
-  /**
-   * Get notified when stock falls below this number
-   */
-  lowStockThreshold?: number | null;
-  /**
-   * Product weight for shipping calculations
-   */
-  weight?: number | null;
-  dimensions?: {
-    length?: number | null;
-    width?: number | null;
-    height?: number | null;
-  };
-  /**
-   * Specific image for this variant
-   */
-  image?: (string | null) | Media;
-  /**
-   * Make this variant available for purchase
-   */
-  isActive?: boolean | null;
-  product?: (string | null) | Product;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "carts".
- */
-export interface Cart {
-  id: string;
-  /**
-   * Associated customer (for logged-in customers)
-   */
-  customer?: (string | null) | Customer;
-  /**
-   * Session identifier for guest users
-   */
-  sessionId?: string | null;
-  address?: (string | null) | Address;
-  /**
-   * Automatic cart cleanup date
-   */
-  expiresAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -536,24 +464,39 @@ export interface Address {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "cart-items".
+ * via the `definition` "customers".
  */
-export interface CartItem {
+export interface Customer {
   id: string;
-  cart: string | Cart;
-  product: string | Product;
-  variant: string;
-  quantity: number;
+  name: string;
+  phone?: string | null;
+  dateOfBirth?: string | null;
+  gender?: ('male' | 'female' | 'other' | 'not_specified') | null;
   /**
-   * Price at the time of adding to cart
+   * Deactivate to prevent customer from logging in
    */
-  price: number;
+  isActive?: boolean | null;
   /**
-   * Calculated as quantity × price
+   * Internal notes about this customer
    */
-  subtotal: number;
+  customerNotes?: string | null;
   updatedAt: string;
   createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -587,7 +530,20 @@ export interface Order {
     city: string;
     province: string;
     postalCode: string;
+    country?: string | null;
   };
+  /**
+   * Payment method code from Duitku
+   */
+  paymentMethod?: string | null;
+  /**
+   * Payment reference from Duitku
+   */
+  paymentReference?: string | null;
+  /**
+   * Virtual Account number (if applicable)
+   */
+  vaNumber?: string | null;
   orderStatus: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   /**
@@ -677,7 +633,7 @@ export interface PaymentOption {
    * Additional information about this payment method
    */
   description?: string | null;
-  icon?: (string | null) | Media;
+  icon?: (number | null) | Media;
   /**
    * Enable or disable this payment option
    */
@@ -693,7 +649,7 @@ export interface PaymentOption {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -709,6 +665,67 @@ export interface PaymentOption {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "carts".
+ */
+export interface Cart {
+  id: string;
+  /**
+   * Associated customer (for logged-in customers)
+   */
+  customer?: (string | null) | Customer;
+  /**
+   * Session identifier for guest users
+   */
+  sessionId?: string | null;
+  address?: (string | null) | Address;
+  /**
+   * Automatic cart cleanup date
+   */
+  expiresAt?: string | null;
+  isDone?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cart-items".
+ */
+export interface CartItem {
+  id: string;
+  cart: string | Cart;
+  product: string | Product;
+  variant: string;
+  quantity: number;
+  /**
+   * Price at the time of adding to cart
+   */
+  price: number;
+  /**
+   * Calculated as quantity × price
+   */
+  subtotal: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: number;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -719,32 +736,24 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
-        relationTo: 'customers';
-        value: string | Customer;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: string | Media;
+        relationTo: 'posts';
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'categories';
         value: string | Category;
       } | null)
     | ({
+        relationTo: 'media';
+        value: number | Media;
+      } | null)
+    | ({
         relationTo: 'products';
         value: string | Product;
       } | null)
     | ({
-        relationTo: 'productVariants';
-        value: number | ProductVariant;
-      } | null)
-    | ({
-        relationTo: 'carts';
-        value: string | Cart;
-      } | null)
-    | ({
-        relationTo: 'cart-items';
-        value: string | CartItem;
+        relationTo: 'addresses';
+        value: string | Address;
       } | null)
     | ({
         relationTo: 'orders';
@@ -763,8 +772,16 @@ export interface PayloadLockedDocument {
         value: number | PaymentOption;
       } | null)
     | ({
-        relationTo: 'addresses';
-        value: string | Address;
+        relationTo: 'customers';
+        value: string | Customer;
+      } | null)
+    | ({
+        relationTo: 'carts';
+        value: string | Cart;
+      } | null)
+    | ({
+        relationTo: 'cart-items';
+        value: string | CartItem;
       } | null);
   globalSlug?: string | null;
   user:
@@ -824,8 +841,6 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   id?: T;
-  name?: T;
-  phone?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -845,39 +860,42 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customers_select".
+ * via the `definition` "posts_select".
  */
-export interface CustomersSelect<T extends boolean = true> {
+export interface PostsSelect<T extends boolean = true> {
   id?: T;
-  name?: T;
-  phone?: T;
-  dateOfBirth?: T;
-  gender?: T;
-  isActive?: T;
-  customerNotes?: T;
+  title?: T;
+  slug?: T;
+  slugLock?: T;
+  content?: T;
+  excerpt?: T;
+  featuredImage?: T;
+  categories?: T;
+  publishedAt?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  id?: T;
+  name?: T;
+  slug?: T;
+  slugLock?: T;
+  parent?: T;
+  description?: T;
+  image?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
-  id?: T;
   alt?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -893,35 +911,23 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
- */
-export interface CategoriesSelect<T extends boolean = true> {
-  id?: T;
-  name?: T;
-  slug?: T;
-  parent?: T;
-  description?: T;
-  image?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
   id?: T;
-  variants?: T;
-  title?: T;
+  name?: T;
   slug?: T;
   slugLock?: T;
   description?: T;
+  defaultVariant?: T;
+  defaultVariantPrice?: T;
   category?: T;
   isActive?: T;
   featured?: T;
   'product-variant'?:
     | T
     | {
+        id?: T;
         variant?: T;
         sku?: T;
         price?: T;
@@ -939,7 +945,6 @@ export interface ProductsSelect<T extends boolean = true> {
             };
         image?: T;
         isActive?: T;
-        id?: T;
       };
   thumbnail?: T;
   gallery?:
@@ -979,55 +984,28 @@ export interface ProductsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "productVariants_select".
+ * via the `definition` "addresses_select".
  */
-export interface ProductVariantsSelect<T extends boolean = true> {
-  variant?: T;
-  sku?: T;
-  price?: T;
-  oldPrice?: T;
-  cost?: T;
-  stockQuantity?: T;
-  lowStockThreshold?: T;
-  weight?: T;
-  dimensions?:
+export interface AddressesSelect<T extends boolean = true> {
+  id?: T;
+  sessionId?: T;
+  customer?: T;
+  label?: T;
+  recipientName?: T;
+  phone?: T;
+  addressLine1?: T;
+  addressLine2?: T;
+  city?: T;
+  province?: T;
+  postalCode?: T;
+  country?: T;
+  isDefault?: T;
+  coordinates?:
     | T
     | {
-        length?: T;
-        width?: T;
-        height?: T;
+        latitude?: T;
+        longitude?: T;
       };
-  image?: T;
-  isActive?: T;
-  product?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "carts_select".
- */
-export interface CartsSelect<T extends boolean = true> {
-  id?: T;
-  customer?: T;
-  sessionId?: T;
-  address?: T;
-  expiresAt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "cart-items_select".
- */
-export interface CartItemsSelect<T extends boolean = true> {
-  id?: T;
-  cart?: T;
-  product?: T;
-  variant?: T;
-  quantity?: T;
-  price?: T;
-  subtotal?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1053,7 +1031,11 @@ export interface OrdersSelect<T extends boolean = true> {
         city?: T;
         province?: T;
         postalCode?: T;
+        country?: T;
       };
+  paymentMethod?: T;
+  paymentReference?: T;
+  vaNumber?: T;
   orderStatus?: T;
   paymentStatus?: T;
   totalAmount?: T;
@@ -1119,30 +1101,69 @@ export interface PaymentOptionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "addresses_select".
+ * via the `definition` "customers_select".
  */
-export interface AddressesSelect<T extends boolean = true> {
+export interface CustomersSelect<T extends boolean = true> {
   id?: T;
-  sessionId?: T;
-  customer?: T;
-  label?: T;
-  recipientName?: T;
+  name?: T;
   phone?: T;
-  addressLine1?: T;
-  addressLine2?: T;
-  city?: T;
-  province?: T;
-  postalCode?: T;
-  country?: T;
-  isDefault?: T;
-  coordinates?:
-    | T
-    | {
-        latitude?: T;
-        longitude?: T;
-      };
+  dateOfBirth?: T;
+  gender?: T;
+  isActive?: T;
+  customerNotes?: T;
   updatedAt?: T;
   createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "carts_select".
+ */
+export interface CartsSelect<T extends boolean = true> {
+  id?: T;
+  customer?: T;
+  sessionId?: T;
+  address?: T;
+  expiresAt?: T;
+  isDone?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cart-items_select".
+ */
+export interface CartItemsSelect<T extends boolean = true> {
+  id?: T;
+  cart?: T;
+  product?: T;
+  variant?: T;
+  quantity?: T;
+  price?: T;
+  subtotal?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1188,7 +1209,7 @@ export interface HomePage {
     enabled?: boolean | null;
     title: string;
     subtitle?: string | null;
-    image?: (string | null) | Media;
+    image?: (number | null) | Media;
     primaryCTA?: {
       label?: string | null;
       href?: string | null;
@@ -1196,7 +1217,7 @@ export interface HomePage {
   };
   promotions?:
     | {
-        icon?: (string | null) | Media;
+        icon?: (number | null) | Media;
         title: string;
         description?: string | null;
         link?: string | null;
@@ -1223,7 +1244,7 @@ export interface HomePage {
   seo?: {
     metaTitle?: string | null;
     metaDescription?: string | null;
-    ogImage?: (string | null) | Media;
+    ogImage?: (number | null) | Media;
   };
   updatedAt?: string | null;
   createdAt?: string | null;

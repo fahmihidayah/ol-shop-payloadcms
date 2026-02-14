@@ -1,0 +1,5 @@
+export { HeroComponent } from './hero'
+export { Promotions } from './promotions'
+export { FeaturedProducts } from './featured-products'
+export { NewArrivals } from './new-arrivals'
+export { CategoriesShowcase } from './categories-showcase'
