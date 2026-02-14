@@ -11,6 +11,11 @@ const nextConfig = {
         hostname: 'images.duitku.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'ol-shop-payloadcms-production.up.railway.app',
+        pathname: '/**',
+      },
     ],
   },
   experimental: {
