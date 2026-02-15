@@ -21,6 +21,15 @@ export const Pages: CollectionConfig = {
             },
             ...slugField('title'),
             {
+              name: 'heroImage',
+              type: 'upload',
+              relationTo: 'media',
+              label: 'Hero Image',
+              admin: {
+                description: 'Main image displayed at the top of the page',
+              },
+            },
+            {
               name: 'content',
               type: 'richText',
               required: true,

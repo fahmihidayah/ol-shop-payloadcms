@@ -718,6 +718,10 @@ export interface Page {
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
+  /**
+   * Main image displayed at the top of the page
+   */
+  heroImage?: (number | null) | Media;
   content: {
     root: {
       type: string;
@@ -1221,6 +1225,7 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   slugLock?: T;
+  heroImage?: T;
   content?: T;
   status?: T;
   seo?:
