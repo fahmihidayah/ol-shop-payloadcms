@@ -81,6 +81,7 @@ export interface Config {
     customers: Customer;
     carts: Cart;
     'cart-items': CartItem;
+    pages: Page;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -101,6 +102,7 @@ export interface Config {
     customers: CustomersSelect<false> | CustomersSelect<true>;
     carts: CartsSelect<false> | CartsSelect<true>;
     'cart-items': CartItemsSelect<false> | CartItemsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -709,6 +711,56 @@ export interface CartItem {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  status: 'draft' | 'published';
+  seo?: {
+    /**
+     * Override the page title for search engines (50-60 characters)
+     */
+    title?: string | null;
+    /**
+     * Brief description for search results (150-160 characters)
+     */
+    description?: string | null;
+    /**
+     * Comma-separated keywords for search engines
+     */
+    keywords?: string | null;
+    /**
+     * Image for social media sharing (1200x630px recommended)
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Prevent search engines from indexing this page
+     */
+    noIndex?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -782,6 +834,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'cart-items';
         value: string | CartItem;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
       } | null);
   globalSlug?: string | null;
   user:
@@ -1154,6 +1210,28 @@ export interface CartItemsSelect<T extends boolean = true> {
   quantity?: T;
   price?: T;
   subtotal?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  slugLock?: T;
+  content?: T;
+  status?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        keywords?: T;
+        ogImage?: T;
+        noIndex?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

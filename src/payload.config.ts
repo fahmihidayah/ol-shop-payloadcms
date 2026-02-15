@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
 import { Users } from './collections/Users/config'
+import { Pages } from './collections/Page/config'
 import { Posts } from './collections/Posts/config'
 import { Categories } from './collections/Categories/config'
 import { Media } from './collections/Media'
@@ -48,6 +49,7 @@ export default buildConfig({
     Customers,
     Carts,
     CartItems,
+    Pages,
   ],
   globals: [HomeConfig],
   editor: lexicalEditor(),

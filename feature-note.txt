@@ -1,0 +1,10 @@
+shipping should dynamic / configurable from global.
+error ketika check out 
+- sudah ada di cart item yang sama 
+- tambah lagi 
+- error ketika check out 
+
+ketika checkout barang tidak berkurang jumlahnya 
+footer header harus di taruh global 
+
+dynamic page untuk about
