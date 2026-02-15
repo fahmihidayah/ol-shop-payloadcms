@@ -193,12 +193,15 @@ export async function createDuitkuPayment(params: {
       body: JSON.stringify(requestBody),
     })
 
+    const data: DuitkuTransactionResponse = await response.json()
+    console.log('data json : ', data)
+
     // console.log('response : ', JSON.stringify(requestBody), await response.json())
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
 
-    const data: DuitkuTransactionResponse = await response.json()
+    // const data: DuitkuTransactionResponse = await response.json()
 
     if (data.statusCode !== '00') {
       return {

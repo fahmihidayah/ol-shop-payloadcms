@@ -14,8 +14,6 @@ export const metadata = {
 export default async function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props
 
-
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
@@ -24,7 +22,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
             <Navbar />
             <main className="min-h-screen">{children}</main>
             <Footer />
-            <Toaster position="top-right" richColors />
+            <Toaster position="top-left" richColors />
           </QueryProvider>
         </ThemeProvider>
       </body>

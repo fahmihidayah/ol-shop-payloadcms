@@ -3,32 +3,13 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import {
-  User,
-  MapPin,
-  Package,
-  Heart,
-  Settings,
-  LogOut,
-  Menu,
-} from 'lucide-react'
+import { User, MapPin, Package, Heart, Settings, LogOut, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { useState } from 'react'
+import { logout } from '@/feature/auth/actions'
 
 interface AccountSidebarProps {
   userName?: string
@@ -71,18 +52,18 @@ function SidebarNav({
   const pathname = usePathname()
 
   const handleLogout = async () => {
-    window.location.href = '/api/users/logout'
+    await logout()
   }
 
   return (
     <>
       {userName && (
-        <div className="px-6 pb-4">
+        <div className="px-6 pb-4 pt-5">
           <p className="font-medium text-foreground">{userName}</p>
           {userEmail && <p className="text-xs text-muted-foreground">{userEmail}</p>}
         </div>
       )}
-      <Separator />
+      {/* <Separator /> */}
       <nav className="flex flex-col">
         {menuItems.map((item) => {
           const Icon = item.icon
@@ -150,25 +131,19 @@ export function AccountSidebar({ userName, userEmail }: AccountSidebarProps) {
       </div>
 
       {/* Desktop: static card sidebar */}
-      <Card className="h-fit sticky top-20 hidden lg:flex lg:flex-col">
-        <CardHeader>
+      <div className="h-fit sticky top-20 hidden lg:flex lg:flex-col rounded-lg  border-[1px] bg-white shadow-lg overflow-clip">
+        {/* <CardHeader>
           <CardTitle className="text-lg">My Account</CardTitle>
           {userName && (
             <>
-              <CardDescription className="font-medium text-foreground">
-                {userName}
-              </CardDescription>
-              {userEmail && (
-                <CardDescription className="text-xs">{userEmail}</CardDescription>
-              )}
+              <CardDescription className="font-medium text-foreground">{userName}</CardDescription>
+              {userEmail && <CardDescription className="text-xs">{userEmail}</CardDescription>}
             </>
           )}
-        </CardHeader>
-        <Separator />
-        <CardContent className="p-0">
-          <SidebarNav userName={userName} userEmail={userEmail} />
-        </CardContent>
-      </Card>
+        </CardHeader> */}
+        {/* <Separator /> */}
+        <SidebarNav userName={userName} userEmail={userEmail} />
+      </div>
     </>
   )
 }
