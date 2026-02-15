@@ -5,6 +5,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { cookies } from 'next/headers'
 import { getMeUser } from '@/lib/customer-utils'
+import { revalidateTag } from 'next/cache'
 
 export interface CartWithItems extends Cart {
   items: CartItem[]
@@ -205,4 +206,8 @@ export const updateCartItemQuantity = async (
       error: error instanceof Error ? error.message : 'Failed to update quantity',
     }
   }
+}
+
+export const revalidateCart = async () => {
+  revalidateTag('cart')
 }

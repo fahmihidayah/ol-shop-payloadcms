@@ -10,6 +10,7 @@ import { OrderItemsCard } from './order-items-card'
 import { ShippingAddressCard } from './shipping-address-card'
 import { OrderActionButtons } from './order-action-buttons'
 import { OrderInfoCard } from './order-info-card'
+import useRefreshCart from '@/hooks/use-refresh-cart'
 
 interface OrderConfirmationProps {
   resultCode: DuitkuResultCode
@@ -33,6 +34,7 @@ export function OrderConfirmation({
   }
 
   const statusInfo = getStatusInfo(resultCode)
+  useRefreshCart()
 
   return (
     <div className="container mx-auto px-4 py-16">

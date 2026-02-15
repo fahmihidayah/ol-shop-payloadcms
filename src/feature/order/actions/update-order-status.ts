@@ -41,10 +41,7 @@ export async function updateOrderStatus(
     // Clear cart items if payment is successful
     if (paymentStatus === 'paid') {
       await clearCartItems()
-      revalidateTag('cart')
     }
-
-    revalidateTag('orders')
 
     return { success: true, order: updatedOrder }
   } catch (error) {
