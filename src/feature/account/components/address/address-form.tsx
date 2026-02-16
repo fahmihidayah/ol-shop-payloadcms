@@ -10,15 +10,15 @@ import {
 } from '@/components/ui/form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { AddressFormSchema, addressFormSchema } from '../../types/address'
+import { AddressFormSchema, addressFormSchema } from '@/feature/account/types/types'
 import { MapPin, Phone, Tag, User } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
-import { createAddress } from '../../actions/address'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
+import { createAddress } from '../../actions/addresses/create-address'
 
 interface AddressFormProps {
   onSuccess?: () => void
@@ -34,7 +34,7 @@ export default function AddressForm({ onSuccess }: AddressFormProps = {}) {
     defaultValues: {
       label: '',
       recipientName: '',
-      phoneNumber: '',
+      phone: '',
       addressLine1: '',
       addressLine2: '',
       city: '',
@@ -47,15 +47,9 @@ export default function AddressForm({ onSuccess }: AddressFormProps = {}) {
 
   const onSubmit = (data: AddressFormSchema) => {
     setError('')
-    const formData = new FormData()
-    Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined && value !== '') {
-        formData.append(key, String(value))
-      }
-    })
 
     startTransition(async () => {
-      const result = await createAddress(formData)
+      const result = await createAddress(data)
       if (result.success) {
         if (onSuccess) {
           onSuccess()
@@ -72,9 +66,7 @@ export default function AddressForm({ onSuccess }: AddressFormProps = {}) {
     <Form {...form}>
       <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
         {error && (
-          <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
-            {error}
-          </div>
+          <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">{error}</div>
         )}
         <FormField
           control={form.control}
@@ -85,12 +77,7 @@ export default function AddressForm({ onSuccess }: AddressFormProps = {}) {
               <FormControl>
                 <div className="relative">
                   <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="e.g. Home, Office"
-                    className="pl-10"
-                    type="text"
-                    {...field}
-                  />
+                  <Input placeholder="e.g. Home, Office" className="pl-10" type="text" {...field} />
                 </div>
               </FormControl>
               <FormMessage />
@@ -106,12 +93,7 @@ export default function AddressForm({ onSuccess }: AddressFormProps = {}) {
               <FormControl>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Recipient Name"
-                    className="pl-10"
-                    type="text"
-                    {...field}
-                  />
+                  <Input placeholder="Recipient Name" className="pl-10" type="text" {...field} />
                 </div>
               </FormControl>
               <FormMessage />
@@ -120,19 +102,14 @@ export default function AddressForm({ onSuccess }: AddressFormProps = {}) {
         />
         <FormField
           control={form.control}
-          name="phoneNumber"
+          name="phone"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Phone Number"
-                    className="pl-10"
-                    type="text"
-                    {...field}
-                  />
+                  <Input placeholder="Phone Number" className="pl-10" type="text" {...field} />
                 </div>
               </FormControl>
               <FormMessage />
@@ -148,11 +125,7 @@ export default function AddressForm({ onSuccess }: AddressFormProps = {}) {
               <FormControl>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Textarea
-                    placeholder="Street address, P.O. box"
-                    className="pl-10"
-                    {...field}
-                  />
+                  <Textarea placeholder="Street address, P.O. box" className="pl-10" {...field} />
                 </div>
               </FormControl>
               <FormMessage />
@@ -168,11 +141,7 @@ export default function AddressForm({ onSuccess }: AddressFormProps = {}) {
               <FormControl>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Textarea
-                    placeholder="Apartment, suite, unit"
-                    className="pl-10"
-                    {...field}
-                  />
+                  <Textarea placeholder="Apartment, suite, unit" className="pl-10" {...field} />
                 </div>
               </FormControl>
               <FormMessage />

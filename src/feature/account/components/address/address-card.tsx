@@ -15,7 +15,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { MapPin, Phone, Trash2, User } from 'lucide-react'
-import { deleteAddress } from '../../actions/address'
+import { deleteAddress } from '../../actions/addresses/delete-address'
 
 interface AddressCardProps {
   address: Address
@@ -49,7 +49,11 @@ export default function AddressCard({ address }: AddressCardProps) {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <form action={async (formData) => { await deleteAddress(formData) }}>
+              <form
+                action={async (formData) => {
+                  await deleteAddress(formData)
+                }}
+              >
                 <input type="hidden" name="addressId" value={address.id} />
                 <AlertDialogAction
                   type="submit"

@@ -24,6 +24,7 @@ import { Customers } from './collections/Customers/config'
 import { Carts } from './collections/Carts/config'
 import { CartItems } from './collections/CartItems/config'
 import { HomeConfig } from './globals/home/config'
+import { endpointsV1 } from './feature/api/v1'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -35,6 +36,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
+  endpoints: [...endpointsV1],
   collections: [
     Users,
     Posts,

@@ -6,7 +6,7 @@ import {
   NewArrivals,
   CategoriesShowcase,
 } from '@/feature/home/components'
-import { getNewArrival } from '@/feature/products/actions'
+import { getNewArrival } from '@/feature/products/actions/get-list-products'
 
 export default async function HomePage() {
   const homeConfig = await getHomeConfig()

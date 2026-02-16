@@ -15,11 +15,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { formatPrice } from '@/lib/price-format-utils'
 import { Category } from '@/payload-types'
-import { ProductFilters as Filters, SortByOption } from '../actions'
 import { X } from 'lucide-react'
+import { ProductFilters as Filter, SortByOption } from '../types'
 
 interface ProductFiltersProps {
-  filters: Filters
+  filters: Filter
   selectedCategories: string[]
   onCategoryChange: (categoryId: string) => void
   priceRange: [number, number]
@@ -50,12 +50,7 @@ export function ProductFilters({
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Filters</h2>
         {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClearFilters}
-            className="h-8 px-2 text-xs"
-          >
+          <Button variant="ghost" size="sm" onClick={onClearFilters} className="h-8 px-2 text-xs">
             <X className="mr-1 h-3 w-3" />
             Clear
           </Button>
@@ -76,7 +71,7 @@ export function ProductFilters({
             </SelectTrigger>
             <SelectContent>
               {filters.sortByOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
+                <SelectItem key={option.value} value={option.value ?? ''}>
                   {option.label}
                 </SelectItem>
               ))}

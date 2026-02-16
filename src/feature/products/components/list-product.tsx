@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useDebounce } from '@/hooks/use-debounce'
-import { getFilters, getProducts, SortByOption } from '../actions'
 import { ProductSearchInput } from './product-search-input'
 import { ProductFilters } from './product-filters'
 import { ProductGrid } from './product-grid'
@@ -18,6 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { getFilters } from '../actions/get-filter'
+import { SortByOption } from '../types'
+import { getProducts } from '../actions/get-list-products'
 
 export function ListProduct({ initialCategory }: { initialCategory?: string }) {
   // Filter states
@@ -182,7 +184,7 @@ export function ListProduct({ initialCategory }: { initialCategory?: string }) {
             </SelectTrigger>
             <SelectContent>
               {filters.sortByOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
+                <SelectItem key={option.value} value={option.value ?? ''}>
                   {option.label}
                 </SelectItem>
               ))}
@@ -227,7 +229,7 @@ export function ListProduct({ initialCategory }: { initialCategory?: string }) {
           </div>
 
           {/* Product Grid */}
-          <ProductGrid products={productsData?.products || []} isLoading={productsLoading} />
+          <ProductGrid products={productsData?.docs || []} isLoading={productsLoading} />
 
           {/* Pagination */}
           {productsData && productsData.totalPages > 1 && (

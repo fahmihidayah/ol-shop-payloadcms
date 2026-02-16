@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getProductBySlug, getRelatedProducts } from '@/feature/products/actions'
+import { getProductBySlug, getRelatedProducts } from '@/feature/products/actions/get-list-products'
 import { ProductDetail } from '@/feature/products/components/product-detail'
 import { Metadata } from 'next'
 
@@ -23,8 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: product.seo?.metaDescription || product.name,
     openGraph: {
       title: product.seo?.ogTitle || product.seo?.metaTitle || product.name,
-      description:
-        product.seo?.ogDescription || product.seo?.metaDescription || product.name,
+      description: product.seo?.ogDescription || product.seo?.metaDescription || product.name,
       type: 'website',
     },
   }
