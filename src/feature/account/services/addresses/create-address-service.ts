@@ -1,6 +1,6 @@
 'use server'
 import { Address } from '@/payload-types'
-import { addressFormSchema, AddressFormSchema } from '../../types/types'
+import { addressFormSchema, AddressFormSchema } from '../../types/address'
 import { ServiceContext } from '@/types/service-context'
 import { ServiceResult } from '@/types/service-result'
 import { formatZodError } from '@/lib/zod'

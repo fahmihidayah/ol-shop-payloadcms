@@ -2,9 +2,9 @@
 
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import { revalidateTag } from 'next/cache'
-import type { OrderStatus, PaymentStatus, UpdateOrderResult } from '@/types/order'
+import type { OrderStatus, PaymentStatus, UpdateOrderResult } from '@/feature/order/types/order'
 import { clearCartItems } from '@/feature/cart/actions'
+import { updateOrderStatusService } from '../services/update-order-status'
 
 /**
  * Update order status in database
@@ -23,27 +23,18 @@ export async function updateOrderStatus(
   try {
     const payload = await getPayload({ config })
 
-    const updateData: any = {
+    const result = await updateOrderStatusService({
+      serviceContext: {
+        collection: 'orders',
+        payload: payload,
+      },
+      orderId,
       orderStatus,
       paymentStatus,
-    }
-
-    if (paymentReference) {
-      updateData.paymentReference = paymentReference
-    }
-
-    const updatedOrder = await payload.update({
-      collection: 'orders',
-      id: orderId,
-      data: updateData,
+      paymentReference,
     })
 
-    // Clear cart items if payment is successful
-    if (paymentStatus === 'paid') {
-      await clearCartItems()
-    }
-
-    return { success: true, order: updatedOrder }
+    return { success: true, order: result.data }
   } catch (error) {
     console.error('[UPDATE_ORDER_STATUS] Error:', error)
     return {

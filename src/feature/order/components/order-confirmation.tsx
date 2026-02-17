@@ -1,7 +1,7 @@
 'use client'
 
 import type { Order, OrderItem } from '@/payload-types'
-import type { DuitkuResultCode } from '@/types/order'
+import type { DuitkuResultCode } from '@/feature/order/types/order'
 import { getStatusInfo } from '../utils/get-status-info'
 import { OrderLoadingState } from './order-loading-state'
 import { OrderStatusCard } from './order-status-card'

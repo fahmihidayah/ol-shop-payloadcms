@@ -2,7 +2,8 @@
 
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import type { GetOrderResult } from '@/types/order'
+import { getOrderByOrderNumberService } from '../services/get-by-order-number'
+import { GetOrderResult } from '../types/order'
 
 /**
  * Get order by order number (not ID)
@@ -13,21 +14,14 @@ export async function getOrderByOrderNumber(orderNumber: string): Promise<GetOrd
   try {
     const payload = await getPayload({ config })
 
-    const result = await payload.find({
-      collection: 'orders',
-      where: {
-        orderNumber: {
-          equals: orderNumber,
-        },
+    const result = await getOrderByOrderNumberService({
+      orderNumber: orderNumber,
+      serviceContext: {
+        payload,
+        collection: 'orders',
       },
-      limit: 1,
     })
-
-    if (result.docs.length === 0) {
-      return { success: false, error: 'Order not found' }
-    }
-
-    return { success: true, order: result.docs[0] }
+    return { success: true, order: result.data }
   } catch (error) {
     console.error('[GET_ORDER_BY_NUMBER] Error:', error)
     return {

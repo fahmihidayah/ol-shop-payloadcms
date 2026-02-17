@@ -3,7 +3,7 @@ import type {
   DuitkuCallbackResultCode,
   OrderStatus,
   PaymentStatus,
-} from '@/types/order'
+} from '@/feature/order/types/order'
 
 /**
  * Map Duitku return URL result code to order and payment status

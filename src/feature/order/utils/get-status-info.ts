@@ -1,5 +1,5 @@
 import { CheckCircle2, XCircle, Clock, AlertCircle } from 'lucide-react'
-import type { DuitkuResultCode, OrderStatusInfo } from '@/types/order'
+import type { DuitkuResultCode, OrderStatusInfo } from '@/feature/order/types/order'
 
 /**
  * Get status information for UI based on result code

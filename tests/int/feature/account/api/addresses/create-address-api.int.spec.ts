@@ -8,7 +8,7 @@ import * as serviceContextModule from '@/types/service-context'
 import type { EnhancedRequest } from '@/feature/api/types/request'
 import type { Address, Customer } from '@/payload-types'
 import type { Payload } from 'payload'
-import type { AddressFormSchema } from '@/feature/account/types/types'
+import type { AddressFormSchema } from '@/feature/account/types/address'
 
 vi.mock('@/feature/account/services/addresses/create-address-service')
 vi.mock('@/types/service-context')

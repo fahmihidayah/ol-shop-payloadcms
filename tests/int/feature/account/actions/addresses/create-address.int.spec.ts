@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createAddress } from '@/feature/account/actions/addresses/create-address'
-import type { AddressFormSchema } from '@/feature/account/types/types'
+import type { AddressFormSchema } from '@/feature/account/types/address'
 import * as customerUtils from '@/lib/customer-utils'
 import * as createAddressServiceModule from '@/feature/account/services/addresses/create-address-service'
 import type { Address, Customer } from '@/payload-types'
@@ -69,7 +69,10 @@ describe('createAddress action', () => {
       updatedAt: new Date().toISOString(),
     } as Address
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
     vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
       data: mockCreatedAddress,
@@ -138,7 +141,10 @@ describe('createAddress action', () => {
       country: '',
     }
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
     vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
       data: undefined,
@@ -170,7 +176,10 @@ describe('createAddress action', () => {
       country: 'USA',
     }
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
     vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
       data: undefined,
@@ -196,7 +205,10 @@ describe('createAddress action', () => {
       country: 'USA',
     }
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
     vi.mocked(createAddressServiceModule.createAddressService).mockRejectedValue(
       new Error('Unexpected error'),
@@ -220,7 +232,10 @@ describe('createAddress action', () => {
       country: 'USA',
     }
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
     vi.mocked(createAddressServiceModule.createAddressService).mockRejectedValue('String error')
 
@@ -250,7 +265,10 @@ describe('createAddress action', () => {
       updatedAt: new Date().toISOString(),
     } as Address
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue(undefined)
     vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
       data: mockCreatedAddress,
@@ -291,7 +309,10 @@ describe('createAddress action', () => {
       updatedAt: new Date().toISOString(),
     } as Address
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
     vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
       data: mockCreatedAddress,
@@ -325,7 +346,10 @@ describe('createAddress action', () => {
       updatedAt: new Date().toISOString(),
     } as Address
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
     vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
       data: mockCreatedAddress,

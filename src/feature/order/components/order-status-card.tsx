@@ -1,5 +1,5 @@
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import type { OrderStatusInfo } from '@/types/order'
+import type { OrderStatusInfo } from '@/feature/order/types/order'
 
 interface OrderStatusCardProps {
   statusInfo: OrderStatusInfo

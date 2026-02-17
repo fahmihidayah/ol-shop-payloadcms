@@ -114,9 +114,11 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'home-page': HomePage;
+    'store-config': StoreConfig;
   };
   globalsSelect: {
     'home-page': HomePageSelect<false> | HomePageSelect<true>;
+    'store-config': StoreConfigSelect<false> | StoreConfigSelect<true>;
   };
   locale: null;
   user:
@@ -1333,6 +1335,70 @@ export interface HomePage {
   createdAt?: string | null;
 }
 /**
+ * Master configuration for branding, localization, and SEO.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "store-config".
+ */
+export interface StoreConfig {
+  id: number;
+  storeName: string;
+  storeOwner?: string | null;
+  logo: number | Media;
+  favicon?: (number | null) | Media;
+  storeDescription?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  defaultCurrency?: ('IDR' | 'USD') | null;
+  currencySymbol?: string | null;
+  weightClass?: ('kg' | 'g') | null;
+  lengthClass?: ('cm' | 'mm') | null;
+  /**
+   * Flat rate for shipping
+   */
+  defaultShippingCost?: number | null;
+  /**
+   * Minimum spend for free shipping
+   */
+  freeShippingThreshold?: number | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  socialLinks?:
+    | {
+        platform?: ('Instagram' | 'WhatsApp' | 'Facebook' | 'TikTok' | 'Twitter') | null;
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The title used by search engines.
+   */
+  metaTitle?: string | null;
+  /**
+   * The summary used by search engines.
+   */
+  metaDescription?: string | null;
+  /**
+   * Image shown when sharing the site on social media.
+   */
+  ogImage?: (number | null) | Media;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "home-page_select".
  */
@@ -1390,6 +1456,39 @@ export interface HomePageSelect<T extends boolean = true> {
         metaDescription?: T;
         ogImage?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "store-config_select".
+ */
+export interface StoreConfigSelect<T extends boolean = true> {
+  storeName?: T;
+  storeOwner?: T;
+  logo?: T;
+  favicon?: T;
+  storeDescription?: T;
+  defaultCurrency?: T;
+  currencySymbol?: T;
+  weightClass?: T;
+  lengthClass?: T;
+  defaultShippingCost?: T;
+  freeShippingThreshold?: T;
+  email?: T;
+  phone?: T;
+  address?: T;
+  socialLinks?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

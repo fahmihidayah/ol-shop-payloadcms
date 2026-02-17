@@ -1,7 +1,7 @@
 'use server'
 import { getMeUser } from '@/lib/customer-utils'
 import { cookies } from 'next/headers'
-import { AddressFormSchema } from '../../types/types'
+import { AddressFormSchema } from '../../types/address'
 import { getPayload } from 'payload'
 import { Address } from '@/payload-types'
 

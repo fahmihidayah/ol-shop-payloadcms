@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createAddressService } from '@/feature/account/services/addresses/create-address-service'
-import type { AddressFormSchema } from '@/feature/account/types/types'
+import type { AddressFormSchema } from '@/feature/account/types/address'
 import type { ServiceContext } from '@/types/service-context'
 import type { Address, Customer } from '@/payload-types'
 import type { Payload } from 'payload'

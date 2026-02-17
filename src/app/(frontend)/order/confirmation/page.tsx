@@ -1,7 +1,7 @@
 import { OrderConfirmation } from '@/feature/order/components/order-confirmation'
 import { updateOrderFromReturnUrl } from '@/feature/order/actions/update-order'
 import { redirect } from 'next/navigation'
-import type { DuitkuResultCode } from '@/types/order'
+import type { DuitkuResultCode } from '@/feature/order/types/order'
 import type { OrderItem } from '@/payload-types'
 import { getPayload } from 'payload'
 import config from '@payload-config'

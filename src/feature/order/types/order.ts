@@ -34,18 +34,18 @@ export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | '
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
 
 /**
- * Result of getting order by order number
+ * Result of updating order
  */
-export interface GetOrderResult {
+export interface UpdateOrderResult {
   success: boolean
   order?: Order
   error?: string
 }
 
 /**
- * Result of updating order
+ * Result of getting order by order number
  */
-export interface UpdateOrderResult {
+export interface GetOrderResult {
   success: boolean
   order?: Order
   error?: string

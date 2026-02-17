@@ -25,6 +25,7 @@ import { Carts } from './collections/Carts/config'
 import { CartItems } from './collections/CartItems/config'
 import { HomeConfig } from './globals/home/config'
 import { endpointsV1 } from './feature/api/v1'
+import { StoreConfig } from './globals/store/config'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -53,7 +54,7 @@ export default buildConfig({
     CartItems,
     Pages,
   ],
-  globals: [HomeConfig],
+  globals: [HomeConfig, StoreConfig],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

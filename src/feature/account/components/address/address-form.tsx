@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { AddressFormSchema, addressFormSchema } from '@/feature/account/types/types'
+import { AddressFormSchema, addressFormSchema } from '@/feature/account/types/address'
 import { MapPin, Phone, Tag, User } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'

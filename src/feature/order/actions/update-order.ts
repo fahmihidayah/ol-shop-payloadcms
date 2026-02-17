@@ -1,11 +1,18 @@
 'use server'
 
 import { duitkuConfig } from '@/lib/duitku-config'
-import type { DuitkuResultCode, DuitkuCallbackParams, UpdateOrderResult } from '@/types/order'
+import type {
+  DuitkuResultCode,
+  DuitkuCallbackParams,
+  UpdateOrderResult,
+} from '@/feature/order/types/order'
 import { getOrderByOrderNumber } from './get-order'
-import { verifyDuitkuSignature } from './verify-signature'
-import { mapReturnUrlResultCode, mapCallbackResultCode } from './map-result-code'
+import { verifyDuitkuSignatureService } from '../services/verify-signature'
+import { mapReturnUrlResultCode, mapCallbackResultCode } from '../utils/map-result-code'
 import { updateOrderStatus } from './update-order-status'
+import { updateOrderFromReturnUrlService } from '../services/update-order-status'
+import { getPayload } from 'payload'
+import config from '@payload-config'
 
 /**
  * Update order status based on Duitku result code from return URL
@@ -27,20 +34,21 @@ export async function updateOrderFromReturnUrl(
 ): Promise<UpdateOrderResult> {
   try {
     // Find order by order number
-    const orderResult = await getOrderByOrderNumber(orderNumber)
-    if (!orderResult.success || !orderResult.order) {
-      return { success: false, error: 'Order not found' }
+    const updateResult = await updateOrderFromReturnUrlService({
+      serviceContext: {
+        collection: 'orders',
+        payload: await getPayload({
+          config,
+        }),
+      },
+      orderNumber,
+      resultCode,
+      reference,
+    })
+    return {
+      success: true,
+      order: updateResult.data,
     }
-
-    const order = orderResult.order
-
-    // Map result code to order status
-    const { orderStatus, paymentStatus } = mapReturnUrlResultCode(resultCode)
-
-    // Update order
-    const updateResult = await updateOrderStatus(order.id, orderStatus, paymentStatus, reference)
-
-    return updateResult
   } catch (error) {
     console.error('[UPDATE_ORDER_FROM_RETURN] Error:', error)
     return {
@@ -64,7 +72,7 @@ export async function updateOrderFromCallback(
     const { merchantCode, amount, merchantOrderId, reference, signature, resultCode } = params
 
     // Verify signature
-    const isValid = await verifyDuitkuSignature(
+    const isValid = await verifyDuitkuSignatureService(
       merchantCode,
       amount,
       merchantOrderId,
