@@ -2,7 +2,7 @@
  * Get a list of documents from the collection
  */
 
-import { ServiceContext } from '@/feature/api/types/service-context'
+import { ServiceContext } from '@/types/service-context'
 import { PaginatedDocs, Where } from 'payload'
 
 export interface ServiceListOptions {

@@ -5,8 +5,7 @@ import { cookies } from 'next/headers'
 import { getPayload } from 'payload'
 
 import config from '@payload-config'
-import { deleteService } from '@/lib/services/delete-service'
-import { Address } from '@/payload-types'
+import { deleteAddressService } from '../../services/addresses/delete-address-service'
 type ActionState = {
   success: boolean
   error?: string
@@ -19,44 +18,27 @@ export async function deleteAddress(formData: FormData): Promise<ActionState> {
       return { success: false, error: 'Address ID is required' }
     }
 
-    const payload = await getPayload({ config })
     const { user } = await getMeUser()
     const cookieStore = await cookies()
+    const sessionId = cookieStore.get('cart-session-id')?.value
 
-    // Fetch address to verify ownership
-    const address = await deleteService<Address>({
+    const result = await deleteAddressService({
+      id: addressId,
       serviceContext: {
         collection: 'addresses',
-        payload,
+        payload: await getPayload({
+          config,
+        }),
+        user: user,
+        sessionId,
       },
-      id: addressId,
-      overrideAccess: true,
     })
-
-    if (!address) {
-      return { success: false, error: 'Address not found' }
-    }
-
-    // Verify ownership: only the owner (user or session) can delete
-    if (user) {
-      const customerId =
-        typeof address.customer === 'string' ? address.customer : address.customer?.id
-      if (customerId !== user.id) {
-        return { success: false, error: 'You are not authorized to delete this address' }
-      }
-    } else {
-      const sessionId = cookieStore.get('cart-session-id')?.value
-      if (!sessionId || address.sessionId !== sessionId) {
-        return { success: false, error: 'You are not authorized to delete this address' }
+    if (result.error) {
+      return {
+        success: false,
+        error: result.message,
       }
     }
-
-    await payload.delete({
-      collection: 'addresses',
-      id: addressId,
-      overrideAccess: true,
-    })
-
     revalidateTag('addresses')
     return { success: true }
   } catch (error) {

@@ -1,4 +1,4 @@
-import { ServiceContext } from '@/feature/api/types/service-context'
+import { ServiceContext } from '@/types/service-context'
 
 export async function createService<F, D>({
   serviceContext,

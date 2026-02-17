@@ -1,13 +1,13 @@
 'use server'
 import { getMeUser } from '@/lib/customer-utils'
 import { cookies } from 'next/headers'
-import { AddressFormSchema, addressFormSchema } from '../../types/types'
-import { createService } from '@/lib/services/create-service'
+import { AddressFormSchema } from '../../types/types'
 import { getPayload } from 'payload'
 import { Address } from '@/payload-types'
 
 import config from '@payload-config'
 import { revalidateTag } from 'next/cache'
+import { createAddressService } from '../../services/addresses/create-address-service'
 
 type CreateAddressResult = {
   success: boolean
@@ -21,33 +21,29 @@ export async function createAddress(data: AddressFormSchema): Promise<CreateAddr
     const cookieStore = await cookies()
     const sessionId = cookieStore.get('cart-session-id')?.value
 
-    if (user) {
-      data.customer = user.id
-    } else {
-      data.sessionId = sessionId
-    }
-    const validated = addressFormSchema.safeParse(data)
-    if (!validated.success) {
+    const result = await createAddressService({
+      data: data,
+      serviceContext: {
+        user: user,
+        sessionId: sessionId,
+        collection: 'addresses',
+        payload: await getPayload({
+          config,
+        }),
+      },
+    })
+
+    if (result.error) {
       return {
         success: false,
-        error: validated.error.issues[0]?.message || 'Invalid form data',
+        error: result.errorMessage ? Object.values(result.errorMessage).join(', ') : result.message,
       }
     }
-
-    const validatedData = validated.data
-
-    const address = await createService({
-      serviceContext: {
-        collection: 'addresses',
-        payload: await getPayload({ config }),
-      },
-      data: validatedData,
-    })
 
     revalidateTag('addresses')
     return {
       success: true,
-      address: address as Address,
+      address: result.data,
     }
   } catch (error) {
     console.error('[CREATE_ADDRESS] Error:', error)
