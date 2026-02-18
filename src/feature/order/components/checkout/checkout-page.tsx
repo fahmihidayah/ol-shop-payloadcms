@@ -9,10 +9,10 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { DuitkuPaymentMethod } from '@/types/duitku'
-import { processCheckout } from '../actions/create-payment'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import type { CheckoutData, CheckoutItem } from '@/types/checkout'
+import { processCheckout } from '../../actions/checkout'
 
 const SHIPPING_COST = 20000
 

@@ -4,7 +4,8 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { OrderStatus, PaymentStatus, UpdateOrderResult } from '@/feature/order/types/order'
 import { clearCartItems } from '@/feature/cart/actions'
-import { updateOrderStatusService } from '../services/update-order-status'
+import { OrderService } from '../../services/order-service'
+// import { updateOrderStatusService } from '../services/update-order-status'
 
 /**
  * Update order status in database
@@ -23,7 +24,7 @@ export async function updateOrderStatus(
   try {
     const payload = await getPayload({ config })
 
-    const result = await updateOrderStatusService({
+    const result = await OrderService.updateOrderStatus({
       serviceContext: {
         collection: 'orders',
         payload: payload,

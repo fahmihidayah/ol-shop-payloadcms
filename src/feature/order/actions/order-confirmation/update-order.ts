@@ -7,12 +7,15 @@ import type {
   UpdateOrderResult,
 } from '@/feature/order/types/order'
 import { getOrderByOrderNumber } from './get-order'
-import { verifyDuitkuSignatureService } from '../services/verify-signature'
-import { mapReturnUrlResultCode, mapCallbackResultCode } from '../utils/map-result-code'
+// import { verifyDuitkuSignatureService } from '../services/verify-signature'
+// import { mapReturnUrlResultCode, mapCallbackResultCode } from '../utils/map-result-code'
 import { updateOrderStatus } from './update-order-status'
-import { updateOrderFromReturnUrlService } from '../services/update-order-status'
+// import { updateOrderFromReturnUrlService } from '../services/update-order-status'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import { OrderService } from '../../services/order-service'
+import { verifyDuitkuSignature } from '../../utils/verify-signature'
+import { mapCallbackResultCode } from '../../utils/map-result-code'
 
 /**
  * Update order status based on Duitku result code from return URL
@@ -34,7 +37,7 @@ export async function updateOrderFromReturnUrl(
 ): Promise<UpdateOrderResult> {
   try {
     // Find order by order number
-    const updateResult = await updateOrderFromReturnUrlService({
+    const updateResult = await OrderService.updateOrderFromReturnUrl({
       serviceContext: {
         collection: 'orders',
         payload: await getPayload({
@@ -72,7 +75,7 @@ export async function updateOrderFromCallback(
     const { merchantCode, amount, merchantOrderId, reference, signature, resultCode } = params
 
     // Verify signature
-    const isValid = await verifyDuitkuSignatureService(
+    const isValid = await verifyDuitkuSignature(
       merchantCode,
       amount,
       merchantOrderId,

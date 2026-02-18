@@ -1,11 +1,11 @@
 // Main component
-export { OrderConfirmation } from './order-confirmation'
-export { OrderItemsCard } from './order-items-card'
+export { OrderConfirmation } from './confirmation/order-confirmation'
+export { OrderItemsCard } from './confirmation/order-items-card'
 
 // Sub-components
-export { OrderStatusCard } from './order-status-card'
-export { OrderDetailsCard } from './order-details-card'
-export { ShippingAddressCard } from './shipping-address-card'
-export { OrderActionButtons } from './order-action-buttons'
-export { OrderInfoCard } from './order-info-card'
-export { OrderLoadingState } from './order-loading-state'
+export { OrderStatusCard } from './confirmation/order-status-card'
+export { OrderDetailsCard } from './confirmation/order-details-card'
+export { ShippingAddressCard } from './confirmation/shipping-address-card'
+export { OrderActionButtons } from './confirmation/order-action-buttons'
+export { OrderInfoCard } from './confirmation/order-info-card'
+export { OrderLoadingState } from './confirmation/order-loading-state'

@@ -1,10 +1,11 @@
-import { OrderConfirmation } from '@/feature/order/components/order-confirmation'
-import { updateOrderFromReturnUrl } from '@/feature/order/actions/update-order'
+import { OrderConfirmation } from '@/feature/order/components/confirmation/order-confirmation'
+// import { updateOrderFromReturnUrl } from '@/feature/order/actions/update-order'
 import { redirect } from 'next/navigation'
 import type { DuitkuResultCode } from '@/feature/order/types/order'
 import type { OrderItem } from '@/payload-types'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import { updateOrderFromReturnUrl } from '@/feature/order/actions/order-confirmation/update-order'
 
 interface OrderConfirmationPageProps {
   searchParams: Promise<{

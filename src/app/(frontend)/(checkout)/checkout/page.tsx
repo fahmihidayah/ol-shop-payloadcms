@@ -1,8 +1,9 @@
 import { getCart } from '@/feature/cart/actions'
 import { getListAddresses } from '@/feature/account/actions/addresses/get-list-address'
-import { getCombinedPaymentOptions } from '@/feature/checkout/actions/payment-options'
-import { CheckoutPageClient } from '@/feature/checkout/components/checkout-page'
+import { getCombinedPaymentOptions } from '@/feature/order/actions/checkout/payment-options'
+// import { CheckoutPageClient } from '@/feature/checkout/components/checkout-page'
 import { redirect } from 'next/navigation'
+import { CheckoutPageClient } from '@/feature/order/components/checkout/checkout-page'
 
 export default async function CheckoutPage() {
   const [cart, addresses] = await Promise.all([getCart(), getListAddresses()])

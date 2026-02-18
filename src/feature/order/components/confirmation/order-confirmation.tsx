@@ -2,7 +2,7 @@
 
 import type { Order, OrderItem } from '@/payload-types'
 import type { DuitkuResultCode } from '@/feature/order/types/order'
-import { getStatusInfo } from '../utils/get-status-info'
+import { getStatusInfo } from '../../utils/get-status-info'
 import { OrderLoadingState } from './order-loading-state'
 import { OrderStatusCard } from './order-status-card'
 import { OrderDetailsCard } from './order-details-card'

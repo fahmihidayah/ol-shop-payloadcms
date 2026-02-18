@@ -11,7 +11,7 @@ import CryptoJS from 'crypto-js'
  * @param signature - Signature from Duitku
  * @returns true if signature is valid
  */
-export async function verifyDuitkuSignatureService(
+export async function verifyDuitkuSignature(
   merchantCode: string,
   amount: number,
   merchantOrderId: string,

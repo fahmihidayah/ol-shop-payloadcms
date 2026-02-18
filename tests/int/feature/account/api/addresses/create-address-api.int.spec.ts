@@ -11,7 +11,7 @@ import type { Payload } from 'payload'
 import type { AddressFormSchema } from '@/feature/account/types/address'
 import { AddressService } from '@/feature/account/services/address-service'
 
-vi.mock('@/feature/account/services/addresses/create-address-service')
+// vi.mock('@/feature/account/services/addresses/create-address-service')
 vi.mock('@/types/service-context')
 vi.mock('payload', async (importOriginal) => {
   const actual = await importOriginal<typeof import('payload')>()
