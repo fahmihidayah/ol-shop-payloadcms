@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { createAddressService } from '@/feature/account/services/addresses/create-address-service'
+// import { createAddressService } from '@/feature/account/services/addresses/create-address-service'
 import type { AddressFormSchema } from '@/feature/account/types/address'
 import type { ServiceContext } from '@/types/service-context'
 import type { Address, Customer } from '@/payload-types'
 import type { Payload } from 'payload'
+import { AddressService } from '@/feature/account/services/address-service'
 
 describe('createAddressService', () => {
   let mockPayload: Payload
@@ -58,7 +59,7 @@ describe('createAddressService', () => {
 
     vi.mocked(mockPayload.create).mockResolvedValue(mockCreatedAddress)
 
-    const result = await createAddressService({
+    const result = await AddressService.create({
       data: addressData,
       serviceContext,
     })
@@ -100,7 +101,7 @@ describe('createAddressService', () => {
 
     vi.mocked(mockPayload.create).mockResolvedValue(mockCreatedAddress)
 
-    const result = await createAddressService({
+    const result = await AddressService.create({
       data: addressData,
       serviceContext,
     })
@@ -128,7 +129,7 @@ describe('createAddressService', () => {
       country: '',
     } as AddressFormSchema
 
-    const result = await createAddressService({
+    const result = await AddressService.create({
       data: invalidData,
       serviceContext,
     })
@@ -151,7 +152,7 @@ describe('createAddressService', () => {
       country: 'USA',
     }
 
-    const result = await createAddressService({
+    const result = await AddressService.create({
       data: invalidData,
       serviceContext,
     })
@@ -184,7 +185,7 @@ describe('createAddressService', () => {
 
     vi.mocked(mockPayload.create).mockResolvedValue(mockCreatedAddress)
 
-    const result = await createAddressService({
+    const result = await AddressService.create({
       data: addressData,
       serviceContext,
     })
@@ -208,7 +209,7 @@ describe('createAddressService', () => {
     vi.mocked(mockPayload.create).mockRejectedValue(new Error('Database error'))
 
     await expect(
-      createAddressService({
+      AddressService.create({
         data: addressData,
         serviceContext,
       }),
@@ -238,7 +239,7 @@ describe('createAddressService', () => {
 
     vi.mocked(mockPayload.create).mockResolvedValue(mockCreatedAddress)
 
-    const result = await createAddressService({
+    const result = await AddressService.create({
       data: addressData,
       serviceContext,
     })
@@ -272,7 +273,7 @@ describe('createAddressService', () => {
         [testCase.field]: testCase.value,
       } as AddressFormSchema
 
-      const result = await createAddressService({
+      const result = await AddressService.create({
         data: invalidData,
         serviceContext,
       })

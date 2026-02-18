@@ -3,9 +3,9 @@ import { withAuth } from '@/feature/api/middleware/with-auth'
 import { withLogging } from '@/feature/api/middleware/with-logging'
 import { withRateLimit } from '@/feature/api/middleware/with-rate-limit'
 import { EnhancedRequest } from '@/feature/api/types/request'
-import { deleteAddressService } from '../../services/addresses/delete-address-service'
 import { createServiceContext } from '@/types/service-context'
 import { Endpoint } from 'payload'
+import { AddressService } from '../../services/address-service'
 
 export async function deleteAddressHandler(req: EnhancedRequest) {
   const addressId = req.routeParams?.id
@@ -18,7 +18,7 @@ export async function deleteAddressHandler(req: EnhancedRequest) {
     }
   }
 
-  const result = await deleteAddressService({
+  const result = await AddressService.delete({
     id: addressId as string,
     serviceContext: await createServiceContext({
       collection: 'addresses',

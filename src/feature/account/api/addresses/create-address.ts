@@ -5,14 +5,14 @@ import { withRateLimit } from '@/feature/api/middleware/with-rate-limit'
 import { withValidation } from '@/feature/api/middleware/with-validation'
 import { addressFormSchema } from '@/feature/account/types/address'
 import { EnhancedRequest } from '@/feature/api/types/request'
-import { createAddressService } from '../../services/addresses/create-address-service'
 import { createServiceContext } from '@/types/service-context'
 import { Endpoint } from 'payload'
+import { AddressService } from '../../services/address-service'
 
 export async function createAddressHandler(req: EnhancedRequest) {
   const { validatedData } = req
 
-  const result = await createAddressService({
+  const result = await AddressService.create({
     data: validatedData,
     serviceContext: await createServiceContext({
       collection: 'addresses',

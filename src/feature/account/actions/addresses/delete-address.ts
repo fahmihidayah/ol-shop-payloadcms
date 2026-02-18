@@ -5,7 +5,7 @@ import { cookies } from 'next/headers'
 import { getPayload } from 'payload'
 
 import config from '@payload-config'
-import { deleteAddressService } from '../../services/addresses/delete-address-service'
+import { AddressService } from '../../services/address-service'
 type ActionState = {
   success: boolean
   error?: string
@@ -22,7 +22,7 @@ export async function deleteAddress(formData: FormData): Promise<ActionState> {
     const cookieStore = await cookies()
     const sessionId = cookieStore.get('cart-session-id')?.value
 
-    const result = await deleteAddressService({
+    const result = await AddressService.delete({
       id: addressId,
       serviceContext: {
         collection: 'addresses',

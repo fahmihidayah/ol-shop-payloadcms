@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getListAddressService } from '@/feature/account/services/addresses/get-list-address-service'
+// import { AddressService.findAll } from '@/feature/account/services/addresses/get-list-address-service'
 import type { ServiceContext } from '@/types/service-context'
 import type { Address, Customer } from '@/payload-types'
 import type { Payload, PaginatedDocs } from 'payload'
+import { AddressService } from '@/feature/account/services/address-service'
 
-describe('getListAddressService', () => {
+describe('AddressService.findAll', () => {
   let mockPayload: Payload
   let mockCustomer: Customer
   let serviceContext: ServiceContext
@@ -82,7 +83,7 @@ describe('getListAddressService', () => {
 
     vi.mocked(mockPayload.find).mockResolvedValue(mockResult)
 
-    const result = await getListAddressService({
+    const result = await AddressService.findAll({
       serviceContext,
     })
 
@@ -134,7 +135,7 @@ describe('getListAddressService', () => {
 
     vi.mocked(mockPayload.find).mockResolvedValue(mockResult)
 
-    const result = await getListAddressService({
+    const result = await AddressService.findAll({
       serviceContext,
     })
 
@@ -154,7 +155,7 @@ describe('getListAddressService', () => {
     serviceContext.user = undefined
     serviceContext.sessionId = undefined
 
-    const result = await getListAddressService({
+    const result = await AddressService.findAll({
       serviceContext,
     })
 
@@ -180,7 +181,7 @@ describe('getListAddressService', () => {
 
     vi.mocked(mockPayload.find).mockResolvedValue(mockResult)
 
-    const result = await getListAddressService({
+    const result = await AddressService.findAll({
       serviceContext,
     })
 
@@ -236,7 +237,7 @@ describe('getListAddressService', () => {
 
     vi.mocked(mockPayload.find).mockResolvedValue(mockResult)
 
-    const result = await getListAddressService({
+    const result = await AddressService.findAll({
       serviceContext,
     })
 
@@ -254,7 +255,7 @@ describe('getListAddressService', () => {
     vi.mocked(mockPayload.find).mockRejectedValue(new Error('Database error'))
 
     await expect(
-      getListAddressService({
+      AddressService.findAll({
         serviceContext,
       }),
     ).rejects.toThrow('Database error')
@@ -294,7 +295,7 @@ describe('getListAddressService', () => {
 
     vi.mocked(mockPayload.find).mockResolvedValue(mockResult)
 
-    const result = await getListAddressService({
+    const result = await AddressService.findAll({
       serviceContext,
     })
 
@@ -345,7 +346,7 @@ describe('getListAddressService', () => {
 
     vi.mocked(mockPayload.find).mockResolvedValue(mockResult)
 
-    const result = await getListAddressService({
+    const result = await AddressService.findAll({
       serviceContext,
     })
 
@@ -378,7 +379,7 @@ describe('getListAddressService', () => {
 
     vi.mocked(mockPayload.find).mockResolvedValue(mockResult)
 
-    await getListAddressService({
+    await AddressService.findAll({
       serviceContext,
     })
 

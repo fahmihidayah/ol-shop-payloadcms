@@ -2,9 +2,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createAddress } from '@/feature/account/actions/addresses/create-address'
 import type { AddressFormSchema } from '@/feature/account/types/address'
 import * as customerUtils from '@/lib/customer-utils'
-import * as createAddressServiceModule from '@/feature/account/services/addresses/create-address-service'
+// import * as createAddressServiceModule from '@/feature/account/services/addresses/create-address-service'
 import type { Address, Customer } from '@/payload-types'
 import { cookies } from 'next/headers'
+import { AddressService } from '@/feature/account/services/address-service'
 
 vi.mock('next/headers', () => ({
   cookies: vi.fn(),
@@ -15,7 +16,6 @@ vi.mock('next/cache', () => ({
 }))
 
 vi.mock('@/lib/customer-utils')
-vi.mock('@/feature/account/services/addresses/create-address-service')
 vi.mock('payload', async (importOriginal) => {
   const actual = await importOriginal<typeof import('payload')>()
   return {
@@ -23,6 +23,14 @@ vi.mock('payload', async (importOriginal) => {
     getPayload: vi.fn(),
   }
 })
+
+vi.mock('@/feature/account/services/address-service', () => ({
+  AddressService: {
+    create: vi.fn(),
+    delete: vi.fn(),
+    findAll: vi.fn(),
+  },
+}))
 
 describe('createAddress action', () => {
   let mockCustomer: Customer
@@ -74,7 +82,7 @@ describe('createAddress action', () => {
       user: mockCustomer,
     })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
+    vi.mocked(AddressService.create).mockResolvedValue({
       data: mockCreatedAddress,
       error: false,
       message: 'Success',
@@ -85,7 +93,7 @@ describe('createAddress action', () => {
     expect(result.success).toBe(true)
     expect(result.address).toEqual(mockCreatedAddress)
     expect(result.error).toBeUndefined()
-    expect(createAddressServiceModule.createAddressService).toHaveBeenCalledWith({
+    expect(AddressService.create).toHaveBeenCalledWith({
       data: addressData,
       serviceContext: expect.objectContaining({
         user: mockCustomer,
@@ -117,7 +125,7 @@ describe('createAddress action', () => {
 
     vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: '', user: undefined })
     mockCookieStore.get.mockReturnValue({ value: 'session-456' })
-    vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
+    vi.mocked(AddressService.create).mockResolvedValue({
       data: mockCreatedAddress,
       error: false,
       message: 'Success',
@@ -146,7 +154,7 @@ describe('createAddress action', () => {
       user: mockCustomer,
     })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
+    vi.mocked(AddressService.create).mockResolvedValue({
       data: undefined,
       error: true,
       errorMessage: {
@@ -181,7 +189,7 @@ describe('createAddress action', () => {
       user: mockCustomer,
     })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
+    vi.mocked(AddressService.create).mockResolvedValue({
       data: undefined,
       error: true,
       message: 'Database error',
@@ -210,9 +218,7 @@ describe('createAddress action', () => {
       user: mockCustomer,
     })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(createAddressServiceModule.createAddressService).mockRejectedValue(
-      new Error('Unexpected error'),
-    )
+    vi.mocked(AddressService.create).mockRejectedValue(new Error('Unexpected error'))
 
     const result = await createAddress(addressData)
 
@@ -237,7 +243,7 @@ describe('createAddress action', () => {
       user: mockCustomer,
     })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(createAddressServiceModule.createAddressService).mockRejectedValue('String error')
+    vi.mocked(AddressService.create).mockRejectedValue('String error')
 
     const result = await createAddress(addressData)
 
@@ -270,7 +276,7 @@ describe('createAddress action', () => {
       user: mockCustomer,
     })
     mockCookieStore.get.mockReturnValue(undefined)
-    vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
+    vi.mocked(AddressService.create).mockResolvedValue({
       data: mockCreatedAddress,
       error: false,
       message: 'Success',
@@ -279,7 +285,7 @@ describe('createAddress action', () => {
     const result = await createAddress(addressData)
 
     expect(result.success).toBe(true)
-    expect(createAddressServiceModule.createAddressService).toHaveBeenCalledWith({
+    expect(AddressService.create).toHaveBeenCalledWith({
       data: addressData,
       serviceContext: expect.objectContaining({
         user: mockCustomer,
@@ -314,7 +320,7 @@ describe('createAddress action', () => {
       user: mockCustomer,
     })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
+    vi.mocked(AddressService.create).mockResolvedValue({
       data: mockCreatedAddress,
       error: false,
       message: 'Success',
@@ -351,7 +357,7 @@ describe('createAddress action', () => {
       user: mockCustomer,
     })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
+    vi.mocked(AddressService.create).mockResolvedValue({
       data: mockCreatedAddress,
       error: false,
       message: 'Success',

@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { deleteAddressService } from '@/feature/account/services/addresses/delete-address-service'
+// import { deleteAddressService } from '@/feature/account/services/addresses/delete-address-service'
 import type { ServiceContext } from '@/types/service-context'
 import type { Address, Customer } from '@/payload-types'
 import type { Payload } from 'payload'
+import { AddressService } from '@/feature/account/services/address-service'
 
 describe('deleteAddressService', () => {
   let mockPayload: Payload
@@ -65,7 +66,7 @@ describe('deleteAddressService', () => {
 
     vi.mocked(mockPayload.delete).mockResolvedValue(mockDeleteResult)
 
-    const result = await deleteAddressService({
+    const result = await AddressService.delete({
       id: addressId,
       serviceContext,
     })
@@ -126,7 +127,7 @@ describe('deleteAddressService', () => {
 
     vi.mocked(mockPayload.delete).mockResolvedValue(mockDeleteResult)
 
-    const result = await deleteAddressService({
+    const result = await AddressService.delete({
       id: addressId,
       serviceContext,
     })
@@ -156,7 +157,7 @@ describe('deleteAddressService', () => {
     serviceContext.user = undefined
     serviceContext.sessionId = undefined
 
-    const result = await deleteAddressService({
+    const result = await AddressService.delete({
       id: 'address-123',
       serviceContext,
     })
@@ -183,7 +184,7 @@ describe('deleteAddressService', () => {
 
     vi.mocked(mockPayload.delete).mockResolvedValue(mockDeleteResult)
 
-    const result = await deleteAddressService({
+    const result = await AddressService.delete({
       id: 'non-existent-address',
       serviceContext,
     })
@@ -196,7 +197,7 @@ describe('deleteAddressService', () => {
   it('should return error when delete returns null', async () => {
     vi.mocked(mockPayload.delete).mockResolvedValue(null as any)
 
-    const result = await deleteAddressService({
+    const result = await AddressService.delete({
       id: 'address-123',
       serviceContext,
     })
@@ -227,7 +228,7 @@ describe('deleteAddressService', () => {
 
     vi.mocked(mockPayload.delete).mockResolvedValue(mockDeleteResult)
 
-    const result = await deleteAddressService({
+    const result = await AddressService.delete({
       id: addressId,
       serviceContext,
     })
@@ -273,7 +274,7 @@ describe('deleteAddressService', () => {
 
     vi.mocked(mockPayload.delete).mockResolvedValue(mockDeleteResult)
 
-    const result = await deleteAddressService({
+    const result = await AddressService.delete({
       id: addressId,
       serviceContext,
     })
@@ -302,7 +303,7 @@ describe('deleteAddressService', () => {
     vi.mocked(mockPayload.delete).mockRejectedValue(new Error('Database error'))
 
     await expect(
-      deleteAddressService({
+      AddressService.delete({
         id: 'address-123',
         serviceContext,
       }),
@@ -327,7 +328,7 @@ describe('deleteAddressService', () => {
 
     vi.mocked(mockPayload.delete).mockResolvedValue(mockDeleteResult)
 
-    const result = await deleteAddressService({
+    const result = await AddressService.delete({
       id: 'address-123',
       serviceContext,
     })
@@ -356,7 +357,7 @@ describe('deleteAddressService', () => {
     serviceContext.user = undefined
     serviceContext.sessionId = ''
 
-    const result = await deleteAddressService({
+    const result = await AddressService.delete({
       id: 'address-123',
       serviceContext,
     })

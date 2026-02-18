@@ -2,13 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
   createAddressEndpoint,
   createAddressHandler,
-} from '@/feature/account/api/addresses/create-address-api'
-import * as createAddressServiceModule from '@/feature/account/services/addresses/create-address-service'
+} from '@/feature/account/api/addresses/create-address'
+// import * as createAddressServiceModule from '@/feature/account/services/addresses/create-address-service'
 import * as serviceContextModule from '@/types/service-context'
 import type { EnhancedRequest } from '@/feature/api/types/request'
 import type { Address, Customer } from '@/payload-types'
 import type { Payload } from 'payload'
 import type { AddressFormSchema } from '@/feature/account/types/address'
+import { AddressService } from '@/feature/account/services/address-service'
 
 vi.mock('@/feature/account/services/addresses/create-address-service')
 vi.mock('@/types/service-context')
@@ -19,6 +20,14 @@ vi.mock('payload', async (importOriginal) => {
     getPayload: vi.fn(),
   }
 })
+
+vi.mock('@/feature/account/services/address-service', () => ({
+  AddressService: {
+    create: vi.fn(),
+    delete: vi.fn(),
+    findAll: vi.fn(),
+  },
+}))
 
 describe('createAddressEndpoint', () => {
   let mockPayload: Payload
@@ -82,7 +91,7 @@ describe('createAddressEndpoint', () => {
 
     mockReq.validatedData = addressData
 
-    vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
+    vi.mocked(AddressService.create).mockResolvedValue({
       data: mockCreatedAddress,
       error: false,
       message: 'Success',
@@ -98,7 +107,7 @@ describe('createAddressEndpoint', () => {
       collection: 'addresses',
       req: mockReq,
     })
-    expect(createAddressServiceModule.createAddressService).toHaveBeenCalledWith({
+    expect(AddressService.create).toHaveBeenCalledWith({
       data: addressData,
       serviceContext: expect.objectContaining({
         collection: 'addresses',
@@ -122,7 +131,7 @@ describe('createAddressEndpoint', () => {
 
     mockReq.validatedData = addressData
 
-    vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
+    vi.mocked(AddressService.create).mockResolvedValue({
       data: undefined,
       error: true,
       message: 'Database error',
@@ -149,7 +158,7 @@ describe('createAddressEndpoint', () => {
 
     mockReq.validatedData = addressData
 
-    vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
+    vi.mocked(AddressService.create).mockResolvedValue({
       data: undefined,
       error: true,
     })
@@ -174,7 +183,7 @@ describe('createAddressEndpoint', () => {
 
     mockReq.validatedData = invalidData
 
-    vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
+    vi.mocked(AddressService.create).mockResolvedValue({
       data: undefined,
       error: true,
       errorMessage: {
@@ -217,7 +226,7 @@ describe('createAddressEndpoint', () => {
 
     mockReq.validatedData = addressData
 
-    vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
+    vi.mocked(AddressService.create).mockResolvedValue({
       data: mockCreatedAddress,
       error: false,
       message: 'Success',
@@ -261,7 +270,7 @@ describe('createAddressEndpoint', () => {
       sessionId: 'session-456',
     })
 
-    vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
+    vi.mocked(AddressService.create).mockResolvedValue({
       data: mockCreatedAddress,
       error: false,
       message: 'Success',
@@ -298,7 +307,7 @@ describe('createAddressEndpoint', () => {
 
     mockReq.validatedData = addressData
 
-    vi.mocked(createAddressServiceModule.createAddressService).mockResolvedValue({
+    vi.mocked(AddressService.create).mockResolvedValue({
       data: mockCreatedAddress,
       error: false,
       message: 'Success',

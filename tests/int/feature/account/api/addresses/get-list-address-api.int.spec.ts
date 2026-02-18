@@ -1,12 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getListAddressEndpoint, getListAddressHandler } from '@/feature/account/api/addresses/get-list-address-api'
-import * as getListAddressServiceModule from '@/feature/account/services/addresses/get-list-address-service'
+import {
+  getListAddressEndpoint,
+  getListAddressHandler,
+} from '@/feature/account/api/addresses/get-list-address'
+// import * as getListAddressServiceModule from '@/feature/account/services/addresses/get-list-address-service'
 import * as serviceContextModule from '@/types/service-context'
 import type { EnhancedRequest } from '@/feature/api/types/request'
 import type { Address, Customer } from '@/payload-types'
-import type { Payload, PaginatedDocs} from 'payload'
+import type { Payload, PaginatedDocs } from 'payload'
+import { AddressService } from '@/feature/account/services/address-service'
 
-vi.mock('@/feature/account/services/addresses/get-list-address-service')
+// vi.mock('@/feature/account/services/addresses/get-list-address-service')
 vi.mock('@/types/service-context')
 vi.mock('payload', async (importOriginal) => {
   const actual = await importOriginal<typeof import('payload')>()
@@ -15,6 +19,14 @@ vi.mock('payload', async (importOriginal) => {
     getPayload: vi.fn(),
   }
 })
+
+vi.mock('@/feature/account/services/address-service', () => ({
+  AddressService: {
+    create: vi.fn(),
+    delete: vi.fn(),
+    findAll: vi.fn(),
+  },
+}))
 
 describe('getListAddressEndpoint', () => {
   let mockPayload: Payload
@@ -85,7 +97,7 @@ describe('getListAddressEndpoint', () => {
       nextPage: null,
     }
 
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockResolvedValue({
+    vi.mocked(AddressService.findAll).mockResolvedValue({
       data: mockResult,
       error: false,
     })
@@ -115,7 +127,7 @@ describe('getListAddressEndpoint', () => {
       nextPage: null,
     }
 
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockResolvedValue({
+    vi.mocked(AddressService.findAll).mockResolvedValue({
       data: mockResult,
       error: false,
     })
@@ -127,7 +139,7 @@ describe('getListAddressEndpoint', () => {
   })
 
   it('should return error when service fails', async () => {
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockResolvedValue({
+    vi.mocked(AddressService.findAll).mockResolvedValue({
       data: undefined,
       error: true,
       message: 'Failed to fetch addresses',
@@ -141,7 +153,7 @@ describe('getListAddressEndpoint', () => {
   })
 
   it('should return default error message when service fails without message', async () => {
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockResolvedValue({
+    vi.mocked(AddressService.findAll).mockResolvedValue({
       data: undefined,
       error: true,
     })
@@ -153,7 +165,7 @@ describe('getListAddressEndpoint', () => {
   })
 
   it('should handle service returning undefined data', async () => {
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockResolvedValue({
+    vi.mocked(AddressService.findAll).mockResolvedValue({
       data: undefined,
       error: false,
     })
@@ -165,7 +177,7 @@ describe('getListAddressEndpoint', () => {
   })
 
   it('should handle service returning data without docs', async () => {
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockResolvedValue({
+    vi.mocked(AddressService.findAll).mockResolvedValue({
       data: {} as PaginatedDocs<Address>,
       error: false,
     })
@@ -221,7 +233,7 @@ describe('getListAddressEndpoint', () => {
       nextPage: null,
     }
 
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockResolvedValue({
+    vi.mocked(AddressService.findAll).mockResolvedValue({
       data: mockResult,
       error: false,
     })

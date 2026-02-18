@@ -7,7 +7,7 @@ import { Address } from '@/payload-types'
 
 import config from '@payload-config'
 import { revalidateTag } from 'next/cache'
-import { createAddressService } from '../../services/addresses/create-address-service'
+import { AddressService } from '../../services/address-service'
 
 type CreateAddressResult = {
   success: boolean
@@ -21,7 +21,7 @@ export async function createAddress(data: AddressFormSchema): Promise<CreateAddr
     const cookieStore = await cookies()
     const sessionId = cookieStore.get('cart-session-id')?.value
 
-    const result = await createAddressService({
+    const result = await AddressService.create({
       data: data,
       serviceContext: {
         user: user,

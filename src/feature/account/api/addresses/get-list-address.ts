@@ -3,12 +3,12 @@ import { withAuth } from '@/feature/api/middleware/with-auth'
 import { withLogging } from '@/feature/api/middleware/with-logging'
 import { withRateLimit } from '@/feature/api/middleware/with-rate-limit'
 import { EnhancedRequest } from '@/feature/api/types/request'
-import { getListAddressService } from '../../services/addresses/get-list-address-service'
 import { createServiceContext } from '@/types/service-context'
 import { Endpoint } from 'payload'
+import { AddressService } from '../../services/address-service'
 
 export async function getListAddressHandler(req: EnhancedRequest) {
-  const result = await getListAddressService({
+  const result = await AddressService.findAll({
     serviceContext: await createServiceContext({
       collection: 'addresses',
       req,
@@ -33,5 +33,9 @@ export async function getListAddressHandler(req: EnhancedRequest) {
 export const getListAddressEndpoint: Endpoint = {
   path: '/v1/addresses',
   method: 'get',
-  handler: composeMiddleware(withLogging, withAuth, withRateLimit(5, 60_000))(getListAddressHandler),
+  handler: composeMiddleware(
+    withLogging,
+    withAuth,
+    withRateLimit(5, 60_000),
+  )(getListAddressHandler),
 }

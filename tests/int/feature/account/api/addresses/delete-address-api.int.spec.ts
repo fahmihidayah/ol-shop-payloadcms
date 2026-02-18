@@ -2,14 +2,15 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
   deleteAddressEndpoint,
   deleteAddressHandler,
-} from '@/feature/account/api/addresses/delete-address-api'
-import * as deleteAddressServiceModule from '@/feature/account/services/addresses/delete-address-service'
+} from '@/feature/account/api/addresses/delete-address'
+// import * as deleteAddressServiceModule from '@/feature/account/services/addresses/delete-address-service'
 import * as serviceContextModule from '@/types/service-context'
 import type { EnhancedRequest } from '@/feature/api/types/request'
 import type { Address, Customer } from '@/payload-types'
 import type { Payload } from 'payload'
+import { AddressService } from '@/feature/account/services/address-service'
 
-vi.mock('@/feature/account/services/addresses/delete-address-service')
+// vi.mock('@/feature/account/services/addresses/delete-address-service')
 vi.mock('@/types/service-context')
 vi.mock('payload', async (importOriginal) => {
   const actual = await importOriginal<typeof import('payload')>()
@@ -18,6 +19,14 @@ vi.mock('payload', async (importOriginal) => {
     getPayload: vi.fn(),
   }
 })
+
+vi.mock('@/feature/account/services/address-service', () => ({
+  AddressService: {
+    create: vi.fn(),
+    delete: vi.fn(),
+    findAll: vi.fn(),
+  },
+}))
 
 describe('deleteAddressEndpoint', () => {
   let mockPayload: Payload
@@ -82,7 +91,7 @@ describe('deleteAddressEndpoint', () => {
       updatedAt: new Date().toISOString(),
     } as Address
 
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockResolvedValue({
+    vi.mocked(AddressService.delete).mockResolvedValue({
       data: mockDeletedAddress,
       error: false,
     })
@@ -97,7 +106,7 @@ describe('deleteAddressEndpoint', () => {
       collection: 'addresses',
       req: mockReq,
     })
-    expect(deleteAddressServiceModule.deleteAddressService).toHaveBeenCalledWith({
+    expect(AddressService.delete).toHaveBeenCalledWith({
       id: 'address-123',
       serviceContext: expect.objectContaining({
         collection: 'addresses',
@@ -115,7 +124,7 @@ describe('deleteAddressEndpoint', () => {
     expect(response.code).toBe(400)
     expect(response.message).toBe('Address ID is required')
     expect(response.success).toBe(false)
-    expect(deleteAddressServiceModule.deleteAddressService).not.toHaveBeenCalled()
+    expect(AddressService.delete).not.toHaveBeenCalled()
   })
 
   it('should return error when routeParams is undefined', async () => {
@@ -129,7 +138,7 @@ describe('deleteAddressEndpoint', () => {
   })
 
   it('should return error when service fails', async () => {
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockResolvedValue({
+    vi.mocked(AddressService.delete).mockResolvedValue({
       data: undefined,
       error: true,
       message: 'Address not found',
@@ -143,7 +152,7 @@ describe('deleteAddressEndpoint', () => {
   })
 
   it('should return default error message when service fails without message', async () => {
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockResolvedValue({
+    vi.mocked(AddressService.delete).mockResolvedValue({
       data: undefined,
       error: true,
     })
@@ -181,7 +190,7 @@ describe('deleteAddressEndpoint', () => {
       sessionId: 'session-456',
     })
 
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockResolvedValue({
+    vi.mocked(AddressService.delete).mockResolvedValue({
       data: mockDeletedAddress,
       error: false,
     })
@@ -194,7 +203,7 @@ describe('deleteAddressEndpoint', () => {
   })
 
   it('should handle unauthorized deletion attempt', async () => {
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockResolvedValue({
+    vi.mocked(AddressService.delete).mockResolvedValue({
       data: undefined,
       error: true,
       message: 'User not found',
@@ -228,7 +237,7 @@ describe('deleteAddressEndpoint', () => {
         updatedAt: new Date().toISOString(),
       } as Address
 
-      vi.mocked(deleteAddressServiceModule.deleteAddressService).mockResolvedValue({
+      vi.mocked(AddressService.delete).mockResolvedValue({
         data: mockDeletedAddress,
         error: false,
       })
@@ -237,7 +246,7 @@ describe('deleteAddressEndpoint', () => {
 
       expect(response.code).toBe(200)
       expect(response.success).toBe(true)
-      expect(deleteAddressServiceModule.deleteAddressService).toHaveBeenCalledWith({
+      expect(AddressService.delete).toHaveBeenCalledWith({
         id: addressId,
         serviceContext: expect.any(Object),
       })
@@ -247,7 +256,7 @@ describe('deleteAddressEndpoint', () => {
   it('should return error when trying to delete non-existent address', async () => {
     mockReq.routeParams = { id: 'non-existent-id' }
 
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockResolvedValue({
+    vi.mocked(AddressService.delete).mockResolvedValue({
       data: undefined,
       error: true,
       message: 'failed to delete ',
@@ -278,7 +287,7 @@ describe('deleteAddressEndpoint', () => {
       updatedAt: new Date().toISOString(),
     } as Address
 
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockResolvedValue({
+    vi.mocked(AddressService.delete).mockResolvedValue({
       data: mockDeletedAddress,
       error: false,
     })
@@ -287,7 +296,7 @@ describe('deleteAddressEndpoint', () => {
 
     expect(response.code).toBe(200)
     expect(response.success).toBe(true)
-    expect(deleteAddressServiceModule.deleteAddressService).toHaveBeenCalledWith({
+    expect(AddressService.delete).toHaveBeenCalledWith({
       id: '12345',
       serviceContext: expect.any(Object),
     })

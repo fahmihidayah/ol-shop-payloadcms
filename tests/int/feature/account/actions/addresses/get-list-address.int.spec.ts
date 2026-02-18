@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { getListAddresses } from '@/feature/account/actions/addresses/get-list-address'
 import * as customerUtils from '@/lib/customer-utils'
-import * as getListAddressServiceModule from '@/feature/account/services/addresses/get-list-address-service'
+// import * as getListAddressServiceModule from '@/feature/account/services/addresses/get-list-address-service'
 import type { Address, Customer } from '@/payload-types'
 import type { PaginatedDocs } from 'payload'
 import { cookies } from 'next/headers'
+import { AddressService } from '@/feature/account/services/address-service'
 
 vi.mock('next/headers', () => ({
   cookies: vi.fn(),
@@ -19,6 +20,14 @@ vi.mock('payload', async (importOriginal) => {
     getPayload: vi.fn(),
   }
 })
+
+vi.mock('@/feature/account/services/address-service', () => ({
+  AddressService: {
+    create: vi.fn(),
+    delete: vi.fn(),
+    findAll: vi.fn(),
+  },
+}))
 
 describe('getListAddresses action', () => {
   let mockCustomer: Customer
@@ -91,9 +100,12 @@ describe('getListAddresses action', () => {
       nextPage: null,
     }
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockResolvedValue({
+    vi.mocked(AddressService.findAll).mockResolvedValue({
       data: mockResult,
       error: false,
     })
@@ -102,7 +114,7 @@ describe('getListAddresses action', () => {
 
     expect(result).toHaveLength(2)
     expect(result).toEqual(mockAddresses)
-    expect(getListAddressServiceModule.getListAddressService).toHaveBeenCalledWith({
+    expect(AddressService.findAll).toHaveBeenCalledWith({
       serviceContext: expect.objectContaining({
         collection: 'addresses',
         user: mockCustomer,
@@ -144,7 +156,7 @@ describe('getListAddresses action', () => {
 
     vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: '', user: undefined })
     mockCookieStore.get.mockReturnValue({ value: 'session-456' })
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockResolvedValue({
+    vi.mocked(AddressService.findAll).mockResolvedValue({
       data: mockResult,
       error: false,
     })
@@ -156,9 +168,12 @@ describe('getListAddresses action', () => {
   })
 
   it('should return empty array when service returns error', async () => {
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockResolvedValue({
+    vi.mocked(AddressService.findAll).mockResolvedValue({
       data: undefined,
       error: true,
       message: 'Address Not found',
@@ -183,9 +198,12 @@ describe('getListAddresses action', () => {
       nextPage: null,
     }
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockResolvedValue({
+    vi.mocked(AddressService.findAll).mockResolvedValue({
       data: mockResult,
       error: false,
     })
@@ -196,11 +214,12 @@ describe('getListAddresses action', () => {
   })
 
   it('should handle service throwing error', async () => {
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockRejectedValue(
-      new Error('Database error'),
-    )
+    vi.mocked(AddressService.findAll).mockRejectedValue(new Error('Database error'))
 
     const result = await getListAddresses()
 
@@ -238,9 +257,12 @@ describe('getListAddresses action', () => {
       nextPage: null,
     }
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue(undefined)
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockResolvedValue({
+    vi.mocked(AddressService.findAll).mockResolvedValue({
       data: mockResult,
       error: false,
     })
@@ -248,7 +270,7 @@ describe('getListAddresses action', () => {
     const result = await getListAddresses()
 
     expect(result).toEqual(mockAddresses)
-    expect(getListAddressServiceModule.getListAddressService).toHaveBeenCalledWith({
+    expect(AddressService.findAll).toHaveBeenCalledWith({
       serviceContext: expect.objectContaining({
         user: mockCustomer,
         sessionId: undefined,
@@ -257,9 +279,12 @@ describe('getListAddresses action', () => {
   })
 
   it('should return empty array when data is undefined', async () => {
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockResolvedValue({
+    vi.mocked(AddressService.findAll).mockResolvedValue({
       data: undefined,
       error: false,
     })
@@ -282,9 +307,12 @@ describe('getListAddresses action', () => {
       nextPage: null,
     } as PaginatedDocs<Address>
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockResolvedValue({
+    vi.mocked(AddressService.findAll).mockResolvedValue({
       data: mockResult,
       error: false,
     })
@@ -297,7 +325,7 @@ describe('getListAddresses action', () => {
   it('should handle null user and sessionId', async () => {
     vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: '', user: undefined })
     mockCookieStore.get.mockReturnValue(undefined)
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockResolvedValue({
+    vi.mocked(AddressService.findAll).mockResolvedValue({
       data: undefined,
       error: true,
       message: 'Address Not found',
@@ -353,9 +381,12 @@ describe('getListAddresses action', () => {
       nextPage: null,
     }
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockResolvedValue({
+    vi.mocked(AddressService.findAll).mockResolvedValue({
       data: mockResult,
       error: false,
     })
@@ -368,9 +399,12 @@ describe('getListAddresses action', () => {
   })
 
   it('should handle non-Error exceptions', async () => {
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(getListAddressServiceModule.getListAddressService).mockRejectedValue('String error')
+    vi.mocked(AddressService.findAll).mockRejectedValue('String error')
 
     const result = await getListAddresses()
 

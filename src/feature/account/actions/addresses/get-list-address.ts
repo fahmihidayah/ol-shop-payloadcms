@@ -5,14 +5,14 @@ import config from '@payload-config'
 import { cookies } from 'next/headers'
 import { getMeUser } from '@/lib/customer-utils'
 import type { Address } from '@/payload-types'
-import { getListAddressService } from '../../services/addresses/get-list-address-service'
+import { AddressService } from '../../services/address-service'
 
 export async function getListAddresses(): Promise<Address[]> {
   try {
     const { user } = await getMeUser()
     const cookieStore = await cookies()
     const sessionId = cookieStore.get('cart-session-id')?.value
-    const result = await getListAddressService({
+    const result = await AddressService.findAll({
       serviceContext: {
         collection: 'addresses',
         payload: await getPayload({ config }),

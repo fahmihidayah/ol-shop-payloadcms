@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { deleteAddress } from '@/feature/account/actions/addresses/delete-address'
 import * as customerUtils from '@/lib/customer-utils'
-import * as deleteAddressServiceModule from '@/feature/account/services/addresses/delete-address-service'
+// import * as deleteAddressServiceModule from '@/feature/account/services/addresses/delete-address-service'
 import type { Address, Customer } from '@/payload-types'
 import { cookies } from 'next/headers'
+import { AddressService } from '@/feature/account/services/address-service'
 
 vi.mock('next/headers', () => ({
   cookies: vi.fn(),
@@ -14,7 +15,16 @@ vi.mock('next/cache', () => ({
 }))
 
 vi.mock('@/lib/customer-utils')
-vi.mock('@/feature/account/services/addresses/delete-address-service')
+// vi.mock('@/feature/account/services/addresses/delete-address-service')
+
+vi.mock('@/feature/account/services/address-service', () => ({
+  AddressService: {
+    create: vi.fn(),
+    delete: vi.fn(),
+    findAll: vi.fn(),
+  },
+}))
+
 vi.mock('payload', async (importOriginal) => {
   const actual = await importOriginal<typeof import('payload')>()
   return {
@@ -66,9 +76,12 @@ describe('deleteAddress action', () => {
       updatedAt: new Date().toISOString(),
     } as Address
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockResolvedValue({
+    vi.mocked(AddressService.delete).mockResolvedValue({
       data: mockDeletedAddress,
       error: false,
     })
@@ -77,7 +90,7 @@ describe('deleteAddress action', () => {
 
     expect(result.success).toBe(true)
     expect(result.error).toBeUndefined()
-    expect(deleteAddressServiceModule.deleteAddressService).toHaveBeenCalledWith({
+    expect(AddressService.delete).toHaveBeenCalledWith({
       id: 'address-123',
       serviceContext: expect.objectContaining({
         collection: 'addresses',
@@ -108,7 +121,7 @@ describe('deleteAddress action', () => {
 
     vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: '', user: undefined })
     mockCookieStore.get.mockReturnValue({ value: 'session-456' })
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockResolvedValue({
+    vi.mocked(AddressService.delete).mockResolvedValue({
       data: mockDeletedAddress,
       error: false,
     })
@@ -126,7 +139,7 @@ describe('deleteAddress action', () => {
 
     expect(result.success).toBe(false)
     expect(result.error).toBe('Address ID is required')
-    expect(deleteAddressServiceModule.deleteAddressService).not.toHaveBeenCalled()
+    expect(AddressService.delete).not.toHaveBeenCalled()
   })
 
   it('should return error when addressId is empty string', async () => {
@@ -143,9 +156,12 @@ describe('deleteAddress action', () => {
     const formData = new FormData()
     formData.append('addressId', 'address-789')
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockResolvedValue({
+    vi.mocked(AddressService.delete).mockResolvedValue({
       data: undefined,
       error: true,
       message: 'Address not found',
@@ -161,9 +177,12 @@ describe('deleteAddress action', () => {
     const formData = new FormData()
     formData.append('addressId', 'address-999')
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockResolvedValue({
+    vi.mocked(AddressService.delete).mockResolvedValue({
       data: undefined,
       error: true,
       message: 'User not found',
@@ -179,11 +198,12 @@ describe('deleteAddress action', () => {
     const formData = new FormData()
     formData.append('addressId', 'address-111')
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockRejectedValue(
-      new Error('Database error'),
-    )
+    vi.mocked(AddressService.delete).mockRejectedValue(new Error('Database error'))
 
     const result = await deleteAddress(formData)
 
@@ -195,9 +215,12 @@ describe('deleteAddress action', () => {
     const formData = new FormData()
     formData.append('addressId', 'address-222')
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockRejectedValue('String error')
+    vi.mocked(AddressService.delete).mockRejectedValue('String error')
 
     const result = await deleteAddress(formData)
 
@@ -224,9 +247,12 @@ describe('deleteAddress action', () => {
       updatedAt: new Date().toISOString(),
     } as Address
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue(undefined)
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockResolvedValue({
+    vi.mocked(AddressService.delete).mockResolvedValue({
       data: mockDeletedAddress,
       error: false,
     })
@@ -234,7 +260,7 @@ describe('deleteAddress action', () => {
     const result = await deleteAddress(formData)
 
     expect(result.success).toBe(true)
-    expect(deleteAddressServiceModule.deleteAddressService).toHaveBeenCalledWith({
+    expect(AddressService.delete).toHaveBeenCalledWith({
       id: 'address-333',
       serviceContext: expect.objectContaining({
         user: mockCustomer,
@@ -263,9 +289,12 @@ describe('deleteAddress action', () => {
       updatedAt: new Date().toISOString(),
     } as Address
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockResolvedValue({
+    vi.mocked(AddressService.delete).mockResolvedValue({
       data: mockDeletedAddress,
       error: false,
     })
@@ -280,9 +309,12 @@ describe('deleteAddress action', () => {
     const formData = new FormData()
     formData.append('addressId', 'address-555')
 
-    vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: 'test-token', user: mockCustomer })
+    vi.mocked(customerUtils.getMeUser).mockResolvedValue({
+      token: 'test-token',
+      user: mockCustomer,
+    })
     mockCookieStore.get.mockReturnValue({ value: 'session-123' })
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockResolvedValue({
+    vi.mocked(AddressService.delete).mockResolvedValue({
       data: undefined,
       error: true,
       message: 'Failed to delete',
@@ -299,7 +331,7 @@ describe('deleteAddress action', () => {
 
     vi.mocked(customerUtils.getMeUser).mockResolvedValue({ token: '', user: undefined })
     mockCookieStore.get.mockReturnValue(undefined)
-    vi.mocked(deleteAddressServiceModule.deleteAddressService).mockResolvedValue({
+    vi.mocked(AddressService.delete).mockResolvedValue({
       data: undefined,
       error: true,
       message: 'User not found',
