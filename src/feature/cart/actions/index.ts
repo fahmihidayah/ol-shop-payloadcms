@@ -1,17 +1,11 @@
 'use server'
 
-import { Cart, CartItem } from '@/payload-types'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { cookies } from 'next/headers'
 import { getMeUser } from '@/lib/customer-utils'
 import { revalidateTag } from 'next/cache'
-
-export interface CartWithItems extends Cart {
-  items: CartItem[]
-  totalItems: number
-  totalPrice: number
-}
+import { CartService, CartWithItems } from '../services/cart-service'
 
 /**
  * Gets the current user's cart with all items and calculated totals
@@ -21,86 +15,31 @@ export const getCart = async (): Promise<CartWithItems | null> => {
     const payload = await getPayload({ config })
     const { user } = await getMeUser()
     const cookieStore = await cookies()
+    const sessionId = cookieStore.get('cart-session-id')?.value
 
-    let cart: Cart | null = null
+    const result = await CartService.getCartWithItems({
+      serviceContext: {
+        payload,
+      },
+      user,
+      sessionId,
+    })
 
-    if (user) {
-      // Logged-in user: find their active cart
-      const existingCarts = await payload.find({
-        collection: 'carts',
-        where: {
-          and: [
-            {
-              customer: {
-                equals: user.id,
-              },
-            },
-          ],
-        },
-        limit: 1,
-      })
-
-      if (existingCarts.docs.length > 0) {
-        cart = existingCarts.docs[0] as Cart
-      }
-    } else {
-      // Guest user: find cart by sessionId
-      const sessionId = cookieStore.get('cart-session-id')?.value
-
-      if (sessionId) {
-        const existingCarts = await payload.find({
-          collection: 'carts',
-          where: {
-            and: [
-              {
-                sessionId: {
-                  equals: sessionId,
-                },
-              },
-            ],
-          },
-          limit: 1,
-        })
-
-        if (existingCarts.docs.length > 0) {
-          cart = existingCarts.docs[0] as Cart
-        }
-      }
-    }
-
-    if (!cart) {
+    if (result.error) {
+      console.error('[GET_CART] Error:', result.message)
       return null
     }
 
-    // Fetch cart items with product details
-    const cartItemsResult = await payload.find({
-      collection: 'cart-items',
-      where: {
-        cart: {
-          equals: cart.id,
-        },
-      },
-      depth: 2, // Include product and variant details
-    })
-
-    const items = cartItemsResult.docs as CartItem[]
-
-    // Calculate totals
-    const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
-    const totalPrice = items.reduce((sum, item) => sum + item.subtotal, 0)
-
-    return {
-      ...cart,
-      items,
-      totalItems,
-      totalPrice,
-    }
+    return result.data ?? null
   } catch (error) {
     console.error('[GET_CART] Error:', error)
     return null
   }
 }
 
+/**
+ * Clears all items from the current user's cart
+ */
 export const clearCartItems = async (): Promise<{ success: boolean; error?: string }> => {
   try {
     const cart = await getCart()
@@ -108,19 +47,23 @@ export const clearCartItems = async (): Promise<{ success: boolean; error?: stri
       return { success: false, error: 'Cart not found' }
     }
 
-    const payload = await getPayload({
-      config,
-    })
+    const payload = await getPayload({ config })
 
-    await payload.delete({
-      collection: 'cart-items',
-      where: {
-        cart: {
-          equals: cart.id,
-        },
+    const result = await CartService.clearCartItems({
+      serviceContext: {
+        payload,
       },
+      cartId: cart.id,
     })
 
+    if (result.error) {
+      return {
+        success: false,
+        error: result.message || 'Failed to clear cart items',
+      }
+    }
+
+    revalidateTag('cart')
     return { success: true }
   } catch (error) {
     console.error('[CLEAR_CART_ITEMS] Error:', error)
@@ -140,16 +83,21 @@ export const deleteCartItem = async (
   try {
     const payload = await getPayload({ config })
 
-    // Delete the cart item
-    await payload.delete({
-      collection: 'cart-items',
-      id: cartItemId,
+    const result = await CartService.deleteCartItem({
+      serviceContext: {
+        payload,
+      },
+      cartItemId,
     })
 
-    // Revalidate cart data
-    const { revalidateTag } = await import('next/cache')
-    revalidateTag('cart')
+    if (result.error) {
+      return {
+        success: false,
+        error: result.message || 'Failed to delete cart item',
+      }
+    }
 
+    revalidateTag('cart')
     return { success: true }
   } catch (error) {
     console.error('[DELETE_CART_ITEM] Error:', error)
@@ -168,36 +116,24 @@ export const updateCartItemQuantity = async (
   quantity: number,
 ): Promise<{ success: boolean; error?: string }> => {
   try {
-    if (quantity < 1) {
-      return { success: false, error: 'Quantity must be at least 1' }
-    }
-
     const payload = await getPayload({ config })
 
-    // Get the cart item to recalculate subtotal
-    const cartItem = await payload.findByID({
-      collection: 'cart-items',
-      id: cartItemId,
+    const result = await CartService.updateCartItemQuantity({
+      serviceContext: {
+        payload,
+      },
+      cartItemId,
+      quantity,
     })
 
-    if (!cartItem) {
-      return { success: false, error: 'Cart item not found' }
+    if (result.error) {
+      return {
+        success: false,
+        error: result.message || 'Failed to update quantity',
+      }
     }
 
-    // Update the cart item
-    await payload.update({
-      collection: 'cart-items',
-      id: cartItemId,
-      data: {
-        quantity,
-        subtotal: quantity * cartItem.price,
-      },
-    })
-
-    // Revalidate cart data
-    const { revalidateTag } = await import('next/cache')
     revalidateTag('cart')
-
     return { success: true }
   } catch (error) {
     console.error('[UPDATE_CART_ITEM_QUANTITY] Error:', error)
@@ -208,6 +144,12 @@ export const updateCartItemQuantity = async (
   }
 }
 
+/**
+ * Revalidates cart cache
+ */
 export const revalidateCart = async () => {
   revalidateTag('cart')
 }
+
+// Re-export the CartWithItems type for convenience
+export type { CartWithItems } from '../services/cart-service'
