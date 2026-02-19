@@ -116,7 +116,6 @@ describe('getListAddresses action', () => {
     expect(result).toEqual(mockAddresses)
     expect(AddressService.findAll).toHaveBeenCalledWith({
       serviceContext: expect.objectContaining({
-        collection: 'addresses',
         user: mockCustomer,
         sessionId: 'session-123',
       }),

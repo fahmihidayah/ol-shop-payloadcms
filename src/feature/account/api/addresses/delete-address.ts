@@ -21,7 +21,6 @@ export async function deleteAddressHandler(req: EnhancedRequest) {
   const result = await AddressService.delete({
     id: addressId as string,
     serviceContext: await createServiceContext({
-      collection: 'addresses',
       req,
     }),
   })

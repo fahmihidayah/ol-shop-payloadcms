@@ -7,7 +7,6 @@ export const getCategories = async (): Promise<Category[]> => {
   try {
     const categories = await CategoryService.findAll({
       serviceContext: {
-        collection: 'categories',
         payload: await getPayload({
           config,
         }),

@@ -26,7 +26,6 @@ export async function updateOrderStatus(
 
     const result = await OrderService.updateOrderStatus({
       serviceContext: {
-        collection: 'orders',
         payload: payload,
       },
       orderId,

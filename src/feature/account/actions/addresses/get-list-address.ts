@@ -14,7 +14,6 @@ export async function getListAddresses(): Promise<Address[]> {
     const sessionId = cookieStore.get('cart-session-id')?.value
     const result = await AddressService.findAll({
       serviceContext: {
-        collection: 'addresses',
         payload: await getPayload({ config }),
         sessionId,
         user,

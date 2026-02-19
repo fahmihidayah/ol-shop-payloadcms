@@ -28,7 +28,6 @@ export const login = async (
     const result = await loginService({
       data: form,
       serviceContext: {
-        collection: 'customers',
         payload: payload,
       },
     })

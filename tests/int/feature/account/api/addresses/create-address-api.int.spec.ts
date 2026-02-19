@@ -55,7 +55,6 @@ describe('createAddressEndpoint', () => {
     } as unknown as EnhancedRequest
 
     vi.mocked(serviceContextModule.createServiceContext).mockResolvedValue({
-      collection: 'addresses',
       payload: mockPayload,
       user: mockCustomer,
       sessionId: 'session-123',
@@ -104,13 +103,11 @@ describe('createAddressEndpoint', () => {
     expect(response.message).toBe('Address created successfully')
     expect(response.data).toEqual(mockCreatedAddress)
     expect(serviceContextModule.createServiceContext).toHaveBeenCalledWith({
-      collection: 'addresses',
       req: mockReq,
     })
     expect(AddressService.create).toHaveBeenCalledWith({
       data: addressData,
       serviceContext: expect.objectContaining({
-        collection: 'addresses',
         user: mockCustomer,
         sessionId: 'session-123',
       }),
@@ -264,7 +261,6 @@ describe('createAddressEndpoint', () => {
     mockReq.validatedData = addressData
 
     vi.mocked(serviceContextModule.createServiceContext).mockResolvedValue({
-      collection: 'addresses',
       payload: mockPayload,
       user: undefined,
       sessionId: 'session-456',

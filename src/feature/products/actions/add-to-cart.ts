@@ -1,11 +1,12 @@
 'use server'
 
-import { Cart, Product } from '@/payload-types'
+import { Cart } from '@/payload-types'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { cookies } from 'next/headers'
 import { getMeUser } from '@/lib/customer-utils'
 import { revalidateTag } from 'next/cache'
+import { ProductService } from '../services/product-service'
 
 export const addToCart = async ({
   productId,
@@ -24,51 +25,39 @@ export const addToCart = async ({
     const payload = await getPayload({ config })
 
     // Step 1: Validate product exists and is active
-    const product = await payload.findByID({
-      collection: 'products',
-      id: productId,
+    const productResult = await ProductService.validateProduct({
+      serviceContext: {
+        payload,
+      },
+      productId,
     })
 
-    if (!product) {
+    if (productResult.error) {
       return {
         success: false,
-        error: 'Product not found',
+        error: productResult.message,
       }
     }
 
-    if (!product.isActive) {
+    const product = productResult.data!
+
+    // Step 2: Validate variant exists, is active, and has sufficient stock
+    const variantResult = ProductService.validateVariant({
+      product,
+      variantId,
+      requestedQuantity: quantity,
+    })
+
+    if (variantResult.error) {
       return {
         success: false,
-        error: 'Product is not available',
+        error: variantResult.message,
       }
     }
 
-    // Step 2: Validate variant exists and is active
-    const variant = product['product-variant']?.find((v) => v.id === variantId)
+    const variant = variantResult.data
 
-    if (!variant) {
-      return {
-        success: false,
-        error: 'Product variant not found',
-      }
-    }
-
-    if (!variant.isActive) {
-      return {
-        success: false,
-        error: 'Product variant is not available',
-      }
-    }
-
-    // Step 3: Check stock availability
-    if (variant.stockQuantity < quantity) {
-      return {
-        success: false,
-        error: `Insufficient stock. Only ${variant.stockQuantity} items available`,
-      }
-    }
-
-    // Step 4: Get or create cart based on user authentication
+    // Step 3: Get or create cart based on user authentication
     const { user } = await getMeUser()
     let cart: Cart | null = null
     const cookieStore = await cookies()
@@ -150,7 +139,7 @@ export const addToCart = async ({
       }
     }
 
-    // Step 5: Check if item already exists in cart
+    // Step 4: Check if item already exists in cart
     const existingCartItems = await payload.find({
       collection: 'cart-items',
       where: {
@@ -180,11 +169,17 @@ export const addToCart = async ({
       const existingItem = existingCartItems.docs[0]
       const newQuantity = existingItem.quantity + quantity
 
-      // Check if new quantity exceeds stock
-      if (newQuantity > variant.stockQuantity) {
+      // Re-validate stock for new quantity
+      const newQuantityValidation = ProductService.validateVariant({
+        product,
+        variantId,
+        requestedQuantity: newQuantity,
+      })
+
+      if (newQuantityValidation.error) {
         return {
           success: false,
-          error: `Cannot add more items. Maximum available stock is ${variant.stockQuantity}`,
+          error: newQuantityValidation.message,
         }
       }
 
@@ -211,7 +206,7 @@ export const addToCart = async ({
       })
     }
 
-    // Step 6: Revalidate cart-related data
+    // Step 5: Revalidate cart-related data
     revalidateTag('cart')
     revalidateTag(`cart-${cart.id}`)
 

@@ -18,7 +18,6 @@ export async function getOrderByOrderNumber(orderNumber: string): Promise<GetOrd
       orderNumber: orderNumber,
       serviceContext: {
         payload,
-        collection: 'orders',
       },
     })
     return { success: true, order: result.data }

@@ -93,7 +93,6 @@ describe('deleteAddress action', () => {
     expect(AddressService.delete).toHaveBeenCalledWith({
       id: 'address-123',
       serviceContext: expect.objectContaining({
-        collection: 'addresses',
         user: mockCustomer,
         sessionId: 'session-123',
       }),

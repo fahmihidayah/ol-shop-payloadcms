@@ -15,7 +15,6 @@ export async function createAddressHandler(req: EnhancedRequest) {
   const result = await AddressService.create({
     data: validatedData,
     serviceContext: await createServiceContext({
-      collection: 'addresses',
       req,
     }),
   })

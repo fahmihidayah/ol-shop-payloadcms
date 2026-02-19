@@ -25,7 +25,6 @@ export async function deleteAddress(formData: FormData): Promise<ActionState> {
     const result = await AddressService.delete({
       id: addressId,
       serviceContext: {
-        collection: 'addresses',
         payload: await getPayload({
           config,
         }),

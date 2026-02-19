@@ -26,7 +26,6 @@ export async function createAddress(data: AddressFormSchema): Promise<CreateAddr
       serviceContext: {
         user: user,
         sessionId: sessionId,
-        collection: 'addresses',
         payload: await getPayload({
           config,
         }),

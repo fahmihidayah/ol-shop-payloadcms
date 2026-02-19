@@ -98,7 +98,6 @@ describe('createAddress action', () => {
       serviceContext: expect.objectContaining({
         user: mockCustomer,
         sessionId: 'session-123',
-        collection: 'addresses',
       }),
     })
   })

@@ -12,9 +12,7 @@ import type { DuitkuPaymentMethod, DuitkuPaymentMethodResponse } from '@/types/d
  * @param amount - Transaction amount to calculate fees
  * @returns Array of payment methods with fees
  */
-export async function getDuitkuPaymentMethods(
-  amount: number,
-): Promise<DuitkuPaymentMethod[]> {
+export async function getDuitkuPaymentMethods(amount: number): Promise<DuitkuPaymentMethod[]> {
   try {
     // Validate configuration
     const configValidation = validateDuitkuConfig()
@@ -63,36 +61,11 @@ export async function getDuitkuPaymentMethods(
 }
 
 /**
- * Get payment options from database
- * @returns Array of active payment options
- */
-export async function getPaymentOptions(): Promise<PaymentOption[]> {
-  try {
-    const payload = await getPayload({ config })
-    const result = await payload.find({
-      collection: 'payment-options',
-      where: {
-        isActive: { equals: true },
-      },
-      limit: 0,
-      depth: 1,
-    })
-
-    return result.docs as PaymentOption[]
-  } catch (error) {
-    console.error('[GET_PAYMENT_OPTIONS] Error:', error)
-    return []
-  }
-}
-
-/**
  * Get payment options from Duitku API only
  * @param amount - Transaction amount for calculating Duitku fees
  * @returns Array of Duitku payment methods
  */
-export async function getCombinedPaymentOptions(
-  amount: number,
-): Promise<DuitkuPaymentMethod[]> {
+export async function getCombinedPaymentOptions(amount: number): Promise<DuitkuPaymentMethod[]> {
   try {
     // Use Duitku payment methods only
     const duitkuMethods = await getDuitkuPaymentMethods(amount)

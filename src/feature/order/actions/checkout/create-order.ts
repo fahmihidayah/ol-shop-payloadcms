@@ -2,20 +2,9 @@
 
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import type { CheckoutData, CheckoutItem, CreateOrderResult } from '@/types/checkout'
+import type { CheckoutData, CreateOrderResult } from '@/types/checkout'
 import { revalidateTag } from 'next/cache'
-import { getCart } from '@/feature/cart/actions'
-
-/**
- * Generate unique order number
- */
-function generateOrderNumber(): string {
-  const timestamp = Date.now()
-  const random = Math.floor(Math.random() * 10000)
-    .toString()
-    .padStart(4, '0')
-  return `ORD-${timestamp}-${random}`
-}
+import { OrderService } from '../../services/order-service'
 
 /**
  * Create order and order items in the database
@@ -27,69 +16,27 @@ export async function createOrder(checkoutData: CheckoutData): Promise<CreateOrd
   try {
     const payload = await getPayload({ config })
 
-    const cart = await getCart()
-
-    // Generate unique order number
-    const orderNumber = generateOrderNumber()
-
-    // Create the order first
-    const order = await payload.create({
-      collection: 'orders',
-      data: {
-        orderNumber,
-        customer: checkoutData.customerId,
-        orderStatus: 'pending', // Initial status - waiting for payment
-        paymentStatus: 'pending',
-        paymentMethod: checkoutData.paymentMethod,
-
-        // Pricing
-        totalAmount: checkoutData.total,
-        shippingCost: checkoutData.shippingCost,
-
-        // Shipping address
-        shippingAddress: {
-          recipientName: checkoutData.shippingAddress.fullName,
-          phone: checkoutData.shippingAddress.phone,
-          addressLine1: checkoutData.shippingAddress.address,
-          city: checkoutData.shippingAddress.city,
-          province: checkoutData.shippingAddress.state ?? '',
-          postalCode: checkoutData.shippingAddress.postalCode,
-          country: checkoutData.shippingAddress.country || 'ID',
-        },
-
-        // Notes
-        notes: checkoutData.notes,
+    const orderResult = await OrderService.create({
+      context: {
+        payload,
       },
+      checkoutData,
     })
 
-    // Create order items
-    const orderItemsPromises = checkoutData.items.map((item: CheckoutItem) =>
-      payload.create({
-        collection: 'order-items',
-        data: {
-          order: order.id,
-          product: item.productId,
-          variant: item.variantId,
-          productSnapshot: {
-            title: item.productName,
-            variantTitle: item.variantName,
-          },
-          quantity: item.quantity,
-          price: item.price,
-          subtotal: item.subtotal,
-        },
-      }),
-    )
-
-    await Promise.all(orderItemsPromises)
+    if (orderResult.error) {
+      return {
+        success: false,
+        error: orderResult.message || 'Failed to create order',
+      }
+    }
 
     // Revalidate orders cache
     revalidateTag('orders')
 
     return {
       success: true,
-      order,
-      orderId: order.id,
+      order: orderResult.data,
+      orderId: orderResult.data?.id,
     }
   } catch (error) {
     console.error('[CREATE_ORDER] Error:', error)
@@ -115,19 +62,21 @@ export async function updateOrderPayment(
   try {
     const payload = await getPayload({ config })
 
-    const updateData: any = {
+    const result = await OrderService.updatePaymentReference({
+      serviceContext: {
+        payload,
+      },
+      orderId,
       paymentReference,
-    }
-
-    if (vaNumber) {
-      updateData.vaNumber = vaNumber
-    }
-
-    await payload.update({
-      collection: 'orders',
-      id: orderId,
-      data: updateData,
+      vaNumber,
     })
+
+    if (result.error) {
+      return {
+        success: false,
+        error: result.message || 'Failed to update order payment',
+      }
+    }
 
     revalidateTag('orders')
 
@@ -144,7 +93,7 @@ export async function updateOrderPayment(
 /**
  * Update order status after successful payment
  * @param orderId - Order ID
- * @param status - New order status
+ * @param orderStatus - New order status
  * @param paymentStatus - New payment status
  * @returns Update result
  */
@@ -156,14 +105,21 @@ export async function updateOrderStatus(
   try {
     const payload = await getPayload({ config })
 
-    await payload.update({
-      collection: 'orders',
-      id: orderId,
-      data: {
-        orderStatus,
-        paymentStatus,
+    const result = await OrderService.updateOrderStatus({
+      serviceContext: {
+        payload,
       },
+      orderId,
+      orderStatus,
+      paymentStatus,
     })
+
+    if (result.error) {
+      return {
+        success: false,
+        error: result.message || 'Failed to update order status',
+      }
+    }
 
     revalidateTag('orders')
 

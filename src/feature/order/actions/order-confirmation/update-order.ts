@@ -39,7 +39,6 @@ export async function updateOrderFromReturnUrl(
     // Find order by order number
     const updateResult = await OrderService.updateOrderFromReturnUrl({
       serviceContext: {
-        collection: 'orders',
         payload: await getPayload({
           config,
         }),

@@ -10,7 +10,6 @@ import { AddressService } from '../../services/address-service'
 export async function getListAddressHandler(req: EnhancedRequest) {
   const result = await AddressService.findAll({
     serviceContext: await createServiceContext({
-      collection: 'addresses',
       req,
     }),
   })
