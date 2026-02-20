@@ -11,7 +11,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { AddressFormSchema, addressFormSchema } from '@/feature/account/types/address'
-import { MapPin, Phone, Tag, User } from 'lucide-react'
+import { Mail, MapPin, Phone, Tag, User } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -21,10 +21,11 @@ import { useState, useTransition } from 'react'
 import { createAddress } from '../../actions/addresses/create-address'
 
 interface AddressFormProps {
+  initial?: Partial<AddressFormSchema>
   onSuccess?: () => void
 }
 
-export default function AddressForm({ onSuccess }: AddressFormProps = {}) {
+export default function AddressForm({ initial, onSuccess }: AddressFormProps = {}) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
@@ -33,8 +34,9 @@ export default function AddressForm({ onSuccess }: AddressFormProps = {}) {
     resolver: zodResolver(addressFormSchema),
     defaultValues: {
       label: '',
-      recipientName: '',
-      phone: '',
+      recipientName: initial?.recipientName,
+      phone: initial?.phone,
+      email: initial?.email,
       addressLine1: '',
       addressLine2: '',
       city: '',
@@ -94,6 +96,22 @@ export default function AddressForm({ onSuccess }: AddressFormProps = {}) {
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input placeholder="Recipient Name" className="pl-10" type="text" {...field} />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="Email" className="pl-10" type="email" {...field} />
                 </div>
               </FormControl>
               <FormMessage />

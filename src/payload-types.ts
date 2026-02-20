@@ -440,6 +440,7 @@ export interface Address {
   label: string;
   recipientName: string;
   phone: string;
+  email?: string | null;
   /**
    * Street address, P.O. box, company name
    */
@@ -1055,6 +1056,7 @@ export interface AddressesSelect<T extends boolean = true> {
   label?: T;
   recipientName?: T;
   phone?: T;
+  email?: T;
   addressLine1?: T;
   addressLine2?: T;
   city?: T;

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { Address } from '@/payload-types'
+import type { Address, Customer } from '@/payload-types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Button } from '@/components/ui/button'
@@ -11,12 +11,14 @@ import AddressForm from '@/feature/account/components/address/address-form'
 import { useRouter } from 'next/navigation'
 
 interface CheckoutAddressSelectorProps {
+  customer?: Customer
   addresses: Address[]
   selectedAddressId: string
   onSelect: (addressId: string) => void
 }
 
 export function CheckoutAddressSelector({
+  customer,
   addresses,
   selectedAddressId,
   onSelect,
@@ -47,7 +49,11 @@ export function CheckoutAddressSelector({
                   htmlFor={`address-${address.id}`}
                   className="flex items-start gap-3 rounded-lg border p-4 cursor-pointer transition-colors hover:bg-muted/50 has-[data-state=checked]:border-primary has-[data-state=checked]:bg-primary/5"
                 >
-                  <RadioGroupItem value={address.id} id={`address-${address.id}`} className="mt-1" />
+                  <RadioGroupItem
+                    value={address.id}
+                    id={`address-${address.id}`}
+                    className="mt-1"
+                  />
                   <div className="flex-1 space-y-1 text-sm font-normal">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold">{address.label}</span>
@@ -69,8 +75,8 @@ export function CheckoutAddressSelector({
                       <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                       <span>
                         {address.addressLine1}
-                        {address.addressLine2 && `, ${address.addressLine2}`},{' '}
-                        {address.city}, {address.province} {address.postalCode}
+                        {address.addressLine2 && `, ${address.addressLine2}`}, {address.city},{' '}
+                        {address.province} {address.postalCode}
                       </span>
                     </div>
                   </div>
@@ -94,14 +100,17 @@ export function CheckoutAddressSelector({
                 Cancel
               </Button>
             </div>
-            <AddressForm onSuccess={handleAddressCreated} />
+            <AddressForm
+              initial={{
+                recipientName: customer?.name ?? '',
+                phone: customer?.phone ?? '',
+                email: customer?.email ?? '',
+              }}
+              onSuccess={handleAddressCreated}
+            />
           </div>
         ) : (
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => setShowForm(true)}
-          >
+          <Button variant="outline" className="w-full" onClick={() => setShowForm(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Add New Address
           </Button>

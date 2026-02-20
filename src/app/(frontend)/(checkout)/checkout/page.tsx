@@ -4,9 +4,10 @@ import { getCombinedPaymentOptions } from '@/feature/order/actions/checkout/paym
 // import { CheckoutPageClient } from '@/feature/checkout/components/checkout-page'
 import { redirect } from 'next/navigation'
 import { CheckoutPageClient } from '@/feature/order/components/checkout/checkout-page'
+import { getMeUser } from '@/lib/customer-utils'
 
 export default async function CheckoutPage() {
-  const [cart, addresses] = await Promise.all([getCart(), getListAddresses()])
+  const [cart, addresses, user] = await Promise.all([getCart(), getListAddresses(), getMeUser()])
 
   if (!cart || cart.items.length === 0) {
     redirect('/cart')
@@ -17,6 +18,7 @@ export default async function CheckoutPage() {
 
   return (
     <CheckoutPageClient
+      customer={user.user}
       addresses={addresses}
       items={cart.items}
       totalItems={cart.totalItems}

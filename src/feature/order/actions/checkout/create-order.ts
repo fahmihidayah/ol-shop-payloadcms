@@ -102,7 +102,7 @@ export async function updateOrderPayment(
  * @returns Update result
  */
 export async function updateOrderStatus(
-  orderId: string,
+  orderNumber: string,
   orderStatus: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled',
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded',
 ): Promise<{ success: boolean; error?: string }> {
@@ -113,7 +113,7 @@ export async function updateOrderStatus(
       serviceContext: {
         payload,
       },
-      orderId,
+      orderNumber,
       orderStatus,
       paymentStatus,
     })

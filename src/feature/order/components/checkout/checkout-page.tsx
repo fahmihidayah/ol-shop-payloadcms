@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import type { Address, CartItem, PaymentOption, Product } from '@/payload-types'
+import type { Address, CartItem, Customer, PaymentOption, Product } from '@/payload-types'
 import { CheckoutAddressSelector } from './checkout-address-selector'
 import { CheckoutCartSummary } from './checkout-cart-summary'
 import { CheckoutPaymentOptions } from './checkout-payment-options'
@@ -15,6 +15,7 @@ import type { CheckoutData, CheckoutItem } from '@/types/checkout'
 import { processCheckout } from '../../actions/checkout'
 
 interface CheckoutPageProps {
+  customer?: Customer
   addresses: Address[]
   items: CartItem[]
   totalItems: number
@@ -24,6 +25,7 @@ interface CheckoutPageProps {
 }
 
 export function CheckoutPageClient({
+  customer,
   addresses,
   items,
   totalItems,
@@ -136,6 +138,7 @@ export function CheckoutPageClient({
         {/* Left: Address + Payment */}
         <div className="flex-1 space-y-6">
           <CheckoutAddressSelector
+            customer={customer}
             addresses={addresses}
             selectedAddressId={selectedAddressId}
             onSelect={setSelectedAddressId}

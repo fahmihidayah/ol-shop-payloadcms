@@ -2,8 +2,10 @@ import AddressForm from '@/feature/account/components/address/address-form'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
+import { getMeUser } from '@/lib/customer-utils'
 
-export default function CreateAddressPage() {
+export default async function CreateAddressPage() {
+  const user = await getMeUser()
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
@@ -14,7 +16,13 @@ export default function CreateAddressPage() {
         </Button>
         <h1 className="text-2xl font-bold">Add New Address</h1>
       </div>
-      <AddressForm />
+      <AddressForm
+        initial={{
+          email: user.user?.email ?? '',
+          recipientName: user.user?.name ?? '',
+          phone: user.user?.phone ?? '',
+        }}
+      />
     </div>
   )
 }
