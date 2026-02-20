@@ -6,6 +6,7 @@ import type { OrderItem } from '@/payload-types'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { updateOrderFromReturnUrl } from '@/feature/order/actions/order-confirmation/update-order'
+import { clearCartItems } from '@/feature/cart/actions'
 
 interface OrderConfirmationPageProps {
   searchParams: Promise<{
@@ -37,6 +38,9 @@ export default async function OrderConfirmationPage({ searchParams }: OrderConfi
 
   // Update order status based on result code
   const result = await updateOrderFromReturnUrl(merchantOrderId, resultCode, reference)
+  if (result.success) {
+    await clearCartItems()
+  }
 
   // If order not found, redirect to home
   // if (!result.success) {

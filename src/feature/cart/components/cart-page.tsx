@@ -37,7 +37,7 @@ export async function CartPage() {
             <CartSummary
               totalItems={cart.totalItems}
               totalPrice={cart.totalPrice}
-              shipping={0} // Free shipping for now
+              shipping={cart.shipping} // Free shipping for now
               tax={0} // No tax calculation for now
             />
           </div>

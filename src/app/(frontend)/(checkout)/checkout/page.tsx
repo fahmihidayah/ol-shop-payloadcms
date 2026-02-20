@@ -21,6 +21,7 @@ export default async function CheckoutPage() {
       items={cart.items}
       totalItems={cart.totalItems}
       totalPrice={cart.totalPrice}
+      shipingCost={cart.shipping}
       paymentOptions={paymentOptions}
     />
   )

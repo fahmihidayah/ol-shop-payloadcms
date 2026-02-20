@@ -6,6 +6,7 @@ import { cookies } from 'next/headers'
 import { getMeUser } from '@/lib/customer-utils'
 import { revalidateTag } from 'next/cache'
 import { CartService, CartWithItems } from '../services/cart-service'
+import { StoreService } from '@/feature/store/services/store-service'
 
 /**
  * Gets the current user's cart with all items and calculated totals

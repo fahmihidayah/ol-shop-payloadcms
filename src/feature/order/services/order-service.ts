@@ -54,14 +54,14 @@ export const OrderService = {
       collection: 'orders',
       data: {
         orderNumber,
-        customer: checkoutData.customerId,
+        customer: context.user?.id,
         orderStatus: 'pending', // Initial status - waiting for payment
         paymentStatus: 'pending',
         paymentMethod: checkoutData.paymentMethod,
-
+        sessionId: context.sessionId,
         // Pricing
         totalAmount: checkoutData.total,
-        shippingCost: checkoutData.shippingCost,
+        shippingCost: checkoutData.shipingCost,
 
         // Shipping address
         shippingAddress: {
@@ -170,18 +170,20 @@ export const OrderService = {
     reference: string
   }): Promise<ServiceResult<Order>> => {
     // Find the order
-    const result = await OrderService.findByOrderNumber({
-      serviceContext,
-      orderNumber,
-    })
+    // const result = await OrderService.findByOrderNumber({
+    //   serviceContext,
+    //   orderNumber,
+    // })
 
-    const { data: orderResult } = result
+    // console.log('updateOrderFromReturnUrl : Result : ', JSON.stringify(result, null, 2))
 
-    if (!orderResult.success || !orderResult.order) {
-      return { error: true, message: 'Order not found' }
-    }
+    // const { data: orderResult } = result
 
-    const order = orderResult.order
+    // if (!orderResult.success || !orderResult.order) {
+    //   return { error: true, message: 'Order not found' }
+    // }
+
+    // const order = orderResult.order
 
     // Map result code to order status
     const { orderStatus, paymentStatus } = mapReturnUrlResultCode(resultCode)
@@ -189,7 +191,7 @@ export const OrderService = {
     // Update order
     const { data } = await OrderService.updateOrderStatus({
       serviceContext: serviceContext,
-      orderId: order.id,
+      orderNumber: orderNumber,
       orderStatus,
       paymentStatus,
       paymentReference: reference,
@@ -226,13 +228,13 @@ export const OrderService = {
    */
   updateOrderStatus: async ({
     serviceContext,
-    orderId,
+    orderNumber,
     orderStatus,
     paymentStatus,
     paymentReference,
   }: {
     serviceContext: ServiceContext
-    orderId: string
+    orderNumber: string
     orderStatus: OrderStatus
     paymentStatus: PaymentStatus
     paymentReference?: string
@@ -246,7 +248,7 @@ export const OrderService = {
       updateData.paymentReference = paymentReference
     }
 
-    return OrderService._updateOrder(serviceContext, orderId, updateData)
+    return OrderService._updateOrder(serviceContext, orderNumber, updateData)
   },
 
   /**
@@ -364,18 +366,23 @@ export const OrderService = {
    */
   _updateOrder: async (
     serviceContext: ServiceContext,
-    orderId: string,
+    orderNumber: string,
     updateData: Record<string, any>,
   ): Promise<ServiceResult<Order>> => {
     const updatedOrder = await serviceContext.payload.update({
       collection: 'orders',
-      id: orderId,
+      where: {
+        orderNumber: {
+          equals: orderNumber,
+        },
+      },
       data: updateData,
     })
+    console.log('data update order  : ', JSON.stringify(updatedOrder.docs[0], null, 2))
 
     return {
       error: false,
-      data: updatedOrder,
+      data: updatedOrder.docs[0],
     }
   },
 }

@@ -5,6 +5,8 @@ import config from '@payload-config'
 import type { CheckoutData, CreateOrderResult } from '@/types/checkout'
 import { revalidateTag } from 'next/cache'
 import { OrderService } from '../../services/order-service'
+import { getMeUser } from '@/lib/customer-utils'
+import { cookies } from 'next/headers'
 
 /**
  * Create order and order items in the database
@@ -19,6 +21,8 @@ export async function createOrder(checkoutData: CheckoutData): Promise<CreateOrd
     const orderResult = await OrderService.create({
       context: {
         payload,
+        user: checkoutData.user,
+        sessionId: checkoutData.sessionId,
       },
       checkoutData,
     })

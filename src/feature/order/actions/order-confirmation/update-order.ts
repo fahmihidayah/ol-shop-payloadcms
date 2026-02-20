@@ -16,6 +16,9 @@ import config from '@payload-config'
 import { OrderService } from '../../services/order-service'
 import { verifyDuitkuSignature } from '../../utils/verify-signature'
 import { mapCallbackResultCode } from '../../utils/map-result-code'
+import { getMeUser } from '@/lib/customer-utils'
+import { cookies } from 'next/headers'
+import { CartService } from '@/feature/cart/services/cart-service'
 
 /**
  * Update order status based on Duitku result code from return URL
@@ -37,11 +40,18 @@ export async function updateOrderFromReturnUrl(
 ): Promise<UpdateOrderResult> {
   try {
     // Find order by order number
+
+    const user = await getMeUser()
+    const cookieStore = await cookies()
+    const sessionId = cookieStore.get('cart-session-id')?.value
+
     const updateResult = await OrderService.updateOrderFromReturnUrl({
       serviceContext: {
         payload: await getPayload({
           config,
         }),
+        user: user.user,
+        sessionId,
       },
       orderNumber,
       resultCode,
@@ -99,7 +109,12 @@ export async function updateOrderFromCallback(
     const { orderStatus, paymentStatus } = mapCallbackResultCode(resultCode)
 
     // Update order
-    const updateResult = await updateOrderStatus(order.id, orderStatus, paymentStatus, reference)
+    const updateResult = await updateOrderStatus(
+      order.orderNumber,
+      orderStatus,
+      paymentStatus,
+      reference,
+    )
 
     return updateResult
   } catch (error) {

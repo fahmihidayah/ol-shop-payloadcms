@@ -1,4 +1,4 @@
-import { Order, OrderItem, Address, Customer } from '@/payload-types'
+import { Order, OrderItem, Address, Customer, User } from '@/payload-types'
 
 /**
  * Checkout item data
@@ -31,13 +31,14 @@ export interface CheckoutAddress {
  * Checkout data for creating order
  */
 export interface CheckoutData {
-  customerId?: string
+  user?: User
+  sessionId?: string
   items: CheckoutItem[]
   shippingAddress: CheckoutAddress
   billingAddress?: CheckoutAddress
   paymentMethod: string
   subtotal: number
-  shippingCost: number
+  shipingCost: number
   tax: number
   total: number
   notes?: string

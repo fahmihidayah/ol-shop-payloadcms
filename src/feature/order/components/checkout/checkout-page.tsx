@@ -14,12 +14,11 @@ import { useRouter } from 'next/navigation'
 import type { CheckoutData, CheckoutItem } from '@/types/checkout'
 import { processCheckout } from '../../actions/checkout'
 
-const SHIPPING_COST = 20000
-
 interface CheckoutPageProps {
   addresses: Address[]
   items: CartItem[]
   totalItems: number
+  shipingCost: number
   totalPrice: number
   paymentOptions: DuitkuPaymentMethod[]
 }
@@ -28,6 +27,7 @@ export function CheckoutPageClient({
   addresses,
   items,
   totalItems,
+  shipingCost,
   totalPrice,
   paymentOptions,
 }: CheckoutPageProps) {
@@ -69,6 +69,16 @@ export function CheckoutPageClient({
       // Calculate totals
       const subtotal = totalPrice
       const tax = 0 // Add tax calculation if needed
+      const total = subtotal + shipingCost + tax
+
+      // Log checkout data for debugging
+      console.log('[CHECKOUT_PAGE] Preparing checkout data:')
+      console.log('  Items:', checkoutItems)
+      console.log('  totalPrice (from cart):', totalPrice)
+      console.log('  subtotal:', subtotal)
+      console.log('  shipingCost:', shipingCost)
+      console.log('  tax:', tax)
+      console.log('  total:', total)
 
       // Build checkout data
       const checkoutData: CheckoutData = {
@@ -84,9 +94,9 @@ export function CheckoutPageClient({
         },
         paymentMethod: selectedPaymentId,
         subtotal,
-        shippingCost: SHIPPING_COST,
+        shipingCost,
         tax,
-        total: subtotal + SHIPPING_COST + tax,
+        total,
       }
 
       // Submit the order
@@ -145,7 +155,7 @@ export function CheckoutPageClient({
               items={items}
               totalItems={totalItems}
               totalPrice={totalPrice}
-              shipping={SHIPPING_COST}
+              shipping={shipingCost}
             />
 
             <Button

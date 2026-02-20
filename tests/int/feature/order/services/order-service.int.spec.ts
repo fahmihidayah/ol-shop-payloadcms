@@ -58,7 +58,7 @@ describe('OrderService', () => {
         },
         paymentMethod: 'VA',
         subtotal: 100000,
-        shippingCost: 15000,
+        shipingCost: 15000,
         tax: 0,
         total: 115000,
         notes: 'Please deliver after 5 PM',
@@ -168,7 +168,7 @@ describe('OrderService', () => {
         },
         paymentMethod: 'QRIS',
         subtotal: 50000,
-        shippingCost: 10000,
+        shipingCost: 10000,
         tax: 0,
         total: 60000,
       }
@@ -234,7 +234,7 @@ describe('OrderService', () => {
         },
         paymentMethod: 'VA',
         subtotal: 175000,
-        shippingCost: 15000,
+        shipingCost: 15000,
         tax: 0,
         total: 190000,
       }
@@ -270,7 +270,7 @@ describe('OrderService', () => {
         },
         paymentMethod: 'VA',
         subtotal: 0,
-        shippingCost: 0,
+        shipingCost: 0,
         tax: 0,
         total: 0,
       }
@@ -298,7 +298,7 @@ describe('OrderService', () => {
         },
         paymentMethod: 'VA',
         subtotal: 0,
-        shippingCost: 15000,
+        shipingCost: 15000,
         tax: 0,
         total: 15000,
       }

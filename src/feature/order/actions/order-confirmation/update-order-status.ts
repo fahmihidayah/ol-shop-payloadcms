@@ -3,7 +3,6 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { OrderStatus, PaymentStatus, UpdateOrderResult } from '@/feature/order/types/order'
-import { clearCartItems } from '@/feature/cart/actions'
 import { OrderService } from '../../services/order-service'
 // import { updateOrderStatusService } from '../services/update-order-status'
 
@@ -16,7 +15,7 @@ import { OrderService } from '../../services/order-service'
  * @returns Update result
  */
 export async function updateOrderStatus(
-  orderId: string,
+  orderNumber: string,
   orderStatus: OrderStatus,
   paymentStatus: PaymentStatus,
   paymentReference?: string,
@@ -28,7 +27,7 @@ export async function updateOrderStatus(
       serviceContext: {
         payload: payload,
       },
-      orderId,
+      orderNumber,
       orderStatus,
       paymentStatus,
       paymentReference,

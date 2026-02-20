@@ -1,6 +1,8 @@
 import { ServiceContext } from '@/types/service-context'
 import { ServiceResult } from '@/types/service-result'
 import { Cart, CartItem, Customer } from '@/payload-types'
+import { StoreService } from '@/feature/store/services/store-service'
+import { calculateShiping } from '@/feature/order/utils/calculate-shiping'
 
 /**
  * Extended Cart type with calculated totals
@@ -8,6 +10,7 @@ import { Cart, CartItem, Customer } from '@/payload-types'
 export interface CartWithItems extends Cart {
   items: CartItem[]
   totalItems: number
+  shipping: number
   totalPrice: number
 }
 
@@ -315,6 +318,9 @@ export const CartService = {
   }): Promise<ServiceResult<CartWithItems | null>> => {
     let cart: Cart | null | undefined = null
 
+    const storeConfig = await StoreService.getStore({
+      context: serviceContext,
+    })
     if (user) {
       // Find cart by user
       const cartResult = await CartService.findCartByUser({
@@ -377,6 +383,7 @@ export const CartService = {
       data: {
         ...cart,
         items,
+        shipping: await calculateShiping({ store: storeConfig }),
         totalItems,
         totalPrice,
       },
@@ -684,7 +691,7 @@ export const CartService = {
     serviceContext: ServiceContext
     cartId: string
   }): Promise<ServiceResult<void>> => {
-    await serviceContext.payload.delete({
+    const result = await serviceContext.payload.delete({
       collection: 'cart-items',
       where: {
         cart: {
@@ -692,6 +699,8 @@ export const CartService = {
         },
       },
     })
+
+    console.log('Cart Service [clearCartItems] : ', JSON.stringify(result.docs, null, 2))
 
     return {
       error: false,
