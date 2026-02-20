@@ -6,9 +6,9 @@ export default async function AccountLayoutPage({ children }: { children: React.
   const { user } = await getMeUser()
 
   // Redirect to login if not authenticated
-  if (!user) {
-    redirect('/login?redirect=/account')
-  }
+  // if (!user) {
+  //   redirect('/login?redirect=/account')
+  // }
 
   return <AccountLayout customer={user}>{children}</AccountLayout>
 }

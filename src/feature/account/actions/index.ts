@@ -3,6 +3,8 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { getMeUser } from '@/lib/customer-utils'
+import { OrderService } from '@/feature/order/services/order-service'
+import { cookies } from 'next/headers'
 
 /**
  * Gets order statistics for the current user
@@ -16,6 +18,8 @@ export const getOrderStatistics = async (): Promise<{
   try {
     const payload = await getPayload({ config })
     const { user } = await getMeUser()
+    const cookiesStore = await cookies()
+    const sessionId = cookiesStore.get('cart-session-id')?.value
 
     if (!user) {
       return {
@@ -27,17 +31,25 @@ export const getOrderStatistics = async (): Promise<{
     }
 
     // Get all orders for the user
-    const ordersResult = await payload.find({
-      collection: 'orders',
-      where: {
-        customer: {
-          equals: user.id,
-        },
+    // const ordersResult = await payload.find({
+    //   collection: 'orders',
+    //   where: {
+    //     customer: {
+    //       equals: user.id,
+    //     },
+    //   },
+    //   limit: 0, // Get all orders
+    // })
+
+    const orderResult = await OrderService.findAll({
+      context: {
+        payload,
+        user,
+        sessionId,
       },
-      limit: 0, // Get all orders
     })
 
-    const orders = ordersResult.docs
+    const orders = orderResult.docs
 
     // Calculate statistics
     const stats = {

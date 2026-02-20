@@ -12,11 +12,12 @@ interface AccountProfileCardProps {
 }
 
 export function AccountProfileCard({ customer }: AccountProfileCardProps) {
-  const initials = customer.name
-    ?.split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase() || 'U'
+  const initials =
+    customer.name
+      ?.split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase() || 'U'
 
   const joinDate = customer.createdAt
     ? new Date(customer.createdAt).toLocaleDateString('en-US', {

@@ -13,9 +13,9 @@ export default async function AccountPage() {
   const { user } = await getMeUser()
 
   // Redirect to login if not authenticated
-  if (!user) {
-    redirect('/login?redirect=/account')
-  }
+  // if (!user) {
+  //   redirect('/login?redirect=/account')
+  // }
 
   // Fetch order statistics
   const orderStats = await getOrderStatistics()

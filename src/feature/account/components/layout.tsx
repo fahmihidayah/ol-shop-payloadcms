@@ -6,7 +6,7 @@ import { Customer } from '@/payload-types'
 
 interface AccountLayoutProps {
   children: ReactNode
-  customer: Customer | null
+  customer?: Customer
 }
 
 export function AccountLayout({ children, customer }: AccountLayoutProps) {
@@ -23,7 +23,11 @@ export function AccountLayout({ children, customer }: AccountLayoutProps) {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar */}
         <aside className="lg:col-span-1">
-          <AccountSidebar userName={userName} userEmail={userEmail} />
+          <AccountSidebar
+            isGuest={customer === undefined}
+            userName={userName}
+            userEmail={userEmail}
+          />
         </aside>
 
         {/* Main Content */}

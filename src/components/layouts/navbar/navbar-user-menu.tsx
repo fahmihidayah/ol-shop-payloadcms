@@ -103,6 +103,12 @@ export function NavbarUserMenu({ customer }: { customer?: Customer | null }) {
           ) : (
             <>
               <DropdownMenuItem asChild>
+                <Link href="/account/orders" className="gap-2">
+                  <Package className="h-4 w-4" />
+                  My Orders
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link href="/login" className="gap-2">
                   <LogIn className="h-4 w-4" />
                   Login
@@ -125,7 +131,8 @@ export function NavbarUserMenu({ customer }: { customer?: Customer | null }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Log Out</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to log out? You will need to sign in again to access your account.
+              Are you sure you want to log out? You will need to sign in again to access your
+              account.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

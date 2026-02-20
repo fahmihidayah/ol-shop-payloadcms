@@ -134,6 +134,29 @@ export const OrderService = {
     }
   },
 
+  findAll: async ({ context }: { context: ServiceContext }) => {
+    const result = context.payload.find({
+      collection: 'orders',
+      where: {
+        and: [
+          context.user
+            ? {
+                customer: {
+                  equals: context.user.id,
+                },
+              }
+            : {
+                sessionId: {
+                  equals: context.sessionId,
+                },
+              },
+        ],
+      },
+      limit: 0,
+    })
+    return result
+  },
+
   /**
    * Updates order status based on payment gateway return URL result code
    *

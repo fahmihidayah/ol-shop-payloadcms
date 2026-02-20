@@ -12,6 +12,7 @@ import { useState } from 'react'
 import { logout } from '@/feature/auth/actions'
 
 interface AccountSidebarProps {
+  isGuest: boolean
   userName?: string
   userEmail?: string
 }
@@ -45,6 +46,7 @@ const menuItems = [
 ]
 
 function SidebarNav({
+  isGuest,
   userName,
   userEmail,
   onNavigate,
@@ -69,36 +71,44 @@ function SidebarNav({
           const Icon = item.icon
           const isActive = pathname === item.href
 
+          const className = cn(
+            'flex items-center gap-3 px-6 py-3 text-sm transition-colors hover:bg-muted',
+            isActive && 'bg-primary/10 text-primary font-medium border-r-2 border-primary',
+          )
+
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onNavigate}
-              className={cn(
-                'flex items-center gap-3 px-6 py-3 text-sm transition-colors hover:bg-muted',
-                isActive && 'bg-primary/10 text-primary font-medium border-r-2 border-primary',
+            <>
+              {isGuest && item.href !== '/account/orders' ? (
+                <span className={cn(className, 'text-primary/50')}>
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </span>
+              ) : (
+                <Link key={item.href} href={item.href} onClick={onNavigate} className={className}>
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
               )}
-            >
-              <Icon className="h-4 w-4" />
-              {item.label}
-            </Link>
+            </>
           )
         })}
         <Separator />
-        <Button
-          variant="ghost"
-          onClick={handleLogout}
-          className="flex items-center gap-3 justify-start px-6 py-3 text-sm text-destructive hover:text-destructive hover:bg-destructive/10 rounded-none h-auto"
-        >
-          <LogOut className="h-4 w-4" />
-          Logout
-        </Button>
+        {!isGuest && (
+          <Button
+            variant="ghost"
+            onClick={handleLogout}
+            className="flex items-center gap-3 justify-start px-6 py-3 text-sm text-destructive hover:text-destructive hover:bg-destructive/10 rounded-none h-auto"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        )}
       </nav>
     </>
   )
 }
 
-export function AccountSidebar({ userName, userEmail }: AccountSidebarProps) {
+export function AccountSidebar({ userName, userEmail, isGuest }: AccountSidebarProps) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
   const activeItem = menuItems.find((item) => item.href === pathname)
@@ -122,6 +132,7 @@ export function AccountSidebar({ userName, userEmail }: AccountSidebarProps) {
               <SheetTitle>My Account</SheetTitle>
             </SheetHeader>
             <SidebarNav
+              isGuest={isGuest}
               userName={userName}
               userEmail={userEmail}
               onNavigate={() => setOpen(false)}
@@ -132,17 +143,7 @@ export function AccountSidebar({ userName, userEmail }: AccountSidebarProps) {
 
       {/* Desktop: static card sidebar */}
       <div className="h-fit sticky top-20 hidden lg:flex lg:flex-col rounded-lg  border-[1px] bg-white shadow-lg overflow-clip">
-        {/* <CardHeader>
-          <CardTitle className="text-lg">My Account</CardTitle>
-          {userName && (
-            <>
-              <CardDescription className="font-medium text-foreground">{userName}</CardDescription>
-              {userEmail && <CardDescription className="text-xs">{userEmail}</CardDescription>}
-            </>
-          )}
-        </CardHeader> */}
-        {/* <Separator /> */}
-        <SidebarNav userName={userName} userEmail={userEmail} />
+        <SidebarNav isGuest={isGuest} userName={userName} userEmail={userEmail} />
       </div>
     </>
   )
