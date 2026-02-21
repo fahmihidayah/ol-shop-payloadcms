@@ -537,6 +537,10 @@ export interface Order {
     postalCode: string;
     country?: string | null;
   };
+  shippingService?: {
+    shippingService?: string | null;
+    resiNumber?: string | null;
+  };
   /**
    * Payment method code from Duitku
    */
@@ -1097,6 +1101,12 @@ export interface OrdersSelect<T extends boolean = true> {
         postalCode?: T;
         country?: T;
       };
+  shippingService?:
+    | T
+    | {
+        shippingService?: T;
+        resiNumber?: T;
+      };
   paymentMethod?: T;
   paymentReference?: T;
   vaNumber?: T;
@@ -1386,17 +1396,62 @@ export interface StoreConfig {
       }[]
     | null;
   /**
-   * The title used by search engines.
+   * The title used by search engines and browser tabs.
    */
   metaTitle?: string | null;
   /**
-   * The summary used by search engines.
+   * The summary used by search engines (120-160 characters recommended).
    */
   metaDescription?: string | null;
   /**
-   * Image shown when sharing the site on social media.
+   * Keywords for search engines to help with discoverability.
+   */
+  keywords?:
+    | {
+        keyword: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The canonical URL for your site (e.g., https://yourstore.com).
+   */
+  canonicalUrl?: string | null;
+  /**
+   * Title for social media sharing (defaults to metaTitle if not set).
+   */
+  ogTitle?: string | null;
+  /**
+   * Description for social media sharing (defaults to metaDescription if not set).
+   */
+  ogDescription?: string | null;
+  /**
+   * Image shown when sharing the site on Facebook, LinkedIn, etc.
    */
   ogImage?: (number | null) | Media;
+  /**
+   * Type of Twitter card to use.
+   */
+  twitterCard?: ('summary' | 'summary_large_image') | null;
+  /**
+   * Title for Twitter sharing (defaults to ogTitle or metaTitle if not set).
+   */
+  twitterTitle?: string | null;
+  /**
+   * Description for Twitter sharing (defaults to ogDescription or metaDescription if not set).
+   */
+  twitterDescription?: string | null;
+  /**
+   * Image for Twitter sharing (defaults to ogImage if not set).
+   */
+  twitterImage?: (number | null) | Media;
+  /**
+   * Prevent search engines from indexing this site.
+   */
+  noIndex?: boolean | null;
+  /**
+   * Prevent search engines from following links on this site.
+   */
+  noFollow?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1490,7 +1545,22 @@ export interface StoreConfigSelect<T extends boolean = true> {
       };
   metaTitle?: T;
   metaDescription?: T;
+  keywords?:
+    | T
+    | {
+        keyword?: T;
+        id?: T;
+      };
+  canonicalUrl?: T;
+  ogTitle?: T;
+  ogDescription?: T;
   ogImage?: T;
+  twitterCard?: T;
+  twitterTitle?: T;
+  twitterDescription?: T;
+  twitterImage?: T;
+  noIndex?: T;
+  noFollow?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

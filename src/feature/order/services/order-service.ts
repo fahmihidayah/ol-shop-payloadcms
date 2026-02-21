@@ -134,6 +134,59 @@ export const OrderService = {
     }
   },
 
+  /**
+   * Finds an order by its ID with related order items
+   *
+   * @param serviceContext - Service context containing payload instance
+   * @param orderId - The order ID to retrieve
+   * @returns Promise resolving to ServiceResult containing the Order with items
+   *
+   * @example
+   * ```typescript
+   * const result = await OrderService.findById({
+   *   serviceContext: { payload },
+   *   orderId: '123456789'
+   * })
+   *
+   * if (!result.error) {
+   *   console.log('Order:', result.data)
+   * }
+   * ```
+   *
+   * @throws {Error} If order is not found
+   */
+  findById: async ({
+    serviceContext,
+    orderId,
+  }: {
+    serviceContext: ServiceContext
+    orderId: string
+  }): Promise<ServiceResult<Order>> => {
+    try {
+      const order = await serviceContext.payload.findByID({
+        collection: 'orders',
+        id: orderId,
+      })
+
+      if (!order) {
+        return {
+          error: true,
+          message: 'Order not found',
+        }
+      }
+
+      return {
+        data: order,
+        error: false,
+      }
+    } catch (error) {
+      return {
+        error: true,
+        message: error instanceof Error ? error.message : 'Failed to find order',
+      }
+    }
+  },
+
   findAll: async ({ context }: { context: ServiceContext }) => {
     const result = context.payload.find({
       collection: 'orders',
@@ -192,42 +245,33 @@ export const OrderService = {
     resultCode: DuitkuResultCode
     reference: string
   }): Promise<ServiceResult<Order>> => {
-    // Find the order
-    // const result = await OrderService.findByOrderNumber({
-    //   serviceContext,
-    //   orderNumber,
-    // })
+    // Find the order first to verify it exists
+    const findResult = await OrderService.findByOrderNumber({
+      serviceContext,
+      orderNumber,
+    })
 
-    // console.log('updateOrderFromReturnUrl : Result : ', JSON.stringify(result, null, 2))
-
-    // const { data: orderResult } = result
-
-    // if (!orderResult.success || !orderResult.order) {
-    //   return { error: true, message: 'Order not found' }
-    // }
-
-    // const order = orderResult.order
+    if (findResult.error || !findResult.data) {
+      return { error: true, message: 'Order not found' }
+    }
 
     // Map result code to order status
     const { orderStatus, paymentStatus } = mapReturnUrlResultCode(resultCode)
 
-    // Update order
-    const { data } = await OrderService.updateOrderStatus({
-      serviceContext: serviceContext,
-      orderNumber: orderNumber,
+    // Update order using orderNumber
+    const updateResult = await OrderService.updateOrderStatus({
+      serviceContext,
+      orderNumber,
       orderStatus,
       paymentStatus,
       paymentReference: reference,
     })
 
-    return {
-      data: data,
-      error: false,
-    }
+    return updateResult
   },
 
   /**
-   * Updates order and payment status
+   * Updates order and payment status by ID
    *
    * @param serviceContext - Service context containing payload instance
    * @param orderId - Order ID to update
@@ -239,7 +283,7 @@ export const OrderService = {
    * @example
    * ```typescript
    * const result = await OrderService.updateOrderStatus({
-   *   serviceContext: { collection: 'orders', payload },
+   *   serviceContext: { payload },
    *   orderId: 'order-123',
    *   orderStatus: 'processing',
    *   paymentStatus: 'paid',
@@ -251,13 +295,15 @@ export const OrderService = {
    */
   updateOrderStatus: async ({
     serviceContext,
+    orderId,
     orderNumber,
     orderStatus,
     paymentStatus,
     paymentReference,
   }: {
     serviceContext: ServiceContext
-    orderNumber: string
+    orderId?: string
+    orderNumber?: string
     orderStatus: OrderStatus
     paymentStatus: PaymentStatus
     paymentReference?: string
@@ -271,7 +317,26 @@ export const OrderService = {
       updateData.paymentReference = paymentReference
     }
 
-    return OrderService._updateOrder(serviceContext, orderNumber, updateData)
+    // Support both ID-based and orderNumber-based updates
+    if (orderId) {
+      const updatedOrder = await serviceContext.payload.update({
+        collection: 'orders',
+        id: orderId,
+        data: updateData,
+      })
+
+      return {
+        error: false,
+        data: updatedOrder,
+      }
+    } else if (orderNumber) {
+      return OrderService._updateOrder(serviceContext, orderNumber, updateData)
+    } else {
+      return {
+        error: true,
+        message: 'Either orderId or orderNumber must be provided',
+      }
+    }
   },
 
   /**
@@ -325,7 +390,17 @@ export const OrderService = {
       updateData.vaNumber = vaNumber
     }
 
-    return OrderService._updateOrder(serviceContext, orderId, updateData)
+    // Use ID-based update for updatePaymentReference
+    const updatedOrder = await serviceContext.payload.update({
+      collection: 'orders',
+      id: orderId,
+      data: updateData,
+    })
+
+    return {
+      error: false,
+      data: updatedOrder,
+    }
   },
 
   /**

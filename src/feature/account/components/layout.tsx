@@ -20,9 +20,9 @@ export function AccountLayout({ children, customer }: AccountLayoutProps) {
         <p className="text-muted-foreground mt-1">Manage your account, orders, and preferences</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 ">
         {/* Sidebar */}
-        <aside className="lg:col-span-1">
+        <aside className="lg:col-span-1 ">
           <AccountSidebar
             isGuest={customer === undefined}
             userName={userName}

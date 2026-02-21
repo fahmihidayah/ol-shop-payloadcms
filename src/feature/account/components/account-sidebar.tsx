@@ -142,7 +142,7 @@ export function AccountSidebar({ userName, userEmail, isGuest }: AccountSidebarP
       </div>
 
       {/* Desktop: static card sidebar */}
-      <div className="h-fit sticky top-20 hidden lg:flex lg:flex-col rounded-lg  border-[1px] bg-white shadow-lg overflow-clip">
+      <div className="h-fit sticky top-20 hidden lg:flex lg:flex-col rounded-lg  border-[1px] bg-background shadow-lg overflow-clip">
         <SidebarNav isGuest={isGuest} userName={userName} userEmail={userEmail} />
       </div>
     </>

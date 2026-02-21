@@ -136,18 +136,136 @@ export const StoreConfig: GlobalConfig = {
             {
               name: 'metaTitle',
               type: 'text',
-              admin: { description: 'The title used by search engines.' },
+              admin: {
+                description: 'The title used by search engines and browser tabs.',
+              },
             },
             {
               name: 'metaDescription',
               type: 'textarea',
-              admin: { description: 'The summary used by search engines.' },
+              admin: {
+                description: 'The summary used by search engines (120-160 characters recommended).',
+              },
             },
             {
-              name: 'ogImage',
-              type: 'upload',
-              relationTo: 'media',
-              admin: { description: 'Image shown when sharing the site on social media.' },
+              name: 'keywords',
+              type: 'array',
+              admin: {
+                description: 'Keywords for search engines to help with discoverability.',
+              },
+              fields: [
+                {
+                  name: 'keyword',
+                  type: 'text',
+                  required: true,
+                },
+              ],
+            },
+            {
+              name: 'canonicalUrl',
+              type: 'text',
+              admin: {
+                description: 'The canonical URL for your site (e.g., https://yourstore.com).',
+              },
+            },
+            {
+              label: 'Open Graph',
+              type: 'collapsible',
+              fields: [
+                {
+                  name: 'ogTitle',
+                  type: 'text',
+                  admin: {
+                    description: 'Title for social media sharing (defaults to metaTitle if not set).',
+                  },
+                },
+                {
+                  name: 'ogDescription',
+                  type: 'textarea',
+                  admin: {
+                    description:
+                      'Description for social media sharing (defaults to metaDescription if not set).',
+                  },
+                },
+                {
+                  name: 'ogImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  admin: {
+                    description: 'Image shown when sharing the site on Facebook, LinkedIn, etc.',
+                  },
+                },
+              ],
+            },
+            {
+              label: 'Twitter',
+              type: 'collapsible',
+              fields: [
+                {
+                  name: 'twitterCard',
+                  type: 'select',
+                  defaultValue: 'summary_large_image',
+                  options: [
+                    {
+                      label: 'Summary',
+                      value: 'summary',
+                    },
+                    {
+                      label: 'Summary Large Image',
+                      value: 'summary_large_image',
+                    },
+                  ],
+                  admin: {
+                    description: 'Type of Twitter card to use.',
+                  },
+                },
+                {
+                  name: 'twitterTitle',
+                  type: 'text',
+                  admin: {
+                    description:
+                      'Title for Twitter sharing (defaults to ogTitle or metaTitle if not set).',
+                  },
+                },
+                {
+                  name: 'twitterDescription',
+                  type: 'textarea',
+                  admin: {
+                    description:
+                      'Description for Twitter sharing (defaults to ogDescription or metaDescription if not set).',
+                  },
+                },
+                {
+                  name: 'twitterImage',
+                  type: 'upload',
+                  relationTo: 'media',
+                  admin: {
+                    description: 'Image for Twitter sharing (defaults to ogImage if not set).',
+                  },
+                },
+              ],
+            },
+            {
+              label: 'Robots',
+              type: 'collapsible',
+              fields: [
+                {
+                  name: 'noIndex',
+                  type: 'checkbox',
+                  defaultValue: false,
+                  admin: {
+                    description: 'Prevent search engines from indexing this site.',
+                  },
+                },
+                {
+                  name: 'noFollow',
+                  type: 'checkbox',
+                  defaultValue: false,
+                  admin: {
+                    description: 'Prevent search engines from following links on this site.',
+                  },
+                },
+              ],
             },
           ],
         },

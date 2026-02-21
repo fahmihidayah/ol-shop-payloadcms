@@ -19,6 +19,7 @@ describe('OrderService', () => {
       create: vi.fn(),
       update: vi.fn(),
       find: vi.fn(),
+      findByID: vi.fn(),
     } as unknown as BasePayload
 
     mockServiceContext = {
@@ -34,8 +35,15 @@ describe('OrderService', () => {
 
   describe('create', () => {
     it('should create order with authenticated customer successfully', async () => {
+      // Set up context with authenticated user
+      mockServiceContext = {
+        payload: mockPayload,
+        user: {
+          id: 'customer-123',
+        } as any,
+      }
+
       const checkoutData: CheckoutData = {
-        customerId: 'customer-123',
         items: [
           {
             productId: 'prod-1',
@@ -202,8 +210,15 @@ describe('OrderService', () => {
     })
 
     it('should create order with multiple items', async () => {
+      // Set up context with authenticated user
+      mockServiceContext = {
+        payload: mockPayload,
+        user: {
+          id: 'customer-123',
+        } as any,
+      }
+
       const checkoutData: CheckoutData = {
-        customerId: 'customer-123',
         items: [
           {
             productId: 'prod-1',
@@ -397,6 +412,59 @@ describe('OrderService', () => {
           orderNumber: 'ORD-1234567890-1234',
         }),
       ).rejects.toThrow('Database connection failed')
+    })
+  })
+
+  describe('findById', () => {
+    it('should find order by ID successfully', async () => {
+      const mockOrder: Order = {
+        id: 'order-123',
+        orderNumber: 'ORD-1234567890-1234',
+        orderStatus: 'pending',
+        paymentStatus: 'pending',
+        totalAmount: 115000,
+        shippingCost: 15000,
+      } as Order
+
+      vi.mocked(mockPayload.findByID).mockResolvedValue(mockOrder)
+
+      const result = await OrderService.findById({
+        serviceContext: mockServiceContext,
+        orderId: 'order-123',
+      })
+
+      expect(result.data).toEqual(mockOrder)
+      expect(result.error).toBe(false)
+      expect(mockPayload.findByID).toHaveBeenCalledWith({
+        collection: 'orders',
+        id: 'order-123',
+      })
+    })
+
+    it('should return error when order not found', async () => {
+      vi.mocked(mockPayload.findByID).mockResolvedValue(undefined as any)
+
+      const result = await OrderService.findById({
+        serviceContext: mockServiceContext,
+        orderId: 'invalid-id',
+      })
+
+      expect(result.error).toBe(true)
+      expect(result.message).toBe('Order not found')
+      expect(result.data).toBeUndefined()
+    })
+
+    it('should handle findByID error', async () => {
+      vi.mocked(mockPayload.findByID).mockRejectedValue(new Error('Database error'))
+
+      const result = await OrderService.findById({
+        serviceContext: mockServiceContext,
+        orderId: 'order-123',
+      })
+
+      expect(result.error).toBe(true)
+      expect(result.message).toBe('Database error')
+      expect(result.data).toBeUndefined()
     })
   })
 

@@ -7,6 +7,17 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { updateOrderFromReturnUrl } from '@/feature/order/actions/order-confirmation/update-order'
 import { clearCartItems } from '@/feature/cart/actions'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Order Confirmation',
+  description:
+    'Thank you for your order! View your order confirmation, payment status, and delivery details.',
+  robots: {
+    index: false,
+    follow: true,
+  },
+}
 
 interface OrderConfirmationPageProps {
   searchParams: Promise<{

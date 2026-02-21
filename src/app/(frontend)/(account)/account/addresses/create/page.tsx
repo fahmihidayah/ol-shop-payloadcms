@@ -3,6 +3,29 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { getMeUser } from '@/lib/customer-utils'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Add New Address | My Addresses | Online Store',
+  description:
+    'Add a new shipping or billing address to your account. Save time on future orders by storing your delivery addresses securely.',
+  keywords: [
+    'add address',
+    'new shipping address',
+    'new billing address',
+    'save address',
+    'delivery location',
+  ],
+  openGraph: {
+    title: 'Add New Address | Online Store',
+    description: 'Quickly add a new delivery address to your account for faster checkout.',
+    type: 'website',
+  },
+  robots: {
+    index: false,
+    follow: true,
+  },
+}
 
 export default async function CreateAddressPage() {
   const user = await getMeUser()

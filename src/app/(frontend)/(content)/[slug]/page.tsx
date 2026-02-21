@@ -13,13 +13,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!page) {
     return {
-      title: 'Page Not Found',
+      title: 'Page Not Found | Online Store',
+      description: 'The requested page could not be found.',
+      robots: {
+        index: false,
+        follow: false,
+      },
     }
   }
 
-  const seoTitle = page.seo?.title || page.title
-  const seoDescription = page.seo?.description || undefined
-  const seoKeywords = page.seo?.keywords || undefined
+  const seoTitle = page.seo?.title || `${page.title} | Online Store`
+  const seoDescription = page.seo?.description || `${page.title} - Learn more about our services and offerings.`
+
+  // Handle keywords (may be array of objects or strings)
+  const seoKeywords = page.seo?.keywords
+    ? Array.isArray(page.seo.keywords)
+      ? page.seo.keywords.map((k) => (typeof k === 'string' ? k : k.keyword || '')).filter(Boolean)
+      : []
+    : [page.title, 'online store', 'information']
 
   return {
     title: seoTitle,
@@ -28,6 +39,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title: seoTitle,
       description: seoDescription,
+      type: 'website',
+      url: `/${slug}`,
       images: page.seo?.ogImage
         ? [
             {
@@ -35,13 +48,26 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
                 typeof page.seo.ogImage === 'string'
                   ? page.seo.ogImage
                   : (page.seo.ogImage as Media).url || '',
+              alt: page.title,
             },
           ]
         : undefined,
     },
+    twitter: {
+      card: 'summary_large_image',
+      title: seoTitle,
+      description: seoDescription,
+      images:
+        page.seo?.ogImage && typeof page.seo.ogImage !== 'string'
+          ? [(page.seo.ogImage as Media).url || '']
+          : undefined,
+    },
     robots: {
       index: !page.seo?.noIndex,
       follow: !page.seo?.noIndex,
+    },
+    alternates: {
+      canonical: `/${slug}`,
     },
   }
 }
