@@ -16,7 +16,9 @@
       "Bash(npx shadcn@latest add:*)",
       "Bash(ls:*)",
       "Bash(pnpm vitest run:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(tree:*)",
+      "Bash(xargs:*)"
     ],
     "deny": []
   }

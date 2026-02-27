@@ -52,15 +52,38 @@ export interface GetOrderResult {
 }
 
 /**
- * Duitku callback parameters
+ * Duitku callback parameters (webhook payload)
+ *
+ * These are the parameters sent by Duitku when a payment status changes.
+ * Documentation: https://docs.duitku.com/api/id/#callback
  */
 export interface DuitkuCallbackParams {
+  /** Merchant code from Duitku */
   merchantCode: string
+
+  /** Payment amount */
   amount: number
+
+  /** Your order number/reference */
   merchantOrderId: string
-  reference: string
-  signature: string
+
+  /** Product detail/description sent to Duitku */
+  productDetail: string
+
+  /** Additional parameters sent during payment creation */
+  additionalParam: string
+
+  /** Payment result code (00 = success, 01 = failed) */
   resultCode: DuitkuCallbackResultCode
+
+  /** Payment method code (e.g., "VC" for credit card, "VA" for virtual account) */
+  paymentCode: string
+
+  /** Duitku payment reference number */
+  reference: string
+
+  /** Security signature from Duitku (MD5 hash) */
+  signature: string
 }
 
 /**

@@ -1,6 +1,6 @@
 import { ServiceContext } from '@/types/service-context'
 import { ServiceResult } from '@/types/service-result'
-import { Category, Product } from '@/payload-types'
+import { CartItem, Category, OrderItem, Product } from '@/payload-types'
 import { PaginatedDocs } from 'payload'
 import { GetProductsParams, ProductFilters, SortByOption } from '../types'
 
@@ -493,5 +493,78 @@ export const ProductService = {
       data: variant,
       error: false,
     }
+  },
+
+  /**
+   * Decreases stock quantity for a specific product variant
+   *
+   * @param context - Service context containing payload instance
+   * @param cartItem - Cart item containing product, variant, and quantity information
+   * @returns Promise that resolves when stock is updated
+   *
+   * @example
+   * ```typescript
+   * await ProductService.decreaseProductStock({
+   *   context: { payload },
+   *   cartItem: {
+   *     product: productData,
+   *     variant: 'variant-id',
+   *     quantity: 2
+   *   }
+   * })
+   * ```
+   */
+  decreaseProductStock: async ({
+    context,
+    orderItem,
+  }: {
+    context: ServiceContext
+    orderItem: OrderItem
+  }): Promise<void> => {
+    const newOrderItem = await context.payload.findByID({
+      collection: 'order-items',
+      id: orderItem.id,
+    })
+    if (newOrderItem && newOrderItem.isStockUpdated) {
+      // Stock already updated for this order item, skip to prevent double decrement
+      return
+    }
+    const product = await context.payload.findByID({
+      collection: 'products',
+      id: (orderItem.product as Product).id,
+    })
+
+    if (!product) {
+      return
+    }
+
+    // Update only the matched variant's stock
+    const updatedVariants = product['product-variant']?.map((variant) => {
+      if (variant.id === orderItem.variant) {
+        return {
+          ...variant,
+          stockQuantity: variant.stockQuantity - orderItem.quantity,
+        }
+      }
+      // Return unchanged variant
+      return variant
+    })
+
+    await context.payload.update({
+      collection: 'products',
+      id: (orderItem.product as Product).id,
+      data: {
+        'product-variant': updatedVariants,
+      },
+    })
+
+    await context.payload.update({
+      collection: 'order-items',
+      id: orderItem.id,
+      data: {
+        ...orderItem,
+        isStockUpdated: true,
+      },
+    })
   },
 }

@@ -18,7 +18,7 @@ import { verifyDuitkuSignature } from '../../utils/verify-signature'
 import { mapCallbackResultCode } from '../../utils/map-result-code'
 import { getMeUser } from '@/lib/customer-utils'
 import { cookies } from 'next/headers'
-import { CartService } from '@/feature/cart/services/cart-service'
+import { ProductService } from '@/feature/products/services/product-service'
 
 /**
  * Update order status based on Duitku result code from return URL
@@ -40,16 +40,14 @@ export async function updateOrderFromReturnUrl(
 ): Promise<UpdateOrderResult> {
   try {
     // Find order by order number
-
     const user = await getMeUser()
     const cookieStore = await cookies()
     const sessionId = cookieStore.get('cart-session-id')?.value
+    const payload = await getPayload({ config })
 
     const updateResult = await OrderService.updateOrderFromReturnUrl({
       serviceContext: {
-        payload: await getPayload({
-          config,
-        }),
+        payload,
         user: user.user,
         sessionId,
       },
@@ -57,6 +55,18 @@ export async function updateOrderFromReturnUrl(
       resultCode,
       reference,
     })
+
+    // NOTE: Stock decrement is NOT done here!
+    // According to Duitku docs, return URL should not be relied upon for final status.
+    // The callback webhook is the authoritative source and will be triggered separately by Duitku.
+    // Stock will be decremented ONLY in updateOrderFromCallback() when Duitku's webhook fires.
+    //
+    // DO NOT manually call updateOrderFromCallback here because:
+    // 1. We don't have a valid signature (only Duitku has it)
+    // 2. Duitku will call the callback webhook separately
+    // 3. Manual call would bypass signature verification (security risk)
+    // 4. Could cause timing issues or duplicate processing
+
     return {
       success: true,
       order: updateResult.data,
@@ -115,6 +125,44 @@ export async function updateOrderFromCallback(
       paymentStatus,
       reference,
     )
+
+    // Decrease product stock ONLY in callback (authoritative source)
+    // This is the only place where stock should be decremented to prevent double decrement
+    if (updateResult.success && updateResult.order && paymentStatus === 'paid') {
+      try {
+        const payload = await getPayload({ config })
+
+        // Fetch order items for this order
+        const orderItems = await payload.find({
+          collection: 'order-items',
+          where: {
+            order: {
+              equals: updateResult.order.id,
+            },
+          },
+          depth: 2,
+        })
+
+        // Decrease stock for each order item
+        const stockDecreasePromises = orderItems.docs.map((orderItem) => {
+          return ProductService.decreaseProductStock({
+            context: { payload },
+            orderItem,
+          })
+        })
+
+        // Execute all stock decrements in parallel
+        await Promise.all(stockDecreasePromises)
+
+        console.log(`[CALLBACK] Successfully decreased stock for order ${merchantOrderId}`)
+      } catch (stockError) {
+        // Log error but don't fail the callback
+        console.error(
+          `[CALLBACK] Failed to decrease stock for order ${merchantOrderId}:`,
+          stockError,
+        )
+      }
+    }
 
     return updateResult
   } catch (error) {

@@ -592,6 +592,10 @@ export interface OrderItem {
    */
   price: number;
   /**
+   * Indicates if stock has been updated for this item
+   */
+  isStockUpdated?: boolean | null;
+  /**
    * Calculated as quantity × price
    */
   subtotal: number;
@@ -1137,6 +1141,7 @@ export interface OrderItemsSelect<T extends boolean = true> {
       };
   quantity?: T;
   price?: T;
+  isStockUpdated?: T;
   subtotal?: T;
   updatedAt?: T;
   createdAt?: T;
