@@ -8,6 +8,7 @@ import { Toaster } from 'sonner'
 import { getStoreConfig } from '@/feature/store/actions'
 import { Metadata } from 'next'
 import { Media } from '@/payload-types'
+import Script from 'next/script'
 
 export async function generateMetadata(): Promise<Metadata> {
   const storeConfig = await getStoreConfig()
@@ -60,6 +61,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
             <Toaster position="top-left" richColors />
           </QueryProvider>
         </ThemeProvider>
+        <Script src="https://app-sandbox.duitku.com/lib/js/duitku.js" strategy="afterInteractive" />
       </body>
     </html>
   )

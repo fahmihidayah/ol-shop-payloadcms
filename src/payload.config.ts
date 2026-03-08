@@ -27,6 +27,8 @@ import { HomeConfig } from './globals/home/config'
 import { endpointsV1 } from './feature/api/v1'
 import { StoreConfig } from './globals/store/config'
 
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -69,9 +71,26 @@ export default buildConfig({
     },
   }),
   sharp,
+  email: nodemailerAdapter({
+    defaultFromAddress: process.env.EMAIL_FROM_ADDRESS || 'noreply@example.com',
+    defaultFromName: process.env.EMAIL_FROM_NAME || 'Ol Store',
+    transportOptions: {
+      host: process.env.SMTP_HOST || 'localhost',
+      port: parseInt(process.env.SMTP_PORT || '1025'),
+      secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+      auth:
+        process.env.SMTP_USER && process.env.SMTP_PASS
+          ? {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS,
+            }
+          : undefined,
+    },
+  }),
   plugins: [
     payloadCloudPlugin(),
     getCloudStoragePlugin(),
+    // emailPlugin(),
     // storage-adapter-placeholder
   ],
 })

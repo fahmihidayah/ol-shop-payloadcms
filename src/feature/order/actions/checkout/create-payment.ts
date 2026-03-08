@@ -1,7 +1,12 @@
 'use server'
 
 import { duitkuConfig, getDuitkuEndpoint } from '@/lib/duitku-config'
-import { generateTransactionSignature, calculateExpiryPeriod } from '@/lib/duitku-utils'
+import {
+  generateTransactionSignature,
+  calculateExpiryPeriod,
+  generateDuitkuSignature,
+} from '@/lib/duitku-utils'
+import CryptoJS from 'crypto-js'
 import type {
   DuitkuTransactionRequest,
   DuitkuTransactionResponse,
@@ -12,6 +17,7 @@ import type { PaymentResult, CheckoutData } from '@/types/checkout'
 import { createOrder, updateOrderPayment } from './create-order'
 import { getMeUser } from '@/lib/customer-utils'
 import { cookies } from 'next/headers'
+import { Customer } from '@/payload-types'
 
 /**
  * Process complete checkout: Create order THEN initiate payment
@@ -153,11 +159,13 @@ export async function processCheckout(checkoutData: CheckoutData): Promise<Payme
       paymentResult.data.vaNumber,
     )
 
-    // Step 6: Return payment URL for redirect
+    // Step 6: Return payment URL and order details
     return {
       success: true,
       paymentUrl: paymentResult.data.paymentUrl,
       reference: paymentResult.data.reference,
+      orderNumber: orderResult.order.orderNumber,
+      orderId: orderResult.orderId,
       vaNumber: paymentResult.data.vaNumber,
     }
   } catch (error) {
@@ -210,8 +218,8 @@ export async function createDuitkuPayment(params: {
       email: params.customerEmail,
       phoneNumber: params.customerPhone,
       customerVaName: params.customerName,
-      callbackUrl,
-      returnUrl,
+      callbackUrl: callbackUrl,
+      returnUrl: returnUrl,
       signature,
       expiryPeriod: calculateExpiryPeriod(expiryPeriod),
     }
@@ -231,7 +239,10 @@ export async function createDuitkuPayment(params: {
     console.log('[CREATE_DUITKU_PAYMENT] Request to Duitku:')
     console.log('  Endpoint:', endpoint)
     console.log('  paymentAmount:', requestBody.paymentAmount)
-    console.log('  itemDetails:', JSON.stringify(requestBody.itemDetails, null, 2))
+    console.log('  callbackUrl:', requestBody.callbackUrl)
+    console.log('  returnUrl:', requestBody.returnUrl)
+    console.log('  merchantOrderId:', requestBody.merchantOrderId)
+    console.log('  Full Request Body:', JSON.stringify(requestBody, null, 2))
 
     // Calculate total from itemDetails being sent
     const sentItemDetailsTotal =
@@ -239,10 +250,27 @@ export async function createDuitkuPayment(params: {
     console.log('  Sum of itemDetails:', sentItemDetailsTotal)
     console.log('  Match:', sentItemDetailsTotal === requestBody.paymentAmount ? '✅' : '❌')
 
+    // Generate timestamp in Jakarta timezone (WIB = UTC+7) in milliseconds
+    const timestampJakarta = Date.now() + 7 * 60 * 60 * 1000
+
+    // Generate signature for headers: SHA256(merchantCode + timestamp + apiKey)
+    const headerSignature = CryptoJS.SHA256(
+      `${merchantCode}${timestampJakarta}${apiKey}`,
+    ).toString()
+
+    console.log('[CREATE_DUITKU_PAYMENT] Request Headers:')
+    console.log('  x-duitku-merchantcode:', merchantCode)
+    console.log('  x-duitku-timestamp:', timestampJakarta)
+    console.log('  x-duitku-signature:', headerSignature)
+
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
+        Accept: 'application/json',
         'Content-Type': 'application/json',
+        'x-duitku-signature': headerSignature,
+        'x-duitku-timestamp': timestampJakarta.toString(),
+        'x-duitku-merchantcode': merchantCode,
       },
       body: JSON.stringify(requestBody),
     })

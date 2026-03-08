@@ -18,7 +18,15 @@
       "Bash(pnpm vitest run:*)",
       "Bash(grep:*)",
       "Bash(tree:*)",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(lsof:*)",
+      "Bash(if [ -f .env ])",
+      "Bash(then echo \"=== .env file exists ===\")",
+      "Bash(else echo \".env file not found - you need to create one from .env.example\")",
+      "Bash(fi:*)",
+      "Bash(then grep -E \"NEXT_PUBLIC_BASE_URL|DUITKU\" .env)",
+      "Bash(else echo \"No .env file found\")",
+      "Bash(node -e:*)"
     ],
     "deny": []
   }

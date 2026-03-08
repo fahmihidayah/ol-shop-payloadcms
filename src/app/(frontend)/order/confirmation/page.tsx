@@ -37,6 +37,12 @@ function isValidResultCode(code: string): code is DuitkuResultCode {
 export default async function OrderConfirmationPage({ searchParams }: OrderConfirmationPageProps) {
   const { merchantOrderId, resultCode, reference } = await searchParams
 
+  console.log('[ORDER_CONFIRMATION_PAGE] Accessed with params:', {
+    merchantOrderId,
+    resultCode,
+    reference,
+  })
+
   // Validate required parameters
   if (!merchantOrderId || !resultCode || !reference) {
     redirect('/')

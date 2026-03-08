@@ -64,7 +64,7 @@ export const clearCartItems = async (): Promise<{ success: boolean; error?: stri
       }
     }
 
-    revalidateTag('cart')
+    // revalidateTag('cart')
     return { success: true }
   } catch (error) {
     console.error('[CLEAR_CART_ITEMS] Error:', error)

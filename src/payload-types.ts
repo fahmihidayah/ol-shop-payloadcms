@@ -121,13 +121,10 @@ export interface Config {
     'store-config': StoreConfigSelect<false> | StoreConfigSelect<true>;
   };
   locale: null;
-  user:
-    | (User & {
-        collection: 'users';
-      })
-    | (Customer & {
-        collection: 'customers';
-      });
+  widgets: {
+    collections: CollectionsWidget;
+  };
+  user: User | Customer;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -192,6 +189,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -502,6 +500,7 @@ export interface Customer {
       }[]
     | null;
   password?: string | null;
+  collection: 'customers';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1569,6 +1568,16 @@ export interface StoreConfigSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

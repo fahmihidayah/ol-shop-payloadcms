@@ -82,7 +82,7 @@ export async function updateOrderPayment(
       }
     }
 
-    revalidateTag('orders')
+    // revalidateTag('orders')
 
     return { success: true }
   } catch (error) {

@@ -11,6 +11,7 @@ import { RegisterFormSchema } from '../types/register-form-schema'
 import { revalidatePath } from 'next/cache'
 import { loginService } from '../services/login-service'
 import { createServiceContext } from '@/types/service-context'
+import { EmailService } from '@/lib/email/email-service'
 /**
  * Authenticates User with email and password
  * Sets payload-token cookie on success
@@ -168,6 +169,19 @@ export const register = async (
     })
 
     console.log('[REGISTER] User created successfully:', newUser.id)
+
+    // Send welcome email
+    const emailResult = await EmailService.sendWelcomeEmail({
+      customerName: newUser.name,
+      customerEmail: newUser.email,
+    })
+
+    if (!emailResult.success) {
+      console.error('[REGISTER] Failed to send welcome email:', emailResult.error)
+      // Continue with registration even if email fails
+    } else {
+      console.log('[REGISTER] Welcome email sent successfully')
+    }
 
     // Auto-login after registration
     const loginResult = await login({

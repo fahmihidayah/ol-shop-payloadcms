@@ -31,7 +31,7 @@ export interface CheckoutAddress {
  * Checkout data for creating order
  */
 export interface CheckoutData {
-  user?: User
+  user?: Customer
   sessionId?: string
   items: CheckoutItem[]
   shippingAddress: CheckoutAddress
@@ -77,6 +77,8 @@ export interface PaymentResult {
   success: boolean
   paymentUrl?: string
   reference?: string
+  orderNumber?: string
+  orderId?: string
   vaNumber?: string
   error?: string
 }

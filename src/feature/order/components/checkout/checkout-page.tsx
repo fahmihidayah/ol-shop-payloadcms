@@ -105,10 +105,57 @@ export function CheckoutPageClient({
       startTransition(async () => {
         const result = await processCheckout(checkoutData)
 
-        if (result.success && result.paymentUrl) {
-          toast.success('Order created successfully! Redirecting to payment...')
-          // Redirect to Duitku payment page
-          window.location.href = result.paymentUrl
+        if (result.success && result.reference) {
+          toast.success('Order created successfully! Opening payment...')
+
+          // Use Duitku Popup instead of redirect
+          // @ts-ignore - Duitku checkout is loaded from external script
+          if (typeof window.checkout !== 'undefined') {
+            // @ts-ignore
+            window.checkout.process(result.reference, {
+              successEvent: function (paymentResult: any) {
+                console.log('[DUITKU_POPUP] ✅ SUCCESS EVENT TRIGGERED')
+                console.log('[DUITKU_POPUP] Payment success:', paymentResult)
+                toast.success('Payment successful!')
+                console.log('[DUITKU_POPUP] Redirecting via router.push to /order/confirmation')
+                // Redirect to order confirmation
+                router.push(
+                  `/order/confirmation?merchantOrderId=${result.orderNumber}&resultCode=00&reference=${paymentResult.reference || result.reference}`,
+                )
+              },
+              pendingEvent: function (paymentResult: any) {
+                console.log('[DUITKU_POPUP] Payment pending:', paymentResult)
+                toast.info('Payment is pending. Please complete your payment.')
+                // Redirect to order confirmation with pending status
+                router.push(
+                  `/order/confirmation?merchantOrderId=${result.orderNumber}&resultCode=01&reference=${paymentResult.reference || result.reference}`,
+                )
+              },
+              errorEvent: function (paymentResult: any) {
+                console.error('[DUITKU_POPUP] Payment error:', paymentResult)
+                toast.error('Payment failed. Please try again.')
+                // Redirect to order confirmation with error status
+                router.push(
+                  `/order/confirmation?merchantOrderId=${result.orderNumber}&resultCode=02&reference=${paymentResult.reference || result.reference}`,
+                )
+              },
+              closeEvent: function (paymentResult: any) {
+                console.log('[DUITKU_POPUP] Payment popup closed:', paymentResult)
+                toast.warning(
+                  'Payment window closed. You can complete payment later from your orders.',
+                )
+                // Redirect to orders page
+                router.push('/account/orders')
+              },
+            })
+          } else {
+            // Fallback to redirect if popup library not loaded
+            console.warn(
+              '[DUITKU_POPUP] Duitku checkout library not loaded, falling back to redirect',
+            )
+            toast.info('Redirecting to payment page...')
+            window.location.href = result.paymentUrl || ''
+          }
         } else {
           toast.error(result.error || 'Failed to create order. Please try again.')
         }
