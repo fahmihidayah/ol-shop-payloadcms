@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import type { CheckoutData, CheckoutItem } from '@/types/checkout'
 import { processCheckout } from '../../actions/checkout'
+import { updateOrderToSuccess } from '../../actions/order-confirmation/update-order'
 
 interface CheckoutPageProps {
   customer?: Customer
@@ -113,12 +114,14 @@ export function CheckoutPageClient({
           if (typeof window.checkout !== 'undefined') {
             // @ts-ignore
             window.checkout.process(result.reference, {
-              successEvent: function (paymentResult: any) {
+              successEvent: async function (paymentResult: any) {
                 console.log('[DUITKU_POPUP] ✅ SUCCESS EVENT TRIGGERED')
                 console.log('[DUITKU_POPUP] Payment success:', paymentResult)
                 toast.success('Payment successful!')
+                const { merchantOrderId, reference, resultCode } = paymentResult
                 console.log('[DUITKU_POPUP] Redirecting via router.push to /order/confirmation')
                 // Redirect to order confirmation
+                await updateOrderToSuccess(merchantOrderId ?? '')
                 router.push(
                   `/order/confirmation?merchantOrderId=${result.orderNumber}&resultCode=00&reference=${paymentResult.reference || result.reference}`,
                 )

@@ -110,7 +110,7 @@ export const OrderService = {
   findByOrderNumber: async (props: {
     serviceContext: ServiceContext
     orderNumber: string
-  }): Promise<ServiceResult<any>> => {
+  }): Promise<ServiceResult<Order>> => {
     const result = await props.serviceContext.payload.find({
       collection: 'orders',
       where: {
