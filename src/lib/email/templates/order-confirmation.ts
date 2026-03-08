@@ -157,11 +157,11 @@ export function generateOrderConfirmationEmail(data: OrderConfirmationEmailData)
           .join('')}
         <tr>
           <td colspan="3" style="text-align: right; padding-top: 20px;"><strong>Subtotal:</strong></td>
-          <td style="padding-top: 20px;">${formatCurrency((order.totalAmount || 0) - (order.shipingCost || 0))}</td>
+          <td style="padding-top: 20px;">${formatCurrency((order.totalAmount || 0) - (order.shippingCost || 0))}</td>
         </tr>
         <tr>
           <td colspan="3" style="text-align: right;"><strong>Shipping:</strong></td>
-          <td>${formatCurrency(order.shipingCost || 0)}</td>
+          <td>${formatCurrency(order.shippingCost || 0)}</td>
         </tr>
         <tr class="total-row">
           <td colspan="3" style="text-align: right;"><strong>Total:</strong></td>
@@ -239,8 +239,8 @@ ${orderItems
   )
   .join('\n')}
 
-Subtotal: ${formatCurrency((order.totalAmount || 0) - (order.shipingCost || 0))}
-Shipping: ${formatCurrency(order.shipingCost || 0)}
+Subtotal: ${formatCurrency((order.totalAmount || 0) - (order.shippingCost || 0))}
+Shipping: ${formatCurrency(order.shippingCost || 0)}
 Total: ${formatCurrency(order.totalAmount || 0)}
 
 Shipping Address:
