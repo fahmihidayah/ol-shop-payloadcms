@@ -1,0 +1,62 @@
+{% extends "base-template.html" %}
+
+{% block content %}
+<p>Hi {{ customerName }},</p>
+
+<p>Great news! Your order <strong>{{ order.orderNumber }}</strong> has been shipped and is on its way to you.</p>
+
+<!-- Tracking Information -->
+{% if trackingNumber %}
+<div class="tracking-info">
+    <p style="margin: 0; font-size: 14px; color: #6b7280;">Tracking Number</p>
+    <div class="tracking-number">{{ trackingNumber }}</div>
+    {% if courierName %}
+    <p style="margin: 10px 0 0 0; font-size: 14px; color: #6b7280;">Courier: <strong>{{ courierName }}</strong></p>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Order Information -->
+<div class="order-info">
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td style="padding: 8px 0; font-weight: 600; width: 40%;">Order Number:</td>
+            <td style="padding: 8px 0;">{{ order.orderNumber }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; font-weight: 600; width: 40%;">Shipped Date:</td>
+            <td style="padding: 8px 0;">{{ shippedDate }}</td>
+        </tr>
+    </table>
+</div>
+
+<!-- Shipping Address -->
+<h3 style="color: #1f2937; font-size: 18px; margin-top: 30px; margin-bottom: 15px;">Shipping Address</h3>
+<div class="order-info">
+    <p style="margin: 0; line-height: 1.8;">
+        <strong>{{ order.shippingAddress.recipientName }}</strong><br>
+        {{ order.shippingAddress.addressLine1 }}<br>
+        {% if order.shippingAddress.addressLine2 %}
+        {{ order.shippingAddress.addressLine2 }}<br>
+        {% endif %}
+        {{ order.shippingAddress.city }}, {{ order.shippingAddress.province }} {{ order.shippingAddress.postalCode }}<br>
+        Phone: {{ order.shippingAddress.phone }}
+    </p>
+</div>
+
+<!-- Track Order Button -->
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ baseUrl }}/account/orders/{{ order.id }}" class="button">Track Your Order</a>
+</div>
+
+<p style="color: #6b7280; font-size: 14px;">
+    <strong>Estimated Delivery:</strong> Please check with the courier for estimated delivery time.
+</p>
+
+<p>Thank you for shopping with us!</p>
+
+<p style="margin-top: 30px;">
+    Best regards,<br>
+    <strong>Online Store Team</strong>
+</p>
+{% endblock %}

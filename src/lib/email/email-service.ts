@@ -5,11 +5,14 @@
  * Uses PayloadCMS email adapter configured in email plugin.
  */
 
+import 'server-only'
+
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Order, OrderItem, Customer } from '@/payload-types'
 import { generateOrderConfirmationEmail } from './templates/order-confirmation'
 import { generateOrderShippedEmail } from './templates/order-shipped'
+import { generatePaymentConfirmationEmail } from './templates/payment-confirmation'
 import { generateWelcomeEmail } from './templates/welcome-email'
 
 export class EmailService {
@@ -107,15 +110,10 @@ export class EmailService {
     try {
       const payload = await getPayload({ config })
 
-      const subject = `Payment Received - ${params.order.orderNumber}`
-      const html = `
-        <p>Hi ${params.customerName},</p>
-        <p>We've received your payment for order <strong>${params.order.orderNumber}</strong>.</p>
-        <p>Your order is now being processed and will be shipped soon.</p>
-        <p>Thank you for your purchase!</p>
-        <p>Best regards,<br>Online Store Team</p>
-      `
-      const text = `Payment Received - ${params.order.orderNumber}\n\nHi ${params.customerName},\n\nWe've received your payment for order ${params.order.orderNumber}.\n\nYour order is now being processed and will be shipped soon.\n\nThank you for your purchase!`
+      const { subject, html, text } = generatePaymentConfirmationEmail({
+        order: params.order,
+        customerName: params.customerName,
+      })
 
       await payload.sendEmail({
         to: params.customerEmail,

@@ -23,11 +23,27 @@ const nextConfig = {
       allowedOrigins: ['your.domain.com'],
     },
   },
-  webpack: (webpackConfig) => {
+  webpack: (webpackConfig, { isServer }) => {
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],
       '.js': ['.ts', '.tsx', '.js', '.jsx'],
       '.mjs': ['.mts', '.mjs'],
+    }
+
+    // Externalize server-only packages to prevent bundling native modules
+    if (isServer) {
+      const externals = Array.isArray(webpackConfig.externals)
+        ? webpackConfig.externals
+        : webpackConfig.externals
+          ? [webpackConfig.externals]
+          : []
+
+      webpackConfig.externals = [
+        ...externals,
+        'nunjucks',
+        'chokidar',
+        'fsevents',
+      ]
     }
 
     return webpackConfig

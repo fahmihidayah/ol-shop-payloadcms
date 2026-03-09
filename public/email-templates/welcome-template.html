@@ -1,0 +1,34 @@
+{% extends "base-template.html" %}
+
+{% block content %}
+<h2>Welcome to {{ companyName }}! 🎉</h2>
+
+{% if welcomeImageUrl %}
+<img src="{{ welcomeImageUrl }}" alt="Welcome to our store" width="560" style="max-width: 100%; height: auto; display: block; margin: 20px auto;" />
+{% endif %}
+
+<p>Hi {{ customerName }},</p>
+
+<p>Thank you for creating an account with us! We're excited to have you as part of our community.</p>
+
+<p>Here's what you can do with your account:</p>
+
+<ul style="line-height: 2; color: #4b5563;">
+    <li>Track your orders in real-time</li>
+    <li>Save your favorite items to wishlist</li>
+    <li>Manage your shipping addresses</li>
+    <li>View your order history</li>
+    <li>Get exclusive member-only deals</li>
+</ul>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ baseUrl }}/products" class="button">Start Shopping</a>
+</div>
+
+<p>If you have any questions, feel free to reach out to our support team.</p>
+
+<p style="margin-top: 30px;">
+    Best regards,<br>
+    <strong>{{ companyName }} Team</strong>
+</p>
+{% endblock %}

@@ -1,5 +1,16 @@
-import fs from 'fs'
+import 'server-only'
+
+import nunjucks from 'nunjucks'
 import path from 'path'
+
+// Configure Nunjucks
+const templatePath = path.join(process.cwd(), 'public', 'email-templates')
+const nunjucksEnv = nunjucks.configure(templatePath, {
+  autoescape: true,
+  trimBlocks: true,
+  lstripBlocks: true,
+  noCache: process.env.NODE_ENV === 'development', // Cache in production
+})
 
 export interface EmailTemplateData {
   // Header
@@ -7,15 +18,19 @@ export interface EmailTemplateData {
   headerTitle: string
   headerSubtitle?: string
 
-  // Body
-  bodyContent: string
-
   // Footer
   companyName: string
   companyAddress?: string
   companyContact?: string
   socialLinks?: Array<{ name: string; url: string }>
   unsubscribeLink?: string
+
+  // Theme
+  themeColor?: string // Primary theme color (default: #2563eb)
+  themeColorDark?: string // Darker shade for gradients (default: #1d4ed8)
+
+  // Template-specific data (passed through to child templates)
+  [key: string]: any
 }
 
 export interface EmailRenderResult {
@@ -25,56 +40,27 @@ export interface EmailRenderResult {
 }
 
 /**
- * Renders an email template with dynamic data
- * @param data - Email template data to populate
+ * Renders an email template using Nunjucks
+ * @param templateName - Name of the template file (e.g., 'welcome-template.html')
+ * @param data - Template data to populate
  * @returns Rendered HTML, plain text, and subject
  */
-export function renderEmailTemplate(data: EmailTemplateData): EmailRenderResult {
-  // Read the base template
-  const templatePath = path.join(process.cwd(), 'public', 'email-templates', 'base-template.html')
-  let html = fs.readFileSync(templatePath, 'utf-8')
+export function renderEmailTemplate(
+  templateName: string,
+  data: EmailTemplateData,
+): EmailRenderResult {
+  // Set default theme colors if not provided
+  const templateData = {
+    ...data,
+    themeColor: data.themeColor || '#2563eb',
+    themeColorDark: data.themeColorDark || '#1d4ed8',
+  }
 
-  // Replace header
-  html = html.replace('{{SUBJECT}}', escapeHtml(data.subject))
-  html = html.replace('{{HEADER_TITLE}}', escapeHtml(data.headerTitle))
-
-  const headerSubtitle = data.headerSubtitle
-    ? `<p>${escapeHtml(data.headerSubtitle)}</p>`
-    : ''
-  html = html.replace('{{HEADER_SUBTITLE}}', headerSubtitle)
-
-  // Replace body content
-  html = html.replace('{{BODY_CONTENT}}', data.bodyContent)
-
-  // Replace footer
-  html = html.replace(/{{COMPANY_NAME}}/g, escapeHtml(data.companyName))
-
-  const companyAddress = data.companyAddress
-    ? escapeHtml(data.companyAddress)
-    : 'Your business address'
-  html = html.replace('{{COMPANY_ADDRESS}}', companyAddress)
-
-  const companyContact = data.companyContact
-    ? escapeHtml(data.companyContact)
-    : 'support@example.com | +1 (555) 123-4567'
-  html = html.replace('{{COMPANY_CONTACT}}', companyContact)
-
-  // Replace social links
-  const socialLinks = data.socialLinks && data.socialLinks.length > 0
-    ? data.socialLinks
-        .map(
-          (link) =>
-            `<a href="${escapeHtml(link.url)}" style="color: #6b7280;">${escapeHtml(link.name)}</a>`,
-        )
-        .join(' • ')
-    : ''
-  html = html.replace('{{SOCIAL_LINKS}}', socialLinks)
-
-  const unsubscribeLink = data.unsubscribeLink || '#'
-  html = html.replace('{{UNSUBSCRIBE_LINK}}', escapeHtml(unsubscribeLink))
+  // Render the template with Nunjucks
+  const html = nunjucksEnv.render(templateName, templateData)
 
   // Generate plain text version
-  const text = generatePlainText(data)
+  const text = generatePlainText(html, data)
 
   return {
     html,
@@ -84,23 +70,9 @@ export function renderEmailTemplate(data: EmailTemplateData): EmailRenderResult 
 }
 
 /**
- * Escapes HTML special characters to prevent XSS
+ * Generates a plain text version of the email from HTML
  */
-function escapeHtml(text: string): string {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
-  }
-  return text.replace(/[&<>"']/g, (char) => map[char])
-}
-
-/**
- * Generates a plain text version of the email
- */
-function generatePlainText(data: EmailTemplateData): string {
+function generatePlainText(html: string, data: EmailTemplateData): string {
   let text = `${data.headerTitle}\n`
 
   if (data.headerSubtitle) {
@@ -109,17 +81,25 @@ function generatePlainText(data: EmailTemplateData): string {
 
   text += '\n' + '='.repeat(60) + '\n\n'
 
-  // Strip HTML tags from body content for plain text
-  const plainBody = data.bodyContent
+  // Strip HTML tags for plain text
+  const plainBody = html
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '') // Remove style tags
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') // Remove script tags
+    .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, '') // Remove head
+    .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '') // Remove header (already in headerTitle)
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/p>/gi, '\n\n')
     .replace(/<\/div>/gi, '\n')
+    .replace(/<\/h[1-6]>/gi, '\n\n')
+    .replace(/<li>/gi, '• ')
+    .replace(/<\/li>/gi, '\n')
     .replace(/<[^>]+>/g, '')
     .replace(/&nbsp;/g, ' ')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
+    .replace(/\n{3,}/g, '\n\n') // Remove excessive newlines
     .trim()
 
   text += plainBody + '\n\n'
@@ -145,23 +125,16 @@ function generatePlainText(data: EmailTemplateData): string {
 }
 
 /**
- * Helper function to create a button HTML
+ * Legacy compatibility: Escapes HTML special characters
+ * (Nunjucks does this automatically, but kept for any custom use)
  */
-export function createButton(text: string, url: string): string {
-  return `<a href="${escapeHtml(url)}" class="button">${escapeHtml(text)}</a>`
-}
-
-/**
- * Helper function to create an image HTML
- */
-export function createImage(src: string, alt: string, width?: number): string {
-  const widthAttr = width ? `width="${width}"` : ''
-  return `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" ${widthAttr} style="max-width: 100%; height: auto; display: block; margin: 20px auto;" />`
-}
-
-/**
- * Helper function to create a divider
- */
-export function createDivider(): string {
-  return '<div class="divider"></div>'
+export function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  }
+  return text.replace(/[&<>"']/g, (char) => map[char])
 }

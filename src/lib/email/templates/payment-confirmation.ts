@@ -1,5 +1,5 @@
 /**
- * Order Shipped Email Template
+ * Payment Confirmation Email Template
  */
 
 import 'server-only'
@@ -8,35 +8,33 @@ import { Order } from '@/payload-types'
 import { formatDate } from '@/lib/utils'
 import { renderEmailTemplate, type EmailRenderResult } from '../template-renderer'
 
-interface OrderShippedEmailData {
+interface PaymentConfirmationEmailData {
   order: Order
   customerName: string
-  trackingNumber?: string
-  courierName?: string
 }
 
-export function generateOrderShippedEmail(data: OrderShippedEmailData): EmailRenderResult {
-  const { order, customerName, trackingNumber, courierName } = data
+export function generatePaymentConfirmationEmail(
+  data: PaymentConfirmationEmailData,
+): EmailRenderResult {
+  const { order, customerName } = data
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
   // Render with Nunjucks template
-  return renderEmailTemplate('order-shipped-template.html', {
-    subject: `Your Order Has Shipped! - ${order.orderNumber}`,
-    headerTitle: '📦 Your Order Is On The Way!',
+  return renderEmailTemplate('payment-confirmation-template.html', {
+    subject: `Payment Received - ${order.orderNumber}`,
+    headerTitle: '✅ Payment Confirmed!',
     headerSubtitle: `Order #${order.orderNumber}`,
     companyName: process.env.EMAIL_FROM_NAME || 'Online Store',
     companyAddress: process.env.COMPANY_ADDRESS,
     companyContact: process.env.COMPANY_CONTACT,
     unsubscribeLink: `${baseUrl}/account/preferences`,
-    themeColor: '#28a745',
-    themeColorDark: '#218838',
+    themeColor: '#10b981',
+    themeColorDark: '#059669',
     // Template-specific data
     customerName,
     order,
-    trackingNumber,
-    courierName,
-    shippedDate: formatDate(new Date()),
+    paymentDate: formatDate(new Date()),
     baseUrl,
   })
 }

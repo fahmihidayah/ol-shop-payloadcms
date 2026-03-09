@@ -1,0 +1,107 @@
+{% extends "base-template.html" %}
+
+{% block content %}
+<p>Hi {{ customerName }},</p>
+
+<p>Your order has been confirmed and will be processed shortly. Here are your order details:</p>
+
+<!-- Order Information -->
+<div class="order-info">
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td style="padding: 8px 0; font-weight: 600; width: 40%;">Order Number:</td>
+            <td style="padding: 8px 0;"><strong>{{ order.orderNumber }}</strong></td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; font-weight: 600; width: 40%;">Order Date:</td>
+            <td style="padding: 8px 0;">{{ orderDate }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; font-weight: 600; width: 40%;">Payment Status:</td>
+            <td style="padding: 8px 0;">{{ paymentStatusLabel | safe }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px 0; font-weight: 600; width: 40%;">Order Status:</td>
+            <td style="padding: 8px 0;">{{ orderStatusLabel | safe }}</td>
+        </tr>
+    </table>
+</div>
+
+<!-- Order Items -->
+<h2 style="color: #1f2937; font-size: 20px; margin-top: 30px; margin-bottom: 15px;">Order Items</h2>
+<table class="items-table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th style="text-align: center; width: 80px;">Qty</th>
+            <th style="text-align: right; width: 120px;">Price</th>
+            <th style="text-align: right; width: 120px;">Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in orderItems %}
+        <tr>
+            <td>
+                {{ item.productSnapshot.title }}
+                {% if item.productSnapshot.variantTitle %}
+                <br><small style="color: #6b7280;">{{ item.productSnapshot.variantTitle }}</small>
+                {% endif %}
+            </td>
+            <td style="text-align: center;">{{ item.quantity }}</td>
+            <td style="text-align: right;">{{ item.priceFormatted }}</td>
+            <td style="text-align: right;"><strong>{{ item.subtotalFormatted }}</strong></td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="3" style="text-align: right; padding-top: 20px;"><strong>Subtotal:</strong></td>
+            <td style="text-align: right; padding-top: 20px;">{{ subtotalFormatted }}</td>
+        </tr>
+        <tr>
+            <td colspan="3" style="text-align: right;"><strong>Shipping:</strong></td>
+            <td style="text-align: right;">{{ shippingFormatted }}</td>
+        </tr>
+        <tr class="total-row">
+            <td colspan="3" style="text-align: right;"><strong>Total:</strong></td>
+            <td style="text-align: right;"><strong>{{ totalFormatted }}</strong></td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- Shipping Address -->
+<h2 style="color: #1f2937; font-size: 20px; margin-top: 30px; margin-bottom: 15px;">Shipping Address</h2>
+<div class="order-info">
+    <p style="margin: 0; line-height: 1.8;">
+        <strong>{{ order.shippingAddress.recipientName }}</strong><br>
+        {{ order.shippingAddress.addressLine1 }}<br>
+        {% if order.shippingAddress.addressLine2 %}
+        {{ order.shippingAddress.addressLine2 }}<br>
+        {% endif %}
+        {{ order.shippingAddress.city }}, {{ order.shippingAddress.province }} {{ order.shippingAddress.postalCode }}<br>
+        {{ order.shippingAddress.country }}<br>
+        Phone: {{ order.shippingAddress.phone }}
+    </p>
+</div>
+
+<!-- Payment Pending Alert -->
+{% if order.paymentStatus === 'pending' %}
+<div class="alert-warning">
+    <strong>⚠️ Payment Pending</strong><br>
+    Please complete your payment to process your order.
+    {% if order.vaNumber %}
+    <br><br><strong>Virtual Account Number:</strong> <code style="background: #f8f9fa; padding: 4px 8px; border-radius: 4px; font-size: 16px;">{{ order.vaNumber }}</code>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- View Order Button -->
+<div style="text-align: center; margin: 30px 0;">
+    <a href="{{ baseUrl }}/account/orders/{{ order.id }}" class="button">View Order Details</a>
+</div>
+
+<p>If you have any questions about your order, please don't hesitate to contact us.</p>
+
+<p style="margin-top: 30px;">
+    Best regards,<br>
+    <strong>Online Store Team</strong>
+</p>
+{% endblock %}
